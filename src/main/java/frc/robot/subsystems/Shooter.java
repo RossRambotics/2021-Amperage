@@ -5,11 +5,17 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.DigitalOutput;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 // Rev Spark Max classes
 import com.revrobotics.CANSparkMax;
+
+import java.util.Map;
+
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANPIDController;
@@ -92,6 +98,17 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putBoolean("Shooter/Tuning Mode", m_bTuning);
     SmartDashboard.putNumber("Shooter/Tuning RPM", m_dTuningRPM);
     SmartDashboard.putNumber("Shooter/RPM Target Range", m_RPM_target_range);
+
+    this.createShuffleBoardTab();
+  }
+
+  public void createShuffleBoardTab() {
+    ShuffleboardTab tab = Shuffleboard.getTab("Sub.Shooter");
+    tab.add("RPM Target", 1).withWidget(BuiltInWidgets.kNumberSlider).withPosition(3, 3)
+        .withProperties(Map.of("min", 0, "max", 10000)); // specify
+                                                         // widget
+                                                         // properties
+                                                         // here
 
   }
 

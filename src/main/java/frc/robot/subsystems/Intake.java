@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import frc.robot.TheRobot;
 
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
@@ -15,12 +16,17 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Intake extends SubsystemBase {
   private DoubleSolenoid intakeSolenoid = new DoubleSolenoid(31, 0, 1);// creates the solenoid on CAN id 15
-  private CANSparkMax intakeMotor = null;
+  private CANSparkMax m_rollerMotor = null;
+  private CANSparkMax m_feederMotor = null;
   private CANEncoder intakeEncoder = null;
   private CANPIDController intakePIDController = null;
   private DigitalOutput m_LEDrelay = new DigitalOutput(1); // LED ring used for targeting in DIO port 1
@@ -37,9 +43,11 @@ public class Intake extends SubsystemBase {
   private boolean m_bExtended = false;
 
   public Intake() {
-    intakeMotor = new CANSparkMax(11, MotorType.kBrushless);
-    intakeMotor.restoreFactoryDefaults();
-    intakeEncoder = new CANEncoder(intakeMotor);
+    m_rollerMotor = new CANSparkMax(11, MotorType.kBrushless);
+    m_feederMotor = new CANSparkMax(12, MotorType.kBrushless);
+
+    m_rollerMotor.restoreFactoryDefaults();
+    intakeEncoder = new CANEncoder(m_rollerMotor);
 
     intakeSolenoid.set(Value.kForward); // retract the intake
 
@@ -47,7 +55,7 @@ public class Intake extends SubsystemBase {
     SmartDashboard.putNumber("Intake/CaptureSpeed", captureSpeed);
     SmartDashboard.putBoolean("Intake/Extended?", m_bExtended);
     /*
-     * intakePIDController = intakeMotor.getPIDController();
+     * intakePIDController = m_rollerMotor.getPIDController();
      * 
      * pid_kP = 0.0001; pid_kI = 0.0; pid_kD = 0.0; pid_kIzone = 0.0; pid_kFF = 0.0;
      * pid_kMAX = 1.0; pid_kMIN = -1.0;
@@ -67,14 +75,41 @@ public class Intake extends SubsystemBase {
      * SmartDashboard.putNumber("Intake/pid_kFF", pid_kFF);
      * SmartDashboard.putNumber("Intake/pid_kMAX", pid_kMAX);
      * SmartDashboard.putNumber("Intake/pid_kMIN", pid_kMIN);
-     * SmartDashboard.putNumber("Intake/intakeMotor_Power", intakeMotor.get());
+     * SmartDashboard.putNumber("Intake/rollerMotor_Power", m_rollerMotor.get());
      */
+
+  }
+
+  public void createShuffleBoardTab() {
+    ShuffleboardTab tab = Shuffleboard.getTab("Sub.Intake");
+
+    CommandBase c = new frc.robot.commands.Test.Intake.StartFeederWheels(this);
+    SmartDashboard.putData("Start Feeder Wheels", c);
+
+    c = new frc.robot.commands.Test.Intake.StopFeederWheels(this);
+    SmartDashboard.putData("Stop Feeder Wheels", c);
+
+    c = new frc.robot.commands.Test.Intake.StartIntakeRoller(this);
+    SmartDashboard.putData("Start Intake Roller", c);
+
+    c = new frc.robot.commands.Test.Intake.StopIntakeRoller(this);
+    SmartDashboard.putData("Stop Intake Roller", c);
+
+    // tab.add("Start Feeder Wheels", c);
+
+    // tab.add("RPM Target",
+    // 1).withWidget(BuiltInWidgets.kNumberSlider).withPosition(3, 3)
+    // .withProperties(Map.of("min", 0, "max", 10000)); // specify
+    // // widget
+    // // properties
+    // // here
+
   }
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Intake/intakeMotor_Power", intakeMotor.get());
-    SmartDashboard.putNumber("Intake/intakeMotor Current", intakeMotor.getOutputCurrent());
+    SmartDashboard.putNumber("Intake/rollerMotor_Power", m_rollerMotor.get());
+    SmartDashboard.putNumber("Intake/rollerMotor Current", m_rollerMotor.getOutputCurrent());
     SmartDashboard.putBoolean("Intake/Extended?", m_bExtended);
     captureSpeed = SmartDashboard.getNumber("Intake/CaptureSpeed", 0);
 
@@ -131,14 +166,14 @@ public class Intake extends SubsystemBase {
 
     // intakePIDController.setReference(captureSpeed, ControlType.kVelocity);
     TheRobot.log("Starting Intake Motor");
-    intakeMotor.set(captureSpeed);
+    m_rollerMotor.set(captureSpeed);
 
   }
 
   // Stops the capture process
   public void stopCapture() {
     // intakePIDController.setReference(0, ControlType.kVelocity);
-    intakeMotor.set(0.0);
+    m_rollerMotor.set(0.0);
   }
 
   // reverse spins the intake in case of jam
@@ -147,7 +182,7 @@ public class Intake extends SubsystemBase {
   public void clear() {
 
     TheRobot.log("Clearing Intake Motor");
-    intakeMotor.set(-captureSpeed);
+    m_rollerMotor.set(-captureSpeed);
   }
 
   public boolean isExtended() {
@@ -157,6 +192,22 @@ public class Intake extends SubsystemBase {
 
   public void setLEDRing(Boolean Powered) { // sets the state of the led ring
     m_LEDrelay.set(Powered);
+  }
+
+  public void startFeederWheels() {
+    m_feederMotor.set(0.5);
+  }
+
+  public void stopFeederWheels() {
+    m_feederMotor.set(0.0);
+  }
+
+  public void startIntakeRoller() {
+    m_rollerMotor.set(0.5);
+  }
+
+  public void stopIntakeRoller() {
+    m_rollerMotor.set(0.0);
   }
 
 }
