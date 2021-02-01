@@ -7,11 +7,11 @@ package frc.robot.commands.Test.Indexer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Indexer;
 
-public class StopIndexer extends CommandBase {
+public class RunIndexer extends CommandBase {
   private Indexer m_indexer = null;
 
-  /** Creates a new StopIndexer. */
-  public StopIndexer(Indexer indexer) {
+  /** Creates a new RunIndexer. */
+  public RunIndexer(Indexer indexer) {
     m_indexer = indexer;
 
     // Use addRequirements() here to declare subsystem dependencies.
@@ -21,22 +21,23 @@ public class StopIndexer extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    m_indexer.advance();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_indexer.stop();
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    m_indexer.stop();
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return true;
+    return false;
   }
 }
