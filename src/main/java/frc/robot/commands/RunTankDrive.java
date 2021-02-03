@@ -31,7 +31,7 @@ public class RunTankDrive extends CommandBase {
 
     
 
-    m_drive.tankDrive(m_drive.m_leftLargeJoystick.getY(), m_drive.m_rightLargeJoystick.getY());
+    m_drive.tankDrive(m_drive.getLeftJoystickY(), m_drive.getRightJoystickY());
   }
 
   // Called once the command ends or is interrupted.

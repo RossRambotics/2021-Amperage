@@ -27,6 +27,7 @@ public class Drive extends SubsystemBase {
   /** Creates a new Drive. */
 
   private Double m_maxDriveOutput = 0.5;
+  private Double m_deadZone = 0.05;
 
   //actually get these values ------------------------------------------------------------------
   //mps = wheel circumference * gearcoefficent * (steps / 100ms) * 1000ms / steps per rotation
@@ -39,8 +40,8 @@ public class Drive extends SubsystemBase {
 
   private NetworkTableEntry m_maxDriveOutputEntry = null;
 
-  public Joystick m_rightLargeJoystick;
-  public Joystick m_leftLargeJoystick;
+  private Joystick m_rightLargeJoystick;
+  private Joystick m_leftLargeJoystick;
   
   private WPI_TalonFX m_rightDriveTalon;
   private WPI_TalonFX m_leftDriveTalon;
@@ -230,5 +231,27 @@ public class Drive extends SubsystemBase {
     double stoppingDistance = Math.pow(mpsVelocity, 2) * a;
 
     return stoppingDistance;
+  }
+
+  public double getLeftJoystickY(){
+    double y = m_leftLargeJoystick.getY();
+
+    if(Math.abs(y) > m_deadZone)
+    {
+      return y;
+    }
+
+    return 0;
+  }
+
+  public double getRightJoystickY(){
+    double y = m_rightLargeJoystick.getY();
+
+    if(Math.abs(y) > m_deadZone)
+    {
+      return y;
+    }
+
+    return 0;
   }
 }
