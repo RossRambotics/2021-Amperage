@@ -11,6 +11,8 @@ import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
+import org.opencv.core.Mat;
+
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
@@ -28,11 +30,12 @@ public class Drive extends SubsystemBase {
 
   private Double m_maxDriveOutput = 0.5;
   private Double m_deadZone = 0.15;
+  private Double m_fineHandlingZone = 0.4;
 
   //actually get these values ------------------------------------------------------------------
   //mps = wheel circumference * gearcoefficent * (steps / 100ms) * 1000ms / steps per rotation
   //steps / 100ms = mps * .1 seconds * steps per rotation / wheel cicumference / gear ratio
-  private Double m_maxVelocity = 5.0; // meters per second
+  private Double m_maxVelocity = 20.0; // meters per second
   private Double m_velocityCoefficent = 50000.0; //(encoder steps / 100 ms)
   private Double m_wheelCircumference = 0.478; //meters - 6 inch diameter
   private Double m_gearCoeffiecent = .0933; // 10.71 to 1 falcon rotation to wheel rotation
@@ -238,7 +241,12 @@ public class Drive extends SubsystemBase {
 
     if(Math.abs(y) > m_deadZone)
     {
-      return y;
+      if(Math.abs(y) < m_fineHandlingZone)
+      {
+        return 5000 * y;
+      }
+
+      return Math.pow(y, 3);// cube for fine handling
     }
 
     return 0;
@@ -249,7 +257,12 @@ public class Drive extends SubsystemBase {
 
     if(Math.abs(y) > m_deadZone)
     {
-      return y;
+      if(Math.abs(y) < m_fineHandlingZone)
+      {
+        return 5000 * y;
+      }
+
+      return Math.pow(y, 3);// cube for fine handling
     }
 
     return 0;
