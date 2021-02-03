@@ -5,12 +5,15 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.RunTankDrive;
+import frc.robot.commands.AutomatedMotion.AutonomousMovementBase;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Robot;
 
 /**
@@ -22,12 +25,26 @@ import frc.robot.Robot;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private String m_defaultDriveMode = "TankDrive";
-  private RunTankDrive m_tankDriveCommand;
+  private Joystick m_leftLargeJoystick;
+  private Joystick m_rightLargeJoystick;
+  
+  private JoystickButton m_triggerRight;
+
+  private Drive m_drive;
+
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the button bindings
-    m_tankDriveCommand = new RunTankDrive(TheRobot.getInstance().m_drive);
+
+    m_drive = TheRobot.getInstance().m_drive;
+
+    
+
+    m_rightLargeJoystick = new Joystick(0);
+    m_leftLargeJoystick = new Joystick(1);
+
+    m_triggerRight = new JoystickButton(m_rightLargeJoystick, 1);
 
     configureButtonBindings();
     }
@@ -38,7 +55,9 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
-  private void configureButtonBindings() {}
+  private void configureButtonBindings() {
+    m_triggerRight.whenActive(new AutonomousMovementBase(m_drive, 1.0, 5.0));
+  }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
@@ -49,10 +68,10 @@ public class RobotContainer {
     // An ExampleCommand will run in autonomous
     switch(m_defaultDriveMode){
       case "TankDrive":
-        return m_tankDriveCommand;
+        return new RunTankDrive(m_drive);
 
       default:
-        return m_tankDriveCommand;
+        return new RunTankDrive(m_drive);
     }
   }
 }

@@ -11,15 +11,10 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 public class RunTankDrive extends CommandBase {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Drive m_drive;
-
-  private Joystick m_rightLargeJoystick;
-  private Joystick m_leftLargeJoystick;
-
   
   public RunTankDrive(Drive drive) {
     m_drive = drive;
-    m_rightLargeJoystick = new Joystick(0);
-    m_leftLargeJoystick = new Joystick(1);
+    
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(drive);
   }
@@ -33,7 +28,10 @@ public class RunTankDrive extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_drive.tankDrive(m_leftLargeJoystick.getY(), m_rightLargeJoystick.getY());
+
+    
+
+    m_drive.tankDrive(m_drive.m_leftLargeJoystick.getY(), m_drive.m_rightLargeJoystick.getY());
   }
 
   // Called once the command ends or is interrupted.
@@ -51,4 +49,5 @@ public class RunTankDrive extends CommandBase {
   public boolean isFinished() {
     return false;
   }
+
 }
