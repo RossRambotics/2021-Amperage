@@ -66,8 +66,8 @@ public class Drive extends SubsystemBase {
     m_rightDriveTalonFollower.follow(m_rightDriveTalon);
 
     //configures the inversion and peak output for the talons
-    m_rightDriveTalon.setInverted(true);
-    m_rightDriveTalonFollower.setInverted(true);
+    //m_rightDriveTalon.setInverted(true);
+    //m_rightDriveTalonFollower.setInverted(true);
    
     // left side talons
     m_leftDriveTalon = new WPI_TalonFX(22);
@@ -79,8 +79,8 @@ public class Drive extends SubsystemBase {
     m_rightTalonConfig = new TalonFXConfiguration();
 
     //configures the inversion and peak output for the talons
-    //m_leftDriveTalon.setInverted(true);
-    //m_leftDriveTalonFollower.setInverted(true);
+    m_leftDriveTalon.setInverted(true);
+    m_leftDriveTalonFollower.setInverted(true);
     
     // speed controller groups
     //m_leftDriveGroup = new SpeedControllerGroup(m_leftDriveTalon, m_leftDriveTalonFollower);
