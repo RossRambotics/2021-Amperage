@@ -27,15 +27,15 @@ public class Drive extends SubsystemBase {
   /** Creates a new Drive. */
 
   private Double m_maxDriveOutput = 0.5;
-  private Double m_deadZone = 0.05;
+  private Double m_deadZone = 0.15;
 
   //actually get these values ------------------------------------------------------------------
   //mps = wheel circumference * gearcoefficent * (steps / 100ms) * 1000ms / steps per rotation
   //steps / 100ms = mps * .1 seconds * steps per rotation / wheel cicumference / gear ratio
   private Double m_maxVelocity = 5.0; // meters per second
   private Double m_velocityCoefficent = 50000.0; //(encoder steps / 100 ms)
-  private Double m_wheelCircumference = 0.4; //meters
-  private Double m_gearCoeffiecent = .05; //
+  private Double m_wheelCircumference = 0.478; //meters - 6 inch diameter
+  private Double m_gearCoeffiecent = .0933; // 10.71 to 1 falcon rotation to wheel rotation
   private Double m_stepsPerRotation = 2048.0; //encoder steps 
 
   private NetworkTableEntry m_maxDriveOutputEntry = null;
@@ -128,8 +128,8 @@ public class Drive extends SubsystemBase {
   public void tankDrive(Double leftSpeed, Double rightSpeed) {
     //m_differentialDrive.tankDrive(leftSpeed, rightSpeed); <-Dumb
 
-    System.out.println(m_leftDriveTalon.getSupplyCurrent());
-
+    System.out.println(rightSpeed);
+    System.out.println(rightSpeed * m_velocityCoefficent);
     m_rightDriveTalon.set(ControlMode.Velocity, rightSpeed * m_velocityCoefficent);
     m_leftDriveTalon.set(ControlMode.Velocity, leftSpeed * m_velocityCoefficent);
   }
