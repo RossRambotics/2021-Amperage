@@ -259,4 +259,11 @@ public class Drive extends SubsystemBase {
 
     return 0;
   }
+  public boolean getLeftJoystickTrigger(){
+    return m_leftLargeJoystick.getRawButton(0);
+  }
+  public boolean getrightJoystickTrigger(){
+    return m_rightLargeJoystick.getRawButton(0); 
+  }   
+
 }
