@@ -5,11 +5,14 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
-import frc.robot.commands.ExampleCommand;
-import frc.robot.subsystems.ExampleSubsystem;
-import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.IntakeReverse;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.commands.ExampleCommand;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -22,7 +25,7 @@ public class RobotContainer {
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
 
   private final ExampleCommand m_autoCommand = new ExampleCommand(m_exampleSubsystem);
-
+  public Joystick m_joystick = new Joystick(0);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -36,7 +39,32 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
-  private void configureButtonBindings() {}
+  private void configureButtonBindings() {
+    Intake intake = TheRobot.getInstance().m_intake;
+
+    JoystickButton bButton = new JoystickButton(m_joystick,2);
+    bButton.whenHeld(new frc.robot.commands.IntakeReverse(intake), true);
+
+    JoystickButton rbButton = new JoystickButton(m_joystick,6);
+    rbButton.whenPressed(new frc.robot.commands.IntakeExtend(intake),true);
+    rbButton.whenPressed(new frc.robot.commands.IntakeMotorOn(intake),true);
+
+    JoystickButton lbButton = new JoystickButton(m_joystick,5);
+    lbButton.whenPressed(new frc.robot.commands.IntakeRetract(intake),true);
+    lbButton.whenPressed(new frc.robot.commands.IntakeMotorOff(intake),true);
+
+    JoystickButton yButton = new JoystickButton(m_joystick,4);
+
+    JoystickButton xButton = new JoystickButton(m_joystick,3);
+
+    JoystickButton aButton = new JoystickButton(m_joystick,1);
+
+    JoystickButton selectButton = new JoystickButton(m_joystick,7);
+
+    JoystickButton startButton = new JoystickButton(m_joystick,8);
+  }
+
+  
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
@@ -46,5 +74,5 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
     return m_autoCommand;
-  }
+}
 }
