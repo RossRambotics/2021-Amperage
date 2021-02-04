@@ -91,23 +91,4 @@ public class RobotContainer {
     JoystickButton startButton = new JoystickButton(m_smallJoystick, 8);
   }
 
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
-  public Command getTelopDefaultDrive() {
-    // An ExampleCommand will run in autonomous
-
-    switch (m_defaultDriveMode) {
-      case "TankDrive":
-        return new RunTankDrive(m_drive);
-
-      case "TankDriveHandBrake":
-        return new RunTankDriveHandBreak(m_drive);
-
-      default:
-        return new RunTankDrive(m_drive);
-    }
-  }
 }

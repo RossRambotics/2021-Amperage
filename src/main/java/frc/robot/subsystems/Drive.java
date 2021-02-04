@@ -24,17 +24,13 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.helper.DriveHandlingSetup.HandlingBase;
 
 public class Drive extends SubsystemBase {
   /** Creates a new Drive. */
 
-  private Double m_maxDriveOutput = 0.5;
-  private Double m_deadZone = 0.15;
-  private Double m_fineHandlingZone = 0.8;
-  private Double m_fineHandlingMaxVeloctiy = 0.07;
+  private HandlingBase m_handlingValues;
 
-  // actually get these values
-  // ------------------------------------------------------------------
   // mps = wheel circumference * gearcoefficent * (steps / 100ms) * 1000ms / steps
   // per rotation
   // steps / 100ms = mps * .1 seconds * steps per rotation / wheel cicumference /
@@ -63,7 +59,9 @@ public class Drive extends SubsystemBase {
 
   private DifferentialDrive m_differentialDrive;
 
-  public Drive() {
+  public Drive(HandlingBase base) {
+    m_handlingValues = base;
+
     // Joysticks
     m_rightLargeJoystick = new Joystick(0);
     m_leftLargeJoystick = new Joystick(1);
@@ -122,11 +120,12 @@ public class Drive extends SubsystemBase {
 
   @Override
   public void periodic() {
-
-    if (m_maxDriveOutput != m_maxDriveOutputEntry.getDouble(0.5)) {
-      m_maxDriveOutput = m_maxDriveOutputEntry.getDouble(0.5);
-      setPeakOutputs(m_maxDriveOutput);
-    }
+    /*
+     * if (m_handlingValues.getMaxDriveOutput() !=
+     * m_maxDriveOutputEntry.getDouble(0.5)) { m_handlingValues.getMaxDriveOutput()
+     * = m_maxDriveOutputEntry.getDouble(0.5);
+     * setPeakOutputs(m_handlingValues.getMaxDriveOutput()); }
+     */
   }
 
   @Override
@@ -141,19 +140,6 @@ public class Drive extends SubsystemBase {
     System.out.println(rightSpeed * m_velocityCoefficent);
     m_rightDriveTalon.set(ControlMode.Velocity, rightSpeed * m_velocityCoefficent);
     m_leftDriveTalon.set(ControlMode.Velocity, leftSpeed * m_velocityCoefficent);
-  }
-
-  private void setPeakOutputs(Double peakOutput) // sets the max peak outputs on a motor to prevent a brownout
-  {
-    m_leftDriveTalon.configPeakOutputForward(peakOutput);
-    m_leftDriveTalon.configPeakOutputReverse(-peakOutput);
-    m_leftDriveTalonFollower.configPeakOutputForward(peakOutput); // you must set this on followers too...
-    m_leftDriveTalonFollower.configPeakOutputReverse(-peakOutput); // you must set this on followers too...
-
-    m_rightDriveTalon.configPeakOutputForward(peakOutput);
-    m_rightDriveTalon.configPeakOutputReverse(-peakOutput);
-    m_rightDriveTalonFollower.configPeakOutputForward(peakOutput); // you must set this on followers too...
-    m_rightDriveTalonFollower.configPeakOutputReverse(-peakOutput); // you must set this on followers too...
   }
 
   private void clearTalonEncoders() // resets the talon encoder positions to 0
@@ -243,14 +229,15 @@ public class Drive extends SubsystemBase {
   public double getLeftJoystickY() {
     double y = m_leftLargeJoystick.getY();
 
-    if (Math.abs(y) > m_deadZone) {
-      if (Math.abs(y) < m_fineHandlingZone) {
-        double fineHandlingCoefficent = m_fineHandlingMaxVeloctiy / (m_fineHandlingZone - m_deadZone);
+    if (Math.abs(y) > m_handlingValues.getDeadZone()) { // enforces joystick deadzone
+      if (Math.abs(y) < m_handlingValues.getFineHandlingZone()) { // low velocity for superior handling
+        double fineHandlingCoefficent = m_handlingValues.getfineHandlingMaxVelocity()
+            / (m_handlingValues.getFineHandlingZone() - m_handlingValues.getDeadZone());
         return fineHandlingCoefficent * y;
       }
 
-      double highPowerCoefficent = (1 - .1) / (1 - m_fineHandlingZone);
-      return Math.pow(y * highPowerCoefficent, 3) + 0.1;
+      double highPowerCoefficent = (1 - .1) / (1 - m_handlingValues.getFineHandlingZone());
+      return Math.pow(y * highPowerCoefficent, 3) + 0.1; // high POWER
     }
 
     return 0;
@@ -259,14 +246,15 @@ public class Drive extends SubsystemBase {
   public double getRightJoystickY() {
     double y = m_rightLargeJoystick.getY();
 
-    if (Math.abs(y) > m_deadZone) {
-      if (Math.abs(y) < m_fineHandlingZone) {
-        double fineHandlingCoefficent = m_fineHandlingMaxVeloctiy / (m_fineHandlingZone - m_deadZone);
+    if (Math.abs(y) > m_handlingValues.getDeadZone()) { // enforces joystick deadzone
+      if (Math.abs(y) < m_handlingValues.getFineHandlingZone()) { // low velocity for superior handling
+        double fineHandlingCoefficent = m_handlingValues.getfineHandlingMaxVelocity()
+            / (m_handlingValues.getFineHandlingZone() - m_handlingValues.getDeadZone());
         return fineHandlingCoefficent * y;
       }
 
-      double highPowerCoefficent = (1 - .1) / (1 - m_fineHandlingZone);
-      return Math.pow(y * highPowerCoefficent, 3) + 0.1;
+      double highPowerCoefficent = (1 - .1) / (1 - m_handlingValues.getFineHandlingZone());
+      return Math.pow(y * highPowerCoefficent, 3) + 0.1; // high POWER
     }
 
     return 0;

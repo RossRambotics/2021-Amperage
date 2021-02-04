@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.helper.DriveHandlingSetup.HandlingBase;
 import frc.robot.subsystems.*;
 
 /**
@@ -25,6 +26,7 @@ public class Robot extends TimedRobot {
   public Intake m_intake = null;
   public Shooter m_shooter = null;
   public Hood m_hood = null;
+  private HandlingBase m_handlingBase;
 
   public Robot() {
     super();
@@ -42,9 +44,11 @@ public class Robot extends TimedRobot {
     // autonomous chooser on the dashboard.
     TheRobot.log("robotInit.");
 
+    m_handlingBase = new HandlingBase();
+
     // m_climber = new Climber();
     // m_controlPanel = new ControlPanel();
-    m_drive = new Drive();
+    m_drive = new Drive(m_handlingBase);
     m_intake = new Intake();
     m_indexer = new Indexer();
     m_shooter = new Shooter();
@@ -106,21 +110,20 @@ public class Robot extends TimedRobot {
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
- 
+
   }
 
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
 
-    m_drive.setDefaultCommand(m_robotContainer.getTelopDefaultDrive());
+    m_drive.setDefaultCommand(m_handlingBase.getDefaultDriveCommand(m_drive));
   }
 
   @Override
   public void testInit() {
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
-
 
   }
 
