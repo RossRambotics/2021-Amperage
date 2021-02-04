@@ -241,10 +241,6 @@ public class Drive extends SubsystemBase {
 
     if(Math.abs(y) > m_deadZone)
     {
-      if(Math.abs(y) < m_fineHandlingZone)
-      {
-        return 5000 * y;
-      }
 
       return Math.pow(y, 3);// cube for fine handling
     }
@@ -257,10 +253,6 @@ public class Drive extends SubsystemBase {
 
     if(Math.abs(y) > m_deadZone)
     {
-      if(Math.abs(y) < m_fineHandlingZone)
-      {
-        return 5000 * y;
-      }
 
       return Math.pow(y, 3);// cube for fine handling
     }
