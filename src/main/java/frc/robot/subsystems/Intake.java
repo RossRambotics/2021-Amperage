@@ -44,7 +44,7 @@ public class Intake extends SubsystemBase {
   private Double pid_kMIN;
 
   private Double captureSpeed = 0.5; // the capture speed for the intake in RPM
-  private boolean m_bExtended = false;
+  private boolean m_bExtended;
 
   public Intake() {
     m_rollerMotor = new CANSparkMax(11, MotorType.kBrushless);
@@ -165,61 +165,75 @@ public class Intake extends SubsystemBase {
 
   // retracts the intake
   public void retract() {
+    this.IntakeMotorOff();
     intakeSolenoid.set(Value.kForward);
     m_bExtended = false;
+    TheRobot.log("Intake Retract!");
   }
 
   // extends the intake
   public void extend() {
     intakeSolenoid.set(Value.kReverse);
     m_bExtended = true;
+    TheRobot.log("Intake Extended!");
+  }
+
+  // spins wheels backwards to unjam a ball after checking to see if the intake is
+  // extended
+  public void IntakeMotorReverse() {
+    if (m_bExtended == true) {
+      TheRobot.log("IntakeMotorReverse setting intake motor");
+      m_rollerMotor.set(-.5);
+      m_feederMotor.set(-.5);
+    } else {
+      m_rollerMotor.set(0);
+      m_feederMotor.set(0);
+      TheRobot.log("Please Extend intake to run");
+    }
   }
 
   // spins the intake to capture a ball
   public void capture() {
-
     // intakePIDController.setReference(captureSpeed, ControlType.kVelocity);
     TheRobot.log("Starting Intake Motor");
     m_rollerMotor.set(captureSpeed);
-
+    m_feederMotor.set(.5);
   }
 
-  // Stops the capture process
-  public void stopCapture() {
-    // intakePIDController.setReference(0, ControlType.kVelocity);
-    m_rollerMotor.set(0.0);
+  // turns off intake motors
+  public void IntakeMotorOff() {
+    m_feederMotor.set(0);
+    m_rollerMotor.set(0);
+    TheRobot.log("motors stopped");
   }
 
-  // reverse spins the intake in case of jam
-  // return true if cleared
-  // return false if jam is still detected
-  public void clear() {
-
-    TheRobot.log("Clearing Intake Motor");
-    m_rollerMotor.set(-captureSpeed);
-  }
-
+  // sees if the intake is extended
   public boolean isExtended() {
 
     return m_bExtended;
   }
 
-  public void setLEDRing(Boolean Powered) { // sets the state of the led ring
+  // sets the state of the led ring
+  public void setLEDRing(Boolean Powered) {
     m_LEDrelay.set(Powered);
   }
 
+  // starts the feeder wheels
   public void startFeederWheels() {
     m_feederMotor.set(0.5);
   }
 
+  // stops the feeder wheels
   public void stopFeederWheels() {
     m_feederMotor.set(0.0);
   }
 
+  // starts the roller wheels
   public void startIntakeRoller() {
     m_rollerMotor.set(0.5);
   }
 
+  // stops roller wheels
   public void stopIntakeRoller() {
     m_rollerMotor.set(0.0);
   }
