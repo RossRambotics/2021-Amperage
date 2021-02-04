@@ -8,11 +8,11 @@ import frc.robot.subsystems.Drive;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
-public class RunTankDrive extends CommandBase {
+public class RunTankDriveHandBreak extends CommandBase {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Drive m_drive;
   
-  public RunTankDrive(Drive drive) {
+  public RunTankDriveHandBreak(Drive drive) {
     m_drive = drive;
     
     // Use addRequirements() here to declare subsystem dependencies.
@@ -28,10 +28,16 @@ public class RunTankDrive extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    if(m_drive.getrightJoystickTrigger() && m_drive.getLeftJoystickTrigger()){
+      m_drive.tankDrive(0.0, 0.0);
+    }else if(m_drive.getLeftJoystickTrigger()){
+      m_drive.tankDrive(0.0, m_drive.getRightJoystickY());
+    }else if(m_drive.getrightJoystickTrigger()){
+      m_drive.tankDrive(m_drive.getLeftJoystickY(), 0.0);
+    }else{
+      m_drive.tankDrive(m_drive.getLeftJoystickY(), m_drive.getRightJoystickY());
+    }
 
-    
-
-    m_drive.tankDrive(m_drive.getLeftJoystickY(), m_drive.getRightJoystickY());
   }
 
   // Called once the command ends or is interrupted.
