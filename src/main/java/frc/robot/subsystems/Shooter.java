@@ -4,11 +4,15 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.DigitalOutput;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 // Rev Spark Max classes
@@ -43,6 +47,9 @@ public class Shooter extends SubsystemBase {
   private double m_pid_kMaxOutput, m_pid_kMinOutput, m_pid_maxRPM;
   private boolean m_bTuning = false;
   private double m_dTuningRPM = 4000;
+  private ShuffleboardTab m_shuffleboardTab = Shuffleboard.getTab("Sub.Shooter");
+  private NetworkTableEntry m_testRPM = null;
+  private NetworkTableEntry m_actualRPM = null;
 
   private double m_dLowPortRPM = 500;
   private boolean m_bToggleLowPort = false;
@@ -103,12 +110,24 @@ public class Shooter extends SubsystemBase {
   }
 
   public void createShuffleBoardTab() {
-    ShuffleboardTab tab = Shuffleboard.getTab("Sub.Shooter");
-    tab.add("RPM Target", 1).withWidget(BuiltInWidgets.kNumberSlider).withPosition(3, 3)
-        .withProperties(Map.of("min", 0, "max", 10000)); // specify
-                                                         // widget
-                                                         // properties
-                                                         // here
+    ShuffleboardTab tab = m_shuffleboardTab;
+    ShuffleboardLayout shooterCommands = tab.getLayout("Commands", BuiltInLayouts.kList).withSize(2, 2)
+        .withProperties(Map.of("Label position", "HIDDEN")); // hide labels for commands
+
+    CommandBase c = new frc.robot.commands.Test.Shooter.StartShooter(this);
+    c.setName("Start Shooter");
+    SmartDashboard.putData(c);
+    shooterCommands.add(c);
+
+    c = new frc.robot.commands.Test.Shooter.StopShooter(this);
+    c.setName("Stop Shooter");
+    SmartDashboard.putData(c);
+    shooterCommands.add(c);
+
+    m_testRPM = m_shuffleboardTab.add("Shooter Test RPM", 4000).withWidget(BuiltInWidgets.kNumberSlider).withSize(4, 1)
+        .withPosition(2, 0).withProperties(Map.of("min", 0, "max", 10000)).getEntry();
+
+    m_actualRPM = m_shuffleboardTab.add("Shooter Actual RPM", 4000).withSize(2, 1).withPosition(2, 1).getEntry();
 
   }
 
@@ -170,6 +189,7 @@ public class Shooter extends SubsystemBase {
 
     // Get the RPM of the motors
     m_RPM_shooter = Math.abs(m_encoder1.getVelocity());
+    m_actualRPM.setDouble(m_RPM_shooter);
 
     // Output to dashboard
     SmartDashboard.putNumber("Shooter/Current RPM", m_RPM_shooter);
@@ -224,6 +244,14 @@ public class Shooter extends SubsystemBase {
     // retract the hood
     Robot r = TheRobot.getInstance();
     r.m_hood.retract();
+  }
+
+  public void start() {
+    // starts the shooter wheels back up to the reference
+    // set the PID Controller to hit the RPM
+    double velocity = m_testRPM.getDouble(0);
+    m_pidController.setReference(velocity, ControlType.kVelocity);
+    TheRobot.log("Shooter ready RPM_target:" + TheRobot.toString(velocity));
   }
 
   // returns true if the shooter is up-to-speed for the target distance

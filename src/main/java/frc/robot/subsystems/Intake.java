@@ -6,6 +6,8 @@ package frc.robot.subsystems;
 
 import frc.robot.TheRobot;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
@@ -16,7 +18,9 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -82,18 +86,28 @@ public class Intake extends SubsystemBase {
 
   public void createShuffleBoardTab() {
     ShuffleboardTab tab = Shuffleboard.getTab("Sub.Intake");
+    ShuffleboardLayout intakeCommands = tab.getLayout("Commands", BuiltInLayouts.kList).withSize(2, 2)
+        .withProperties(Map.of("Label position", "HIDDEN")); // hide labels for commands
 
     CommandBase c = new frc.robot.commands.Test.Intake.StartFeederWheels(this);
-    SmartDashboard.putData("Start Feeder Wheels", c);
+    c.setName("Start Feeder Wheels");
+    SmartDashboard.putData(c);
+    intakeCommands.add(c);
 
     c = new frc.robot.commands.Test.Intake.StopFeederWheels(this);
-    SmartDashboard.putData("Stop Feeder Wheels", c);
+    c.setName("Stop Feeder Wheels");
+    SmartDashboard.putData(c);
+    intakeCommands.add(c);
 
     c = new frc.robot.commands.Test.Intake.StartIntakeRoller(this);
-    SmartDashboard.putData("Start Intake Roller", c);
+    c.setName("Start Intake Roller");
+    SmartDashboard.putData(c);
+    intakeCommands.add(c);
 
     c = new frc.robot.commands.Test.Intake.StopIntakeRoller(this);
-    SmartDashboard.putData("Stop Intake Roller", c);
+    c.setName("Stop Intake Roller");
+    SmartDashboard.putData(c);
+    intakeCommands.add(c);
 
     // tab.add("Start Feeder Wheels", c);
 
