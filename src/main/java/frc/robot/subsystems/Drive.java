@@ -30,7 +30,8 @@ public class Drive extends SubsystemBase {
 
   private Double m_maxDriveOutput = 0.5;
   private Double m_deadZone = 0.15;
-  private Double m_fineHandlingZone = 0.4;
+  private Double m_fineHandlingZone = 0.8;
+  private Double m_fineHandlingMaxVeloctiy = 0.07;
 
   //actually get these values ------------------------------------------------------------------
   //mps = wheel circumference * gearcoefficent * (steps / 100ms) * 1000ms / steps per rotation
@@ -239,10 +240,17 @@ public class Drive extends SubsystemBase {
   public double getLeftJoystickY(){
     double y = m_leftLargeJoystick.getY();
 
+    
+
     if(Math.abs(y) > m_deadZone)
     {
+      if(Math.abs(y) < m_fineHandlingZone){
+        double fineHandlingCoefficent = m_fineHandlingMaxVeloctiy / (m_fineHandlingZone - m_deadZone);
+        return fineHandlingCoefficent * y;
+      }
 
-      return Math.pow(y, 3);// cube for fine handling
+      double highPowerCoefficent = (1 - .1) / (1 - m_fineHandlingZone);
+      return Math.pow(y * highPowerCoefficent, 3) + 0.1;
     }
 
     return 0;
@@ -251,19 +259,27 @@ public class Drive extends SubsystemBase {
   public double getRightJoystickY(){
     double y = m_rightLargeJoystick.getY();
 
+
     if(Math.abs(y) > m_deadZone)
     {
+      if(Math.abs(y) < m_fineHandlingZone){
+        double fineHandlingCoefficent = m_fineHandlingMaxVeloctiy / (m_fineHandlingZone - m_deadZone);
+        return fineHandlingCoefficent * y;
+      }
 
-      return Math.pow(y, 3);// cube for fine handling
+      double highPowerCoefficent = (1 - .1) / (1 - m_fineHandlingZone); 
+      return Math.pow(y * highPowerCoefficent, 3) + 0.1;
     }
 
     return 0;
   }
+
   public boolean getLeftJoystickTrigger(){
-    return m_leftLargeJoystick.getRawButton(0);
+    return m_leftLargeJoystick.getRawButton(1);
   }
+
   public boolean getrightJoystickTrigger(){
-    return m_rightLargeJoystick.getRawButton(0); 
+    return m_rightLargeJoystick.getRawButton(1); 
   }   
 
 }

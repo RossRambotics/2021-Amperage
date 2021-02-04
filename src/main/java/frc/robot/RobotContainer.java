@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.commands.ExampleCommand;
-import frc.robot.commands.RunTankDrive;
+import frc.robot.commands.*;
 import frc.robot.commands.AutomatedMotion.AutonomousMovementBase;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.*;
@@ -24,7 +24,7 @@ import frc.robot.Robot;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private String m_defaultDriveMode = "TankDrive";
+  private String m_defaultDriveMode = "TankDriveHandBrake";
   private Joystick m_leftLargeJoystick;
   private Joystick m_rightLargeJoystick;
   
@@ -56,7 +56,6 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    m_triggerRight.whenActive(new AutonomousMovementBase(m_drive, 1.0, 5.0));
   }
 
   /**
@@ -69,6 +68,9 @@ public class RobotContainer {
     switch(m_defaultDriveMode){
       case "TankDrive":
         return new RunTankDrive(m_drive);
+
+      case "TankDriveHandBrake":
+        return new RunTankDriveHandBreak(m_drive);
 
       default:
         return new RunTankDrive(m_drive);

@@ -28,8 +28,9 @@ public class RunTankDriveHandBreak extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-
-    if(m_drive.getLeftJoystickTrigger()){
+    if(m_drive.getrightJoystickTrigger() && m_drive.getLeftJoystickTrigger()){
+      m_drive.tankDrive(0.0, 0.0);
+    }else if(m_drive.getLeftJoystickTrigger()){
       m_drive.tankDrive(0.0, m_drive.getRightJoystickY());
     }else if(m_drive.getrightJoystickTrigger()){
       m_drive.tankDrive(m_drive.getLeftJoystickY(), 0.0);
@@ -37,7 +38,6 @@ public class RunTankDriveHandBreak extends CommandBase {
       m_drive.tankDrive(m_drive.getLeftJoystickY(), m_drive.getRightJoystickY());
     }
 
-    m_drive.tankDrive(m_drive.getLeftJoystickY(), m_drive.getRightJoystickY());
   }
 
   // Called once the command ends or is interrupted.
