@@ -21,7 +21,6 @@ import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.commands.RunTankDrive;
 
 import frc.robot.Robot;
 
@@ -34,14 +33,7 @@ import frc.robot.Robot;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private String m_defaultDriveMode = "TankDriveHandBrake";
-  private Joystick m_leftLargeJoystick;
-  private Joystick m_rightLargeJoystick;
   public Joystick m_smallJoystick;
-
-  private JoystickButton m_triggerRight;
-
-  private Drive m_drive;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -49,13 +41,7 @@ public class RobotContainer {
   public RobotContainer() {
     // Configure the button bindings
 
-    m_drive = TheRobot.getInstance().m_drive;
-
-    m_rightLargeJoystick = new Joystick(0);
-    m_leftLargeJoystick = new Joystick(1);
-    m_smallJoystick = new Joystick(2);
-
-    m_triggerRight = new JoystickButton(m_rightLargeJoystick, 1);
+    m_smallJoystick = new Joystick(2); // leave as 2
 
     configureButtonBindings();
   }

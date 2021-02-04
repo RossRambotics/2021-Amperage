@@ -22,8 +22,11 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.commands.DriveModes.UpdateHandlingCharacteristics;
+import frc.robot.helper.DriveHandlingSetup.DefaultHardSurfaceHandling;
 import frc.robot.helper.DriveHandlingSetup.HandlingBase;
 
 public class Drive extends SubsystemBase {
@@ -41,8 +44,6 @@ public class Drive extends SubsystemBase {
   private Double m_gearCoeffiecent = .0933; // 10.71 to 1 falcon rotation to wheel rotation
   private Double m_stepsPerRotation = 2048.0; // encoder steps
 
-  private NetworkTableEntry m_maxDriveOutputEntry = null;
-
   private Joystick m_rightLargeJoystick;
   private Joystick m_leftLargeJoystick;
 
@@ -50,14 +51,10 @@ public class Drive extends SubsystemBase {
   private WPI_TalonFX m_leftDriveTalon;
   private WPI_TalonFX m_rightDriveTalonFollower;
   private WPI_TalonFX m_leftDriveTalonFollower;
-  private SpeedControllerGroup m_leftDriveGroup;
-  private SpeedControllerGroup m_rightDriveGroup;
   private TalonFXConfiguration m_leftTalonConfig;
   private TalonFXConfiguration m_rightTalonConfig;
 
   private String m_driveProfileSlot = "StraightDrive";
-
-  private DifferentialDrive m_differentialDrive;
 
   public Drive(HandlingBase base) {
     m_handlingValues = base;
@@ -88,44 +85,28 @@ public class Drive extends SubsystemBase {
     m_leftDriveTalon.setInverted(true);
     m_leftDriveTalonFollower.setInverted(true);
 
-    // speed controller groups
-    // m_leftDriveGroup = new SpeedControllerGroup(m_leftDriveTalon,
-    // m_leftDriveTalonFollower);
-    // m_rightDriveGroup = new SpeedControllerGroup(m_rightDriveTalon,
-    // m_rightDriveTalonFollower);
-
-    // create the differential drive
-    // m_differentialDrive = new DifferentialDrive(m_leftDriveGroup,
-    // m_rightDriveGroup);
-
     m_velocityCoefficent = getVelocityCoefficent();
-
     clearTalonEncoders();
-
-    // setPeakOutputs(m_maxDriveOutput);
     configureTalons();
     setProfileSlot();
     createShuffleBoardTab();
   }
 
   public void createShuffleBoardTab() {
-    ShuffleboardTab tab = Shuffleboard.getTab("Sub.Indexer");
+    ShuffleboardTab tab = Shuffleboard.getTab("Sub.Drive");
 
-    ShuffleboardLayout shooterCommands = tab.getLayout("Drive Calibration", BuiltInLayouts.kList).withSize(2, 2)
+    ShuffleboardLayout driveModeCommands = tab.getLayout("Set Drive Mode", BuiltInLayouts.kList).withSize(2, 3)
         .withProperties(Map.of("Label position", "HIDDEN")); // hide labels for commands
 
-    m_maxDriveOutputEntry = shooterCommands.add("MAX POWER!", 0.5).withWidget(BuiltInWidgets.kNumberSlider)
-        .withSize(4, 1).withProperties(Map.of("min", 0, "max", 1)).getEntry();
+    CommandBase driveModeSelectCommand = new UpdateHandlingCharacteristics(this, new DefaultHardSurfaceHandling());
+    driveModeSelectCommand.setName("Hard Surface Default");
+    SmartDashboard.putData(driveModeSelectCommand);
+    driveModeCommands.add(driveModeSelectCommand);
   }
 
   @Override
   public void periodic() {
-    /*
-     * if (m_handlingValues.getMaxDriveOutput() !=
-     * m_maxDriveOutputEntry.getDouble(0.5)) { m_handlingValues.getMaxDriveOutput()
-     * = m_maxDriveOutputEntry.getDouble(0.5);
-     * setPeakOutputs(m_handlingValues.getMaxDriveOutput()); }
-     */
+
   }
 
   @Override
@@ -151,18 +132,22 @@ public class Drive extends SubsystemBase {
   }
 
   private void configureTalons() {
-    m_leftTalonConfig.peakOutputForward = 0.5; // configures the peak outputs
-    m_leftTalonConfig.peakOutputReverse = -0.5;
-    m_rightTalonConfig.peakOutputForward = 0.5;
-    m_rightTalonConfig.peakOutputReverse = -0.5;
+    m_leftTalonConfig.peakOutputForward = m_handlingValues.getMaxDriveOutput(); // configures the peak outputs
+    m_leftTalonConfig.peakOutputReverse = -m_handlingValues.getMaxDriveOutput();
+    ;
+    m_rightTalonConfig.peakOutputForward = m_handlingValues.getMaxDriveOutput();
+    ;
+    m_rightTalonConfig.peakOutputReverse = -m_handlingValues.getMaxDriveOutput();
+    ;
 
-    m_leftTalonConfig.slot0.kP = 0.1; // configures the slot0 pids -> switch slots to control different modes
-    m_leftTalonConfig.slot0.kI = 0;
-    m_leftTalonConfig.slot0.kD = 0;
+    m_leftTalonConfig.slot0.kP = m_handlingValues.getTalonTankDriveKp(); // configures the slot0 pids -> switch slots to
+                                                                         // control different modes
+    m_leftTalonConfig.slot0.kI = m_handlingValues.getTalonTankDriveKi();
+    m_leftTalonConfig.slot0.kD = m_handlingValues.getTalonTankDriveKd();
 
-    m_rightTalonConfig.slot0.kP = 0.1;
-    m_rightTalonConfig.slot0.kI = 0;
-    m_rightTalonConfig.slot0.kD = 0;
+    m_rightTalonConfig.slot0.kP = m_handlingValues.getTalonTankDriveKp();
+    m_rightTalonConfig.slot0.kI = m_handlingValues.getTalonTankDriveKi();
+    m_rightTalonConfig.slot0.kD = m_handlingValues.getTalonTankDriveKd();
 
     m_leftDriveTalon.configAllSettings(m_leftTalonConfig);
     m_rightDriveTalon.configAllSettings(m_rightTalonConfig);
@@ -266,6 +251,12 @@ public class Drive extends SubsystemBase {
 
   public boolean getrightJoystickTrigger() {
     return m_rightLargeJoystick.getRawButton(1);
+  }
+
+  public void updateHandlingBase(HandlingBase base) {
+    // updates the drive handling characteristics and refreshes talonconfigs
+    m_handlingValues = base;
+    configureTalons();
   }
 
 }
