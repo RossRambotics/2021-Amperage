@@ -10,6 +10,8 @@ public class AutonomousMovementBase extends CommandBase {
   private double m_targetMeters;
   private double m_targetSteps; // the intended amount of steps
   private double m_targetMaxVelocity; // peak velocity in mps
+  private double m_intialStepsLeft;
+  private double m_intialStepsRight; // the inital step count when the command begins
 
   public AutonomousMovementBase(Drive drive, double targetMeters, double targetMaxVelocity) {
     m_drive = drive;

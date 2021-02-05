@@ -11,6 +11,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+import com.ctre.phoenix.sensors.PigeonIMU;
 
 import org.opencv.core.Mat;
 
@@ -57,6 +58,8 @@ public class Drive extends SubsystemBase {
   private TalonFXConfiguration m_leftTalonConfig;
   private TalonFXConfiguration m_rightTalonConfig;
 
+  private PigeonIMU m_pigeon;
+
   private String m_driveProfileSlot = "StraightDrive";
 
   public Drive(HandlingBase base) {
@@ -89,6 +92,8 @@ public class Drive extends SubsystemBase {
     // configures the inversion and peak output for the talons
     m_leftDriveTalon.setInverted(true);
     m_leftDriveTalonFollower.setInverted(true);
+
+    m_pigeon = new PigeonIMU(31);// new pigeon on 31; doesnt work with falcon 500
 
     m_velocityCoefficent = getVelocityCoefficent();
     clearTalonEncoders();
@@ -128,6 +133,12 @@ public class Drive extends SubsystemBase {
     // m_differentialDrive.tankDrive(leftSpeed, rightSpeed); <-Dumb
     m_rightDriveTalon.set(ControlMode.Velocity, rightSpeed * m_velocityCoefficent);
     m_leftDriveTalon.set(ControlMode.Velocity, leftSpeed * m_velocityCoefficent);
+  }
+
+  public double getPigeonYaw() {
+    double[] ypr = new double[3];
+    m_pigeon.getYawPitchRoll(ypr);
+    return ypr[0];
   }
 
   public void arcadeDrive(double x, double y) {
