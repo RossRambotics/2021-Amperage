@@ -81,6 +81,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
         m_talonTankDriveKd = getTalonTankDriveKd();
 
         m_defaultDriveCommandName = getDefaultDriveCommandName();
+        m_tabName = getTabName();
 
     }
 
