@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import java.time.Year;
 import java.util.Map;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -26,6 +27,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.commands.DriveModes.UpdateHandlingCharacteristics;
+import frc.robot.helper.DriveHandlingSetup.DefaultHardSurfaceArcadeDrive;
 import frc.robot.helper.DriveHandlingSetup.DefaultHardSurfaceHandling;
 import frc.robot.helper.DriveHandlingSetup.HandlingBase;
 
@@ -38,14 +40,15 @@ public class Drive extends SubsystemBase {
   // per rotation
   // steps / 100ms = mps * .1 seconds * steps per rotation / wheel cicumference /
   // gear ratio
-  private Double m_maxVelocity = 20.0; // meters per second
-  private Double m_velocityCoefficent = 50000.0; // (encoder steps / 100 ms)
-  private Double m_wheelCircumference = 0.478; // meters - 6 inch diameter
-  private Double m_gearCoeffiecent = .0933; // 10.71 to 1 falcon rotation to wheel rotation
-  private Double m_stepsPerRotation = 2048.0; // encoder steps
+  private double m_maxVelocity = 20.0; // meters per second
+  private double m_velocityCoefficent = 50000.0; // (encoder steps / 100 ms)
+  private double m_wheelCircumference = 0.478; // meters - 6 inch diameter
+  private double m_gearCoeffiecent = .0933; // 10.71 to 1 falcon rotation to wheel rotation
+  private double m_stepsPerRotation = 2048.0; // encoder steps
 
   private Joystick m_rightLargeJoystick;
   private Joystick m_leftLargeJoystick;
+  private Joystick m_smallJoystick;
 
   private WPI_TalonFX m_rightDriveTalon;
   private WPI_TalonFX m_leftDriveTalon;
@@ -58,10 +61,12 @@ public class Drive extends SubsystemBase {
 
   public Drive(HandlingBase base) {
     m_handlingValues = base;
+    System.out.println(base.getMaxDriveOutput());
 
     // Joysticks
     m_rightLargeJoystick = new Joystick(0);
     m_leftLargeJoystick = new Joystick(1);
+    m_smallJoystick = new Joystick(2);
 
     // right side talons
     m_rightDriveTalon = new WPI_TalonFX(21);
@@ -102,6 +107,11 @@ public class Drive extends SubsystemBase {
     driveModeSelectCommand.setName("Hard Surface Default");
     SmartDashboard.putData(driveModeSelectCommand);
     driveModeCommands.add(driveModeSelectCommand);
+
+    driveModeSelectCommand = new UpdateHandlingCharacteristics(this, new DefaultHardSurfaceArcadeDrive());
+    driveModeSelectCommand.setName("Hard Surface Arcade Default");
+    SmartDashboard.putData(driveModeSelectCommand);
+    driveModeCommands.add(driveModeSelectCommand);
   }
 
   @Override
@@ -114,12 +124,28 @@ public class Drive extends SubsystemBase {
     // This method will be called once per scheduler run during simulation
   }
 
-  public void tankDrive(Double leftSpeed, Double rightSpeed) {
+  public void tankDrive(double leftSpeed, double rightSpeed) {
     // m_differentialDrive.tankDrive(leftSpeed, rightSpeed); <-Dumb
-
-    System.out.println(rightSpeed);
-    System.out.println(rightSpeed * m_velocityCoefficent);
     m_rightDriveTalon.set(ControlMode.Velocity, rightSpeed * m_velocityCoefficent);
+    m_leftDriveTalon.set(ControlMode.Velocity, leftSpeed * m_velocityCoefficent);
+  }
+
+  public void arcadeDrive(double x, double y) {
+    double leftSpeed = y - x; // acrade drive algorithm
+    double rightSpeed = y + x;
+
+    if (leftSpeed > 1) { // normalizes the speeds to acceptable values
+      leftSpeed = 1;
+    } else if (leftSpeed < -1) {
+      leftSpeed = -1;
+    }
+    if (rightSpeed > 1) {
+      rightSpeed = 1;
+    } else if (rightSpeed < -1) {
+      rightSpeed = -1;
+    }
+
+    m_rightDriveTalon.set(ControlMode.Velocity, rightSpeed * m_velocityCoefficent); // sets speeds
     m_leftDriveTalon.set(ControlMode.Velocity, leftSpeed * m_velocityCoefficent);
   }
 
@@ -201,7 +227,7 @@ public class Drive extends SubsystemBase {
     return m_wheelCircumference * m_gearCoeffiecent / m_stepsPerRotation;
   }
 
-  public double getDecelerationDistance(Double velocity) // velocity in steps / 100ms
+  public double getDecelerationDistance(double velocity) // velocity in steps / 100ms
   {
     double mpsVelocity = m_gearCoeffiecent * m_wheelCircumference * velocity * 10 / m_stepsPerRotation;
     double a = 500.0;
@@ -221,8 +247,15 @@ public class Drive extends SubsystemBase {
         return fineHandlingCoefficent * y;
       }
 
-      double highPowerCoefficent = (1 - .1) / (1 - m_handlingValues.getFineHandlingZone());
-      return Math.pow(y * highPowerCoefficent, 3) + 0.1; // high POWER
+      double highPowerCoefficent = (Math.pow(1 - m_handlingValues.getfineHandlingMaxVelocity(), .33333))
+          / (1 - m_handlingValues.getFineHandlingZone());
+
+      if (y < 0) {
+        return Math.pow((y + m_handlingValues.getFineHandlingZone()) * highPowerCoefficent, 3)
+            - m_handlingValues.getfineHandlingMaxVelocity(); // high POWER
+      }
+      return Math.pow((y - m_handlingValues.getFineHandlingZone()) * highPowerCoefficent, 3)
+          + m_handlingValues.getfineHandlingMaxVelocity(); // high POWER
     }
 
     return 0;
@@ -238,11 +271,25 @@ public class Drive extends SubsystemBase {
         return fineHandlingCoefficent * y;
       }
 
-      double highPowerCoefficent = (1 - .1) / (1 - m_handlingValues.getFineHandlingZone());
-      return Math.pow(y * highPowerCoefficent, 3) + 0.1; // high POWER
+      double highPowerCoefficent = (Math.pow(1 - m_handlingValues.getfineHandlingMaxVelocity(), .33333))
+          / (1 - m_handlingValues.getFineHandlingZone());
+      if (y < 0) {
+        return Math.pow((y + m_handlingValues.getFineHandlingZone()) * highPowerCoefficent, 3)
+            - m_handlingValues.getfineHandlingMaxVelocity(); // high POWER
+      }
+      return Math.pow((y - m_handlingValues.getFineHandlingZone()) * highPowerCoefficent, 3)
+          + m_handlingValues.getfineHandlingMaxVelocity(); // high POWER
     }
 
     return 0;
+  }
+
+  public double getSmallJoystickX() {
+    return m_smallJoystick.getX();
+  }
+
+  public double getSmallJoystickY() {
+    return m_smallJoystick.getY();
   }
 
   public boolean getLeftJoystickTrigger() {
@@ -254,7 +301,7 @@ public class Drive extends SubsystemBase {
   }
 
   public void updateHandlingBase(HandlingBase base) {
-    // updates the drive handling characteristics and refreshes talonconfigs
+    // updates the drive handling characteristics and refreshes talon configs
     m_handlingValues = base;
     configureTalons();
   }

@@ -12,18 +12,18 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.commands.DriveModes.*;
 import frc.robot.subsystems.Drive;
 
-public class HandlingBase {
-    private String m_name = "Default";
-    private String m_defaultDriveCommandName = "None";
+public class HandlingBase { // extend this class to create a unique set of handling characteristics
+    private String m_tabName;
+    protected String m_defaultDriveCommandName;
 
-    protected Double m_maxDriveOutput = 0.0;
-    protected Double m_deadZone = 0.15;
-    protected Double m_fineHandlingZone = 0.8;
-    protected Double m_fineHandlingMaxVeloctiy = 0.07;
+    protected double m_maxDriveOutput = 0.0;
+    protected double m_deadZone = 0.15;
+    protected double m_fineHandlingZone = 0.8;
+    protected double m_fineHandlingMaxVeloctiy = 0.07;
 
-    protected Double m_talonTankDriveKp = 0.1;
-    protected Double m_talonTankDriveKi = 0.1;
-    protected Double m_talonTankDriveKd = 0.1;
+    protected double m_talonTankDriveKp = 0.1;
+    protected double m_talonTankDriveKi = 0.1;
+    protected double m_talonTankDriveKd = 0.1;
 
     private NetworkTableEntry m_maxDriveOutputEntry;
     private NetworkTableEntry m_deadZoneEntry;
@@ -35,11 +35,12 @@ public class HandlingBase {
     private NetworkTableEntry m_talonTankDriveKdEntry;
 
     public HandlingBase() {
+        setBaseMemberVariables();
         createShuffleBoardTab();
     }
 
     private void createShuffleBoardTab() {
-        ShuffleboardTab tab = Shuffleboard.getTab("Sub.Handling " + m_name);
+        ShuffleboardTab tab = Shuffleboard.getTab("Sub.Handling " + m_tabName);
 
         ShuffleboardLayout talonCalibrations = tab.getLayout("Talon Calibration", BuiltInLayouts.kList).withSize(2, 5)
                 .withProperties(Map.of("Label position", "HIDDEN")); // hide labels for commands
@@ -47,15 +48,36 @@ public class HandlingBase {
         ShuffleboardLayout handlingCalibrations = tab.getLayout("Handling Calibration", BuiltInLayouts.kList)
                 .withSize(2, 5).withProperties(Map.of("Label position", "HIDDEN")); // hide labels for commands
 
-        m_maxDriveOutputEntry = handlingCalibrations.add("Max Power", m_maxDriveOutput).getEntry();
-        m_deadZoneEntry = handlingCalibrations.add("Joystick Deadzone", m_deadZone).getEntry();
-        m_fineHandlingZoneEntry = handlingCalibrations.add("Fine Handling Zone", m_fineHandlingZone).getEntry();
-        m_fineHandlingMaxVeloctiyEntry = handlingCalibrations.add("High Velocity Zone", m_fineHandlingMaxVeloctiy)
-                .getEntry();
+        System.out.println(handlingCalibrations.getComponents());
 
-        m_talonTankDriveKpEntry = talonCalibrations.add("Drive Talon TankDrive Kp", m_talonTankDriveKp).getEntry();
-        m_talonTankDriveKiEntry = talonCalibrations.add("Drive Talon TankDrive Ki", m_talonTankDriveKi).getEntry();
-        m_talonTankDriveKdEntry = talonCalibrations.add("Drive Talon TankDrive Kd", m_talonTankDriveKd).getEntry();
+        if (talonCalibrations.getComponents().size() == 0) { // if there are components in the list already do not run
+            m_maxDriveOutputEntry = handlingCalibrations.add("Max Power", m_maxDriveOutput).getEntry();
+            m_deadZoneEntry = handlingCalibrations.add("Joystick Deadzone", m_deadZone).getEntry();
+            m_fineHandlingZoneEntry = handlingCalibrations.add("Fine Handling Zone", m_fineHandlingZone).getEntry();
+            m_fineHandlingMaxVeloctiyEntry = handlingCalibrations.add("High Velocity Zone", m_fineHandlingMaxVeloctiy)
+                    .getEntry();
+        }
+
+        if (talonCalibrations.getComponents().size() == 0) {// if there are already components in the list do not run
+            m_talonTankDriveKpEntry = talonCalibrations.add("Drive Talon TankDrive Kp", m_talonTankDriveKp).getEntry();
+            m_talonTankDriveKiEntry = talonCalibrations.add("Drive Talon TankDrive Ki", m_talonTankDriveKi).getEntry();
+            m_talonTankDriveKdEntry = talonCalibrations.add("Drive Talon TankDrive Kd", m_talonTankDriveKd).getEntry();
+        }
+    }
+
+    public void setBaseMemberVariables() // sets all of the base member variable values
+    {
+        m_maxDriveOutput = getMaxDriveOutput();
+        m_deadZone = getDeadZone();
+        m_fineHandlingZone = getFineHandlingZone();
+        m_fineHandlingMaxVeloctiy = getfineHandlingMaxVelocity();
+
+        m_talonTankDriveKp = getTalonTankDriveKp();
+        m_talonTankDriveKi = getTalonTankDriveKi();
+        m_talonTankDriveKd = getTalonTankDriveKd();
+
+        m_defaultDriveCommandName = getDefaultDriveCommandName();
+
     }
 
     public void refreshNetworkTablesValues() // refreshes values to the ones from network tables -> defaults must be
@@ -74,42 +96,57 @@ public class HandlingBase {
     public Command getDefaultDriveCommand(Drive drive) {
         switch (m_defaultDriveCommandName) {
             case "TankDrive":
+                System.out.println("TankDrive Running");
                 return new RunTankDrive(drive);
 
             case "TankDriveHandBrake":
+                System.out.println("TankDriveHandBrake Running");
                 return new RunTankDriveHandBrake(drive);
 
+            case "ArcadeDrive":
+                System.out.println("ArcadeDrive Running");
+                return new RunArcadeDrive(drive);
+
             default:
+                System.out.println("TankDrive is Running by default!!!!");
                 return new RunTankDrive(drive);
         }
     }
 
-    public Double getMaxDriveOutput() {
-        return m_maxDriveOutput;
+    public double getMaxDriveOutput() {
+        return 0.0;
     }
 
-    public Double getDeadZone() {
-        return m_deadZone;
+    public double getDeadZone() {
+        return 0.15;
     }
 
-    public Double getFineHandlingZone() {
-        return m_fineHandlingZone;
+    public double getFineHandlingZone() {
+        return 0.8;
     }
 
-    public Double getfineHandlingMaxVelocity() {
-        return m_fineHandlingMaxVeloctiy;
+    public double getfineHandlingMaxVelocity() {
+        return 0.7;
     }
 
-    public Double getTalonTankDriveKp() {
-        return m_talonTankDriveKp;
+    public double getTalonTankDriveKp() {
+        return 0.1;
     }
 
-    public Double getTalonTankDriveKi() {
-        return m_talonTankDriveKi;
+    public double getTalonTankDriveKi() {
+        return 0;
     }
 
-    public Double getTalonTankDriveKd() {
-        return m_talonTankDriveKd;
+    public double getTalonTankDriveKd() {
+        return 0;
+    }
+
+    protected String getDefaultDriveCommandName() {
+        return "None";
+    }
+
+    protected String getTabName() {
+        return "default";
     }
 
 }

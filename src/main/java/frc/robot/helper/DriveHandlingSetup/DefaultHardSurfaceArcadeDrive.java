@@ -1,6 +1,6 @@
 package frc.robot.helper.DriveHandlingSetup;
 
-public class DefaultHardSurfaceHandling extends HandlingBase {
+public class DefaultHardSurfaceArcadeDrive extends HandlingBase {
     @Override
     public double getMaxDriveOutput() {
         return 0.5;
@@ -8,7 +8,7 @@ public class DefaultHardSurfaceHandling extends HandlingBase {
 
     @Override
     public String getDefaultDriveCommandName() {
-        return "TankDriveHandBrake";
+        return "ArcadeDrive";
     }
 
     @Override

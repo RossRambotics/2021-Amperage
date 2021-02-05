@@ -35,15 +35,15 @@ public class Intake extends SubsystemBase {
   private CANPIDController intakePIDController = null;
   private DigitalOutput m_LEDrelay = new DigitalOutput(1); // LED ring used for targeting in DIO port 1
 
-  private Double pid_kP;
-  private Double pid_kI;
-  private Double pid_kD;
-  private Double pid_kIzone;
-  private Double pid_kFF;
-  private Double pid_kMAX;
-  private Double pid_kMIN;
+  private double pid_kP;
+  private double pid_kI;
+  private double pid_kD;
+  private double pid_kIzone;
+  private double pid_kFF;
+  private double pid_kMAX;
+  private double pid_kMIN;
 
-  private Double captureSpeed = 0.5; // the capture speed for the intake in RPM
+  private double captureSpeed = 0.5; // the capture speed for the intake in RPM
   private boolean m_bExtended;
 
   public Intake() {

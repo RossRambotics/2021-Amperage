@@ -3,6 +3,7 @@ package frc.robot.commands.DriveModes;
 import frc.robot.helper.DriveHandlingSetup.HandlingBase;
 import frc.robot.subsystems.Drive;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 public class UpdateHandlingCharacteristics extends CommandBase {
   private final Drive m_drive;
@@ -16,6 +17,7 @@ public class UpdateHandlingCharacteristics extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    CommandScheduler.getInstance().cancel(CommandScheduler.getInstance().getDefaultCommand(m_drive));
     m_drive.setDefaultCommand(m_handlingBase.getDefaultDriveCommand(m_drive)); // updates the default drive mode
     m_drive.updateHandlingBase(m_handlingBase);
   }
