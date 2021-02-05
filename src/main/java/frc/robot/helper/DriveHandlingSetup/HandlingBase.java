@@ -19,16 +19,19 @@ public class HandlingBase { // extend this class to create a unique set of handl
     protected double m_maxDriveOutput = 0.0;
     protected double m_deadZone = 0.15;
     protected double m_fineHandlingZone = 0.8;
-    protected double m_fineHandlingMaxVeloctiy = 0.07;
+    protected double m_fineHandlingMaxVelocity = 0.07;
 
     protected double m_talonTankDriveKp = 0.1;
     protected double m_talonTankDriveKi = 0.1;
     protected double m_talonTankDriveKd = 0.1;
 
+    private double m_fineHandlingCoefficent;
+    private double m_highPowerCoefficent;
+
     private NetworkTableEntry m_maxDriveOutputEntry;
     private NetworkTableEntry m_deadZoneEntry;
     private NetworkTableEntry m_fineHandlingZoneEntry;
-    private NetworkTableEntry m_fineHandlingMaxVeloctiyEntry;
+    private NetworkTableEntry m_fineHandlingMaxVelocityEntry;
 
     private NetworkTableEntry m_talonTankDriveKpEntry;
     private NetworkTableEntry m_talonTankDriveKiEntry;
@@ -36,6 +39,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
 
     public HandlingBase() {
         setBaseMemberVariables();
+        setCalculatedMemberVariables();
         createShuffleBoardTab();
     }
 
@@ -54,7 +58,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
             m_maxDriveOutputEntry = handlingCalibrations.add("Max Power", m_maxDriveOutput).getEntry();
             m_deadZoneEntry = handlingCalibrations.add("Joystick Deadzone", m_deadZone).getEntry();
             m_fineHandlingZoneEntry = handlingCalibrations.add("Fine Handling Zone", m_fineHandlingZone).getEntry();
-            m_fineHandlingMaxVeloctiyEntry = handlingCalibrations.add("High Velocity Zone", m_fineHandlingMaxVeloctiy)
+            m_fineHandlingMaxVelocityEntry = handlingCalibrations.add("High Velocity Zone", m_fineHandlingMaxVelocity)
                     .getEntry();
         }
 
@@ -65,12 +69,12 @@ public class HandlingBase { // extend this class to create a unique set of handl
         }
     }
 
-    public void setBaseMemberVariables() // sets all of the base member variable values
+    private void setBaseMemberVariables() // sets all of the base member variable values
     {
         m_maxDriveOutput = getMaxDriveOutput();
         m_deadZone = getDeadZone();
         m_fineHandlingZone = getFineHandlingZone();
-        m_fineHandlingMaxVeloctiy = getfineHandlingMaxVelocity();
+        m_fineHandlingMaxVelocity = getfineHandlingMaxVelocity();
 
         m_talonTankDriveKp = getTalonTankDriveKp();
         m_talonTankDriveKi = getTalonTankDriveKi();
@@ -80,13 +84,19 @@ public class HandlingBase { // extend this class to create a unique set of handl
 
     }
 
+    private void setCalculatedMemberVariables() // sets and calculates member contants
+    {
+        m_fineHandlingCoefficent = m_fineHandlingMaxVelocity / (m_fineHandlingZone - m_deadZone);
+        m_highPowerCoefficent = (Math.pow(1 - m_fineHandlingMaxVelocity, .333333333333333)) / (1 - m_fineHandlingZone);
+    }
+
     public void refreshNetworkTablesValues() // refreshes values to the ones from network tables -> defaults must be
                                              // updated in code
     {
         m_maxDriveOutput = m_maxDriveOutputEntry.getDouble(m_maxDriveOutput);
         m_deadZone = m_deadZoneEntry.getDouble(m_deadZone);
         m_fineHandlingZone = m_fineHandlingZoneEntry.getDouble(m_fineHandlingZone);
-        m_fineHandlingMaxVeloctiy = m_fineHandlingMaxVeloctiyEntry.getDouble(m_fineHandlingMaxVeloctiy);
+        m_fineHandlingMaxVelocity = m_fineHandlingMaxVelocityEntry.getDouble(m_fineHandlingMaxVelocity);
 
         m_talonTankDriveKp = m_talonTankDriveKpEntry.getDouble(m_talonTankDriveKp);
         m_talonTankDriveKi = m_talonTankDriveKiEntry.getDouble(m_talonTankDriveKi);
@@ -147,6 +157,14 @@ public class HandlingBase { // extend this class to create a unique set of handl
 
     protected String getTabName() {
         return "default";
+    }
+
+    final public double getFineHandlingCoefficent() {
+        return m_fineHandlingCoefficent;
+    }
+
+    final public double getHighPowerCoefficent() {
+        return m_highPowerCoefficent;
     }
 
 }
