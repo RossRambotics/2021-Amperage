@@ -58,6 +58,8 @@ public class Indexer extends SubsystemBase {
    */
   public Indexer() {
 
+    // test
+
     m_bottomMotor = new CANSparkMax(3, MotorType.kBrushless);
     m_topMotor = new CANSparkMax(4, MotorType.kBrushless);
     m_bottomMotor.restoreFactoryDefaults();
