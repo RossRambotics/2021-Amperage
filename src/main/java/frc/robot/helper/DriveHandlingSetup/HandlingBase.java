@@ -11,30 +11,40 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.commands.DriveModes.*;
 import frc.robot.subsystems.Drive;
 
+// Override getter functions for base values to change handling characteristics of the robot
+// Do not override getter functions for Calculated Values!!!
+
 public class HandlingBase { // extend this class to create a unique set of handling characteristics
     private String m_tabName;
     protected String m_defaultDriveCommandName;
 
-    protected double m_maxDriveOutput = 0.0;
-    protected double m_deadZone = 0.15;
-    protected double m_fineHandlingZone = 0.8;
-    protected double m_fineHandlingMaxVelocity = 0.07;
+    protected double m_maxDriveOutput = 0.0; // the max power usable by any drive falcon
 
-    protected double m_talonTankDriveKp = 0.1;
-    protected double m_talonTankDriveKi = 0.1;
-    protected double m_talonTankDriveKd = 0.1;
+    protected double m_tankDeadZone = 0.15; // the deadzone in the joysticks for tankdrive
+    protected double m_tankFineHandlingZone = 0.8; // the zone in the tank drive algorithm dedicated for precise driving
+    protected double m_tankFineHandlingMaxVelocity = 0.07; // maximum relative velocity avaliable for tank fine handling
 
-    private double m_fineHandlingCoefficent;
-    private double m_highPowerCoefficent;
+    protected double m_arcadeLowTurnZone = 0.5; // the percentage in the x values of the arcade
+    protected double m_arcadeLowMaxTurn = 0.25; // percentage of turning wieght avaliable in the arcade low turn zone
 
-    private NetworkTableEntry m_maxDriveOutputEntry;
-    private NetworkTableEntry m_deadZoneEntry;
-    private NetworkTableEntry m_fineHandlingZoneEntry;
-    private NetworkTableEntry m_fineHandlingMaxVelocityEntry;
+    protected double m_talonTankDriveKp = 0.1; // Drive talon default PID kP
+    protected double m_talonTankDriveKi = 0.1; // Drive talon default PID kI
+    protected double m_talonTankDriveKd = 0.1; // Drive talon default PID KD
 
-    private NetworkTableEntry m_talonTankDriveKpEntry;
-    private NetworkTableEntry m_talonTankDriveKiEntry;
-    private NetworkTableEntry m_talonTankDriveKdEntry;
+    private double m_tankFineHandlingCoefficent; // Calculated value
+    private double m_tankHighPowerCoefficent; // Calculated value
+
+    private double m_arcadeLowTurnCoefficent; // Calculated value
+    private double m_arcadeHighTurnCoefficent;// Calculated value
+
+    private NetworkTableEntry m_maxDriveOutputEntry; // Network Table Entry for Shuffleboard
+    private NetworkTableEntry m_deadZoneEntry; // Network Table Entry for Shuffleboard
+    private NetworkTableEntry m_fineHandlingZoneEntry; // Network Table Entry for Shuffleboard
+    private NetworkTableEntry m_fineHandlingMaxVelocityEntry; // Network Table Entry for Shuffleboard
+
+    private NetworkTableEntry m_talonTankDriveKpEntry; // Network Table Entry for Shuffleboard
+    private NetworkTableEntry m_talonTankDriveKiEntry; // Network Table Entry for Shuffleboard
+    private NetworkTableEntry m_talonTankDriveKdEntry; // Network Table Entry for Shuffleboard
 
     public HandlingBase() {
         setBaseMemberVariables();
@@ -53,12 +63,13 @@ public class HandlingBase { // extend this class to create a unique set of handl
 
         System.out.println(handlingCalibrations.getComponents());
 
-        if (talonCalibrations.getComponents().size() == 0) { // if there are components in the list already do not run
+        if (handlingCalibrations.getComponents().size() == 0) { // if there are components in the list already do not
+                                                                // run
             m_maxDriveOutputEntry = handlingCalibrations.add("Max Power", m_maxDriveOutput).getEntry();
-            m_deadZoneEntry = handlingCalibrations.add("Joystick Deadzone", m_deadZone).getEntry();
-            m_fineHandlingZoneEntry = handlingCalibrations.add("Fine Handling Zone", m_fineHandlingZone).getEntry();
-            m_fineHandlingMaxVelocityEntry = handlingCalibrations.add("High Velocity Zone", m_fineHandlingMaxVelocity)
-                    .getEntry();
+            m_deadZoneEntry = handlingCalibrations.add("Joystick Deadzone", m_tankDeadZone).getEntry();
+            m_fineHandlingZoneEntry = handlingCalibrations.add("Fine Handling Zone", m_tankFineHandlingZone).getEntry();
+            m_fineHandlingMaxVelocityEntry = handlingCalibrations
+                    .add("High Velocity Zone", m_tankFineHandlingMaxVelocity).getEntry();
         }
 
         if (talonCalibrations.getComponents().size() == 0) {// if there are already components in the list do not run
@@ -71,9 +82,12 @@ public class HandlingBase { // extend this class to create a unique set of handl
     private void setBaseMemberVariables() // sets all of the base member variable values
     {
         m_maxDriveOutput = getMaxDriveOutput();
-        m_deadZone = getDeadZone();
-        m_fineHandlingZone = getFineHandlingZone();
-        m_fineHandlingMaxVelocity = getfineHandlingMaxVelocity();
+        m_tankDeadZone = getTankDeadZone();
+        m_tankFineHandlingZone = getTankFineHandlingZone();
+        m_tankFineHandlingMaxVelocity = getTankFineHandlingMaxVelocity();
+
+        m_arcadeLowMaxTurn = getArcadeLowMaxTurn();
+        m_arcadeLowTurnZone = getArcadeLowTurnZone();
 
         m_talonTankDriveKp = getTalonTankDriveKp();
         m_talonTankDriveKi = getTalonTankDriveKi();
@@ -81,22 +95,25 @@ public class HandlingBase { // extend this class to create a unique set of handl
 
         m_defaultDriveCommandName = getDefaultDriveCommandName();
         m_tabName = getTabName();
-
     }
 
     private void setCalculatedMemberVariables() // sets and calculates member contants
     {
-        m_fineHandlingCoefficent = m_fineHandlingMaxVelocity / (m_fineHandlingZone - m_deadZone);
-        m_highPowerCoefficent = (Math.pow(1 - m_fineHandlingMaxVelocity, .333333333333333)) / (1 - m_fineHandlingZone);
+        m_tankFineHandlingCoefficent = m_tankFineHandlingMaxVelocity / (m_tankFineHandlingZone - m_tankDeadZone);
+        m_tankHighPowerCoefficent = (Math.pow(1 - m_tankFineHandlingMaxVelocity, .333333333333333))
+                / (1 - m_tankFineHandlingZone);
+
+        m_arcadeLowTurnCoefficent = m_arcadeLowMaxTurn / m_arcadeLowTurnZone;
+        m_arcadeHighTurnCoefficent = (1 - m_arcadeLowMaxTurn) / (1 - m_arcadeLowTurnZone);
     }
 
     public void refreshNetworkTablesValues() // refreshes values to the ones from network tables -> defaults must be
                                              // updated in code
     {
         m_maxDriveOutput = m_maxDriveOutputEntry.getDouble(m_maxDriveOutput);
-        m_deadZone = m_deadZoneEntry.getDouble(m_deadZone);
-        m_fineHandlingZone = m_fineHandlingZoneEntry.getDouble(m_fineHandlingZone);
-        m_fineHandlingMaxVelocity = m_fineHandlingMaxVelocityEntry.getDouble(m_fineHandlingMaxVelocity);
+        m_tankDeadZone = m_deadZoneEntry.getDouble(m_tankDeadZone);
+        m_tankFineHandlingZone = m_fineHandlingZoneEntry.getDouble(m_tankFineHandlingZone);
+        m_tankFineHandlingMaxVelocity = m_fineHandlingMaxVelocityEntry.getDouble(m_tankFineHandlingMaxVelocity);
 
         m_talonTankDriveKp = m_talonTankDriveKpEntry.getDouble(m_talonTankDriveKp);
         m_talonTankDriveKi = m_talonTankDriveKiEntry.getDouble(m_talonTankDriveKi);
@@ -127,16 +144,32 @@ public class HandlingBase { // extend this class to create a unique set of handl
         return 0.0;
     }
 
-    public double getDeadZone() {
+    public double getTankDeadZone() {
         return 0.15;
     }
 
-    public double getFineHandlingZone() {
+    public double getTankFineHandlingZone() {
         return 0.8;
     }
 
-    public double getfineHandlingMaxVelocity() {
+    public double getTankFineHandlingMaxVelocity() {
         return 0.7;
+    }
+
+    public double getArcadeLowMaxTurn() {
+        return 0.25;
+    }
+
+    public double getArcadeLowTurnZone() {
+        return 0.5;
+    }
+
+    public double getArcadeLowTurnCoefficent() {
+        return m_arcadeLowTurnCoefficent;
+    }
+
+    public double getArcadeHighTurnCoefficent() {
+        return m_arcadeHighTurnCoefficent;
     }
 
     public double getTalonTankDriveKp() {
@@ -159,12 +192,12 @@ public class HandlingBase { // extend this class to create a unique set of handl
         return "default";
     }
 
-    final public double getFineHandlingCoefficent() {
-        return m_fineHandlingCoefficent;
+    final public double getTankFineHandlingCoefficent() {
+        return m_tankFineHandlingCoefficent;
     }
 
-    final public double getHighPowerCoefficent() {
-        return m_highPowerCoefficent;
+    final public double getTankHighPowerCoefficent() {
+        return m_tankHighPowerCoefficent;
     }
 
 }

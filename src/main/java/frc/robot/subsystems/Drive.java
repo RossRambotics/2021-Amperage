@@ -142,6 +142,13 @@ public class Drive extends SubsystemBase {
   }
 
   public void arcadeDrive(double x, double y) {
+
+    if (Math.abs(x) < m_handlingValues.getArcadeLowTurnZone()) { // adjust to make a fine turning zone
+      x = m_handlingValues.getArcadeLowTurnCoefficent() * x; // makes the robot turnable at low speeds
+    } else {
+      x = m_handlingValues.getArcadeHighTurnCoefficent() * x + m_handlingValues.getArcadeLowMaxTurn(); // MAXPOWER
+    }
+
     double leftSpeed = y - x; // acrade drive algorithm
     double rightSpeed = y + x;
 
@@ -261,15 +268,17 @@ public class Drive extends SubsystemBase {
   public double getLeftJoystickY() {
     double y = m_leftLargeJoystick.getY();
 
-    if (Math.abs(y) > m_handlingValues.getDeadZone()) { // enforces joystick deadzone
-      if (Math.abs(y) < m_handlingValues.getFineHandlingZone()) { // low velocity for superior handling
-        return m_handlingValues.getFineHandlingCoefficent() * y;
+    if (Math.abs(y) > m_handlingValues.getTankDeadZone()) { // enforces joystick deadzone
+      if (Math.abs(y) < m_handlingValues.getTankFineHandlingZone()) { // low velocity for superior handling
+        return m_handlingValues.getTankFineHandlingCoefficent() * y;
       } else if (y < 0) { // handles negative
-        return Math.pow((y + m_handlingValues.getFineHandlingZone()) * m_handlingValues.getHighPowerCoefficent(), 3)
-            - m_handlingValues.getfineHandlingMaxVelocity(); // high POWER
+        return Math
+            .pow((y + m_handlingValues.getTankFineHandlingZone()) * m_handlingValues.getTankHighPowerCoefficent(), 3)
+            - m_handlingValues.getTankFineHandlingMaxVelocity(); // high POWER
       } else {
-        return Math.pow((y - m_handlingValues.getFineHandlingZone()) * m_handlingValues.getHighPowerCoefficent(), 3)
-            + m_handlingValues.getfineHandlingMaxVelocity(); // high POWER
+        return Math
+            .pow((y - m_handlingValues.getTankFineHandlingZone()) * m_handlingValues.getTankHighPowerCoefficent(), 3)
+            + m_handlingValues.getTankFineHandlingMaxVelocity(); // high POWER
       }
     }
 
@@ -279,15 +288,17 @@ public class Drive extends SubsystemBase {
   public double getRightJoystickY() {
     double y = m_rightLargeJoystick.getY();
 
-    if (Math.abs(y) > m_handlingValues.getDeadZone()) { // enforces joystick deadzone
-      if (Math.abs(y) < m_handlingValues.getFineHandlingZone()) { // low velocity for superior handling
-        return m_handlingValues.getFineHandlingCoefficent() * y;
+    if (Math.abs(y) > m_handlingValues.getTankDeadZone()) { // enforces joystick deadzone
+      if (Math.abs(y) < m_handlingValues.getTankFineHandlingZone()) { // low velocity for superior handling
+        return m_handlingValues.getTankFineHandlingCoefficent() * y;
       } else if (y < 0) { // handles negative
-        return Math.pow((y + m_handlingValues.getFineHandlingZone()) * m_handlingValues.getHighPowerCoefficent(), 3)
-            - m_handlingValues.getfineHandlingMaxVelocity(); // high POWER
+        return Math
+            .pow((y + m_handlingValues.getTankFineHandlingZone()) * m_handlingValues.getTankHighPowerCoefficent(), 3)
+            - m_handlingValues.getTankFineHandlingMaxVelocity(); // high POWER
       } else {
-        return Math.pow((y - m_handlingValues.getFineHandlingZone()) * m_handlingValues.getHighPowerCoefficent(), 3)
-            + m_handlingValues.getfineHandlingMaxVelocity(); // high POWER
+        return Math
+            .pow((y - m_handlingValues.getTankFineHandlingZone()) * m_handlingValues.getTankHighPowerCoefficent(), 3)
+            + m_handlingValues.getTankFineHandlingMaxVelocity(); // high POWER
       }
     }
 
