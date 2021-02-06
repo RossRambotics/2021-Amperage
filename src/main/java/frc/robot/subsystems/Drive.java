@@ -145,15 +145,28 @@ public class Drive extends SubsystemBase {
     double leftSpeed = y - x; // acrade drive algorithm
     double rightSpeed = y + x;
 
-    if (leftSpeed > 1) { // normalizes the speeds to acceptable values
-      leftSpeed = 1;
-    } else if (leftSpeed < -1) {
-      leftSpeed = -1;
+    if (leftSpeed > 0) {
+      leftSpeed = Math.pow(leftSpeed, 2);
+      if (leftSpeed > 1) {
+        leftSpeed = 1;
+      }
+    } else {
+      leftSpeed = -Math.pow(leftSpeed, 2);
+      if (leftSpeed < -1) {
+        leftSpeed = -1;
+      }
     }
-    if (rightSpeed > 1) {
-      rightSpeed = 1;
-    } else if (rightSpeed < -1) {
-      rightSpeed = -1;
+
+    if (rightSpeed > 0) {
+      rightSpeed = Math.pow(rightSpeed, 2);
+      if (rightSpeed > 1) {
+        rightSpeed = 1;
+      }
+    } else {
+      rightSpeed = -Math.pow(rightSpeed, 2);
+      if (rightSpeed < -1) {
+        rightSpeed = -1;
+      }
     }
 
     m_rightDriveTalon.set(ControlMode.Velocity, rightSpeed * m_velocityCoefficent); // sets speeds
