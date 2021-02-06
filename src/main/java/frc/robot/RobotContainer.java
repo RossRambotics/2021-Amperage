@@ -54,6 +54,7 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     Intake intake = TheRobot.getInstance().m_intake;
+    Drive drive = TheRobot.getInstance().m_drive;
 
     JoystickButton bButton = new JoystickButton(m_smallJoystick, 2);
     bButton.whenHeld(new frc.robot.commands.IntakeReverse(intake), true);
@@ -69,6 +70,7 @@ public class RobotContainer {
     JoystickButton yButton = new JoystickButton(m_smallJoystick, 4);
 
     JoystickButton xButton = new JoystickButton(m_smallJoystick, 3);
+    xButton.whileHeld(new frc.robot.commands.AutomatedMotion.ManualDriveStraight(drive, 1));
 
     JoystickButton aButton = new JoystickButton(m_smallJoystick, 1);
 

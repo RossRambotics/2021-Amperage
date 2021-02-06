@@ -4,9 +4,11 @@ import java.util.Map;
 
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.shuffleboard.WidgetType;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.commands.DriveModes.*;
 import frc.robot.subsystems.Drive;
@@ -42,6 +44,9 @@ public class HandlingBase { // extend this class to create a unique set of handl
     private NetworkTableEntry m_fineHandlingZoneEntry; // Network Table Entry for Shuffleboard
     private NetworkTableEntry m_fineHandlingMaxVelocityEntry; // Network Table Entry for Shuffleboard
 
+    private NetworkTableEntry m_arcadeLowTurnZoneEntry;
+    private NetworkTableEntry m_arcadeLowMaxTurnEntry;
+
     private NetworkTableEntry m_talonTankDriveKpEntry; // Network Table Entry for Shuffleboard
     private NetworkTableEntry m_talonTankDriveKiEntry; // Network Table Entry for Shuffleboard
     private NetworkTableEntry m_talonTankDriveKdEntry; // Network Table Entry for Shuffleboard
@@ -55,28 +60,63 @@ public class HandlingBase { // extend this class to create a unique set of handl
     private void createShuffleBoardTab() {
         ShuffleboardTab tab = Shuffleboard.getTab("Sub.Handling " + m_tabName);
 
-        ShuffleboardLayout talonCalibrations = tab.getLayout("Talon Calibration", BuiltInLayouts.kList).withSize(2, 5)
-                .withProperties(Map.of("Label position", "HIDDEN")); // hide labels for commands
+        /*
+         * ShuffleboardLayout talonCalibrations = tab.getLayout("Talon Calibration",
+         * BuiltInLayouts.kList).withSize(2, 5) .withProperties(Map.of("Label position",
+         * "HIDDEN")); // hide labels for commands
+         * 
+         * ShuffleboardLayout handlingCalibrations =
+         * tab.getLayout("Handling Calibration", BuiltInLayouts.kList) .withSize(2,
+         * 5).withProperties(Map.of("Label position", "HIDDEN")); // hide labels for
+         * commands
+         * 
+         * 
+         * if (handlingCalibrations.getComponents().size() == 0) { // if there are
+         * components in the list already do not // run m_maxDriveOutputEntry =
+         * handlingCalibrations.add("Max Power", m_maxDriveOutput).getEntry();
+         * m_deadZoneEntry = handlingCalibrations.add("Joystick Deadzone",
+         * m_tankDeadZone).getEntry(); m_fineHandlingZoneEntry =
+         * handlingCalibrations.add("Fine Handling Zone",
+         * m_tankFineHandlingZone).getEntry(); m_fineHandlingMaxVelocityEntry =
+         * handlingCalibrations .add("High Velocity Zone",
+         * m_tankFineHandlingMaxVelocity).getEntry(); }
+         * 
+         * if (talonCalibrations.getComponents().size() == 0) {// if there are already
+         * components in the list do not run m_talonTankDriveKpEntry =
+         * talonCalibrations.add("Drive Talon TankDrive Kp",
+         * m_talonTankDriveKp).getEntry(); m_talonTankDriveKiEntry =
+         * talonCalibrations.add("Drive Talon TankDrive Ki",
+         * m_talonTankDriveKi).getEntry(); m_talonTankDriveKdEntry =
+         * talonCalibrations.add("Drive Talon TankDrive Kd",
+         * m_talonTankDriveKd).getEntry(); }
+         */
+        if (tab.getComponents().size() == 0) {// if the tab is not populated alredy
+            m_maxDriveOutputEntry = tab.add("Max Power", m_maxDriveOutput).withWidget(BuiltInWidgets.kNumberBar)
+                    .withSize(2, 1).withProperties(Map.of("min", -1, "max", 1)).withPosition(0, 0).getEntry();
+            m_deadZoneEntry = tab.add("Tank Dead Zone", m_tankDeadZone).withWidget(BuiltInWidgets.kNumberBar)
+                    .withSize(2, 1).withProperties(Map.of("min", -1, "max", 1)).withPosition(0, 1).getEntry();
+            m_fineHandlingZoneEntry = tab.add("Tank Fine Handling Zone", m_tankFineHandlingZone)
+                    .withWidget(BuiltInWidgets.kNumberBar).withSize(2, 1).withProperties(Map.of("min", -1, "max", 1))
+                    .withPosition(0, 2).getEntry();
+            m_maxDriveOutputEntry = tab.add("Tank Fine Handling Max Relative Velocity", m_tankFineHandlingMaxVelocity)
+                    .withWidget(BuiltInWidgets.kNumberBar).withSize(2, 1).withProperties(Map.of("min", -1, "max", 1))
+                    .withPosition(0, 3).getEntry();
 
-        ShuffleboardLayout handlingCalibrations = tab.getLayout("Handling Calibration", BuiltInLayouts.kList)
-                .withSize(2, 5).withProperties(Map.of("Label position", "HIDDEN")); // hide labels for commands
+            m_arcadeLowMaxTurnEntry = tab.add("Arcade Drive Low Turn Max Power", m_arcadeLowMaxTurn)
+                    .withWidget(BuiltInWidgets.kNumberBar).withSize(2, 1).withProperties(Map.of("min", -1, "max", 1))
+                    .withPosition(2, 0).getEntry();
+            m_arcadeLowMaxTurnEntry = tab.add("Arcade Drive Low Turn Zone", m_arcadeLowTurnZone)
+                    .withWidget(BuiltInWidgets.kNumberBar).withSize(2, 1).withProperties(Map.of("min", -1, "max", 1))
+                    .withPosition(2, 1).getEntry();
 
-        System.out.println(handlingCalibrations.getComponents());
-
-        if (handlingCalibrations.getComponents().size() == 0) { // if there are components in the list already do not
-                                                                // run
-            m_maxDriveOutputEntry = handlingCalibrations.add("Max Power", m_maxDriveOutput).getEntry();
-            m_deadZoneEntry = handlingCalibrations.add("Joystick Deadzone", m_tankDeadZone).getEntry();
-            m_fineHandlingZoneEntry = handlingCalibrations.add("Fine Handling Zone", m_tankFineHandlingZone).getEntry();
-            m_fineHandlingMaxVelocityEntry = handlingCalibrations
-                    .add("High Velocity Zone", m_tankFineHandlingMaxVelocity).getEntry();
+            m_maxDriveOutputEntry = tab.add("Talon Tank Kp", m_talonTankDriveKp).withWidget(BuiltInWidgets.kTextView)
+                    .withSize(1, 1).withPosition(4, 0).getEntry();
+            m_maxDriveOutputEntry = tab.add("Talon Tank Ki", m_talonTankDriveKi).withWidget(BuiltInWidgets.kTextView)
+                    .withSize(1, 1).withPosition(4, 1).getEntry();
+            m_maxDriveOutputEntry = tab.add("Talon Tank Kd", m_talonTankDriveKd).withWidget(BuiltInWidgets.kTextView)
+                    .withSize(1, 1).withPosition(4, 2).getEntry();
         }
 
-        if (talonCalibrations.getComponents().size() == 0) {// if there are already components in the list do not run
-            m_talonTankDriveKpEntry = talonCalibrations.add("Drive Talon TankDrive Kp", m_talonTankDriveKp).getEntry();
-            m_talonTankDriveKiEntry = talonCalibrations.add("Drive Talon TankDrive Ki", m_talonTankDriveKi).getEntry();
-            m_talonTankDriveKdEntry = talonCalibrations.add("Drive Talon TankDrive Kd", m_talonTankDriveKd).getEntry();
-        }
     }
 
     private void setBaseMemberVariables() // sets all of the base member variable values
