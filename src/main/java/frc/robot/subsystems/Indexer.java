@@ -11,6 +11,10 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.TheRobot;
 import frc.robot.commands.Indexer.CheckPowercell;
 import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.revrobotics.CANSparkMax;
@@ -36,6 +40,31 @@ public class Indexer extends SubsystemBase {
     CommandBase c = new SequentialCommandGroup(new WaitCommand(0.1), new CheckPowercell(this));
     c.setName("Indexer's DefCMD");
     this.setDefaultCommand(c);
+
+    this.createShuffleBoardTab();
+  }
+
+  public void createShuffleBoardTab() {
+    ShuffleboardTab tab = Shuffleboard.getTab("Sub.Indexer");
+
+    ShuffleboardLayout shooterCommands = tab.getLayout("Commands", BuiltInLayouts.kList).withSize(2, 2)
+        .withProperties(Map.of("Label position", "HIDDEN")); // hide labels for commands
+
+    CommandBase c = new frc.robot.commands.Test.Indexer.StartIndexer(this);
+    c.setName("Start Indexer");
+    SmartDashboard.putData(c);
+    shooterCommands.add(c);
+
+    c = new frc.robot.commands.Test.Indexer.StopIndexer(this);
+    c.setName("Stop Indexer");
+    SmartDashboard.putData(c);
+    shooterCommands.add(c);
+
+    // TODO make the timeout value a variable on the tab
+    c = new frc.robot.commands.Test.Indexer.RunIndexer(this).withTimeout(0.5);
+    c.setName("Run Indexer");
+    SmartDashboard.putData(c);
+    shooterCommands.add(c);
   }
 
   @Override
