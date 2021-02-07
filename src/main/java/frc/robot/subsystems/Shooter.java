@@ -183,19 +183,19 @@ public class Shooter extends SubsystemBase {
     // m_pidController.setD(d);
     // m_pid_kD = d;
     // }
-    if ((iz != m_pid_kIz)) {
-      m_pidController.setIZone(iz);
-      m_pid_kIz = iz;
-    }
-    if ((ff != m_pid_kFF)) {
-      m_pidController.setFF(ff);
-      m_pid_kFF = ff;
-    }
-    if ((max != m_pid_kMaxOutput) || (min != m_pid_kMinOutput)) {
-      m_pidController.setOutputRange(min, max);
-      m_pid_kMinOutput = min;
-      m_pid_kMaxOutput = max;
-    }
+    // if ((iz != m_pid_kIz)) {
+    // m_pidController.setIZone(iz);
+    // m_pid_kIz = iz;
+    // }
+    // if ((ff != m_pid_kFF)) {
+    // m_pidController.setFF(ff);
+    // m_pid_kFF = ff;
+    // }
+    // if ((max != m_pid_kMaxOutput) || (min != m_pid_kMinOutput)) {
+    // m_pidController.setOutputRange(min, max);
+    // m_pid_kMinOutput = min;
+    // m_pid_kMaxOutput = max;
+    // }
 
     // Get the RPM of the motors
     m_RPM_shooter = Math.abs(m_encoder1.getVelocity());
@@ -205,11 +205,7 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putNumber("Shooter/Current RPM", m_RPM_shooter);
     SmartDashboard.putNumber("Shooter/Target RPM", m_RPM_target);
 
-    // m_dpid_kI_Modified = setModifiedkI(m_RPM_target, m_pid_kI);
-    m_pidController.setI(m_dpid_kI_Modified);
-
     SmartDashboard.putNumber("Shooter/I Gain Modified", m_dpid_kI_Modified);
-
   }
 
   // shoots the balls
@@ -295,7 +291,7 @@ public class Shooter extends SubsystemBase {
       m_RPM_target = m_dLowPortRPM; // If low power port enabled use low RPM
 
     // set the PID Controller to hit the RPM
-    m_pidController.setReference(m_RPM_target, ControlType.kVelocity);
+    // m_pidController.setReference(m_RPM_target, ControlType.kVelocity);
     TheRobot.log("Shooter ready RPM_target:" + TheRobot.toString(m_RPM_target));
 
     // See if motor RPM are within range tolerance
