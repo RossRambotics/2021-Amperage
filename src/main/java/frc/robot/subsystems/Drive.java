@@ -16,6 +16,7 @@ import com.ctre.phoenix.sensors.PigeonIMU;
 import org.opencv.core.Mat;
 
 import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -58,7 +59,8 @@ public class Drive extends SubsystemBase {
   private TalonFXConfiguration m_leftTalonConfig;
   private TalonFXConfiguration m_rightTalonConfig;
 
-  private PigeonIMU m_pigeon;
+  // private PigeonIMU m_pigeon; // replaced by ADXRS450 gyro
+  private ADXRS450_Gyro m_gyro; // the gyro in the SPI port
 
   private String m_driveProfileSlot = "StraightDrive";
 
@@ -93,7 +95,10 @@ public class Drive extends SubsystemBase {
     m_leftDriveTalon.setInverted(true);
     m_leftDriveTalonFollower.setInverted(true);
 
-    m_pigeon = new PigeonIMU(31);// new pigeon on 31; doesnt work with falcon 500
+    // m_pigeon = new PigeonIMU(31);// new pigeon on 31; doesnt work with falcon 500
+    // -- replaced
+    m_gyro = new ADXRS450_Gyro();
+    m_gyro.reset();
 
     m_velocityCoefficent = getVelocityCoefficent();
     clearTalonEncoders();
@@ -136,9 +141,7 @@ public class Drive extends SubsystemBase {
   }
 
   public double getPigeonYaw() {
-    double[] ypr = new double[3];
-    m_pigeon.getYawPitchRoll(ypr);
-    return ypr[0];
+    return m_gyro.getAngle();
   }
 
   public void arcadeDrive(double x, double y) {
