@@ -136,6 +136,8 @@ public class Drive extends SubsystemBase {
 
   public void tankDrive(double leftSpeed, double rightSpeed) {
     // m_differentialDrive.tankDrive(leftSpeed, rightSpeed); <-Dumb
+
+    System.out.println("Left: " + leftSpeed + " Right: " + rightSpeed);
     m_rightDriveTalon.set(ControlMode.Velocity, rightSpeed * m_velocityCoefficent);
     m_leftDriveTalon.set(ControlMode.Velocity, leftSpeed * m_velocityCoefficent);
   }

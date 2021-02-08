@@ -28,10 +28,9 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Intake extends SubsystemBase {
-  private DoubleSolenoid intakeSolenoid = new DoubleSolenoid(31, 0, 1);// creates the solenoid on CAN id 15
+  private DoubleSolenoid m_intakeSolenoid = new DoubleSolenoid(31, 2, 4);// creates the solenoid on CAN id 15
   private CANSparkMax m_rollerMotor = null;
   private CANSparkMax m_feederMotor = null;
-  private CANEncoder intakeEncoder = null;
   private CANPIDController intakePIDController = null;
   private DigitalOutput m_LEDrelay = new DigitalOutput(1); // LED ring used for targeting in DIO port 1
 
@@ -51,11 +50,9 @@ public class Intake extends SubsystemBase {
     m_feederMotor = new CANSparkMax(12, MotorType.kBrushless);
 
     m_rollerMotor.restoreFactoryDefaults();
-    intakeEncoder = new CANEncoder(m_rollerMotor);
 
-    intakeSolenoid.set(Value.kForward); // retract the intake
+    m_intakeSolenoid.set(Value.kForward); // retract the intake
 
-    intakeEncoder.setPosition(0);
     SmartDashboard.putNumber("Intake/CaptureSpeed", captureSpeed);
     SmartDashboard.putBoolean("Intake/Extended?", m_bExtended);
     /*
@@ -166,14 +163,14 @@ public class Intake extends SubsystemBase {
   // retracts the intake
   public void retract() {
     this.IntakeMotorOff();
-    intakeSolenoid.set(Value.kForward);
+    m_intakeSolenoid.set(Value.kForward);
     m_bExtended = false;
     TheRobot.log("Intake Retract!");
   }
 
   // extends the intake
   public void extend() {
-    intakeSolenoid.set(Value.kReverse);
+    m_intakeSolenoid.set(Value.kReverse);
     m_bExtended = true;
     TheRobot.log("Intake Extended!");
   }

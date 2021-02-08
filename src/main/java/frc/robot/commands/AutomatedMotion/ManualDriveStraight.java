@@ -16,9 +16,9 @@ public class ManualDriveStraight extends CommandBase {
     private double m_previousYaw; // from the previous execute loop
     private Timer m_timer; // allows for the calculation of the derivative
 
-    private double m_Kp = 1;
+    private double m_Kp = 0.005;
     private double m_Ki = 0;
-    private double m_Kd = 0;
+    private double m_Kd = 0.0013;
 
     public ManualDriveStraight(Drive drive, double callingJoystick) { // calling joystick corrosponds to port number
         m_callingJoystick = callingJoystick;
@@ -30,6 +30,7 @@ public class ManualDriveStraight extends CommandBase {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
+        m_timer.start();
         m_timer.reset(); // start the timer over again
         m_initalYaw = m_drive.getPigeonYaw();
         m_previousYaw = m_initalYaw; // so it has a reasonable value
@@ -42,14 +43,19 @@ public class ManualDriveStraight extends CommandBase {
         double secondsSinceLastLoop = m_timer.get(); // gets the loop time
         m_timer.reset();
 
+        System.out.println(currentYaw);
+
         // calculated the error correction
         double dCorrection = m_Kd * (currentYaw - m_previousYaw) / secondsSinceLastLoop; // degrees over seconds
         double pCorrection = m_Kp * (currentYaw - m_initalYaw);
-        double iCorrection = m_Ki * m_errorSum;
-        double totalCorrection = dCorrection - pCorrection - iCorrection;
+        double iCorrection = m_Ki * m_errorSum * secondsSinceLastLoop;
+        double totalCorrection = -dCorrection - pCorrection - iCorrection;
+        totalCorrection = -totalCorrection; // invert to correct for gyro direction
         // if this value is positive speed up right motor or slow left
         // if this value is negative speed up left motor or slow right
+        // note both motors and joystcicks are inverted ;)
 
+        System.out.println("Total Correction: " + totalCorrection);
         double joystickValue = 0;
         if (m_callingJoystick == 0) {
             joystickValue = m_drive.getRightJoystickY();
@@ -57,38 +63,38 @@ public class ManualDriveStraight extends CommandBase {
             joystickValue = m_drive.getLeftJoystickY();
         }
 
-        if (joystickValue > 0) { // if the robot is moving forward
+        if (joystickValue > 0) { // if the robot is moving backward
             if (totalCorrection > 0) {
-                double leftValue = joystickValue - totalCorrection;
-                Math.min(1, leftValue); // ensure the values are in the range
-                Math.max(1, leftValue);
+                double leftValue = joystickValue + totalCorrection;
+                leftValue = Math.min(1, leftValue); // ensure the values are in the range
+                leftValue = Math.max(-1, leftValue);
 
                 m_drive.tankDrive(leftValue, joystickValue);// if total correction is positive slow left
             } else {
                 double rightValue = joystickValue - totalCorrection;
-                Math.min(1, rightValue); // ensure the values are in the range
-                Math.max(1, rightValue);
+                rightValue = Math.min(1, rightValue); // ensure the values are in the range
+                rightValue = Math.max(-1, rightValue);
 
                 m_drive.tankDrive(joystickValue, rightValue);// if total correction is positive slow right
             }
-        } else { // if the robot is moving backward
+        } else { // if the robot is moving forward
             if (totalCorrection > 0) {
                 double leftValue = joystickValue + totalCorrection;
-                Math.min(1, leftValue); // ensure the values are in the range
-                Math.max(1, leftValue);
+                leftValue = Math.min(1, leftValue); // ensure the values are in the range
+                leftValue = Math.max(-1, leftValue);
 
                 m_drive.tankDrive(leftValue, joystickValue);// if total correction is positive slow left
             } else {
-                double rightValue = joystickValue + totalCorrection;
-                Math.min(1, rightValue); // ensure the values are in the range
-                Math.max(1, rightValue);
+                double rightValue = joystickValue - totalCorrection;
+                rightValue = Math.min(1, rightValue); // ensure the values are in the range
+                rightValue = Math.max(-1, rightValue);
 
                 m_drive.tankDrive(joystickValue, rightValue);// if total correction is positive slow right
             }
         }
 
         m_errorSum = m_errorSum + (currentYaw - m_initalYaw); // before or after current round of calculations??
-
+        m_previousYaw = currentYaw;
     }
 
     // Called once the command ends or is interrupted.
