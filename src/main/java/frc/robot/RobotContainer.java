@@ -5,46 +5,90 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.IntakeReverse;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.commands.ExampleCommand;
+
+import frc.robot.commands.*;
+import frc.robot.commands.AutomatedMotion.AutonomousMovementBase;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+
+import frc.robot.Robot;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
- * subsystems, commands, and button mappings) should be declared here.
+ * This class is where the bulk of the robot should be declared. Since
+ * Command-based is a "declarative" paradigm, very little robot logic should
+ * actually be handled in the {@link Robot} periodic methods (other than the
+ * scheduler calls). Instead, the structure of the robot (including subsystems,
+ * commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
+  public Joystick m_smallJoystick;
+  public Joystick m_largeLeftJoystick;
+  public Joystick m_largeRightJoystick;
 
-  private final ExampleCommand m_autoCommand = new ExampleCommand(m_exampleSubsystem);
-
-
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  /**
+   * The container for the robot. Contains subsystems, OI devices, and commands.
+   */
   public RobotContainer() {
     // Configure the button bindings
+
+    m_smallJoystick = new Joystick(2); // leave as 2
+    m_largeRightJoystick = new Joystick(0);
+    m_largeLeftJoystick = new Joystick(1);
+
+
     configureButtonBindings();
   }
 
   /**
-   * Use this method to define your button->command mappings. Buttons can be created by
-   * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
+   * Use this method to define your button->command mappings. Buttons can be
+   * created by instantiating a {@link GenericHID} or one of its subclasses
+   * ({@link edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then
+   * passing it to a {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
-  private void configureButtonBindings() {}
+  private void configureButtonBindings() {
+    Intake intake = TheRobot.getInstance().m_intake;
+    Drive drive = TheRobot.getInstance().m_drive;
 
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
-  public Command getAutonomousCommand() {
-    // An ExampleCommand will run in autonomous
-    return m_autoCommand;
+    JoystickButton bButton = new JoystickButton(m_smallJoystick, 2);
+    bButton.whenHeld(new frc.robot.commands.IntakeReverse(intake), true);
+
+    JoystickButton rbButton = new JoystickButton(m_smallJoystick, 6);
+    rbButton.whenPressed(new frc.robot.commands.IntakeExtend(intake), true);
+    rbButton.whenPressed(new frc.robot.commands.IntakeMotorOn(intake), true);
+
+    JoystickButton lbButton = new JoystickButton(m_smallJoystick, 5);
+    lbButton.whenPressed(new frc.robot.commands.IntakeRetract(intake), true);
+    lbButton.whenPressed(new frc.robot.commands.IntakeMotorOff(intake), true);
+
+    JoystickButton yButton = new JoystickButton(m_smallJoystick, 4);
+
+    JoystickButton xButton = new JoystickButton(m_smallJoystick, 3);
+    xButton.whenPressed(new frc.robot.commands.AutomatedMotion.ManualDriveStraight(drive, 1));
+
+    JoystickButton aButton = new JoystickButton(m_smallJoystick, 1);
+
+    JoystickButton selectButton = new JoystickButton(m_smallJoystick, 7);
+
+    JoystickButton startButton = new JoystickButton(m_smallJoystick, 8);
+
+    JoystickButton ltop3button = new JoystickButton(m_largeLeftJoystick, 3);
+    ltop3button.whileHeld(new frc.robot.commands.AutomatedMotion.ManualDriveStraight(drive, 1));
+    JoystickButton rtop3button = new JoystickButton(m_largeRightJoystick, 3);
+    rtop3button.whileHeld(new frc.robot.commands.AutomatedMotion.ManualDriveStraight(drive, 0));
+
+    
   }
+
 }

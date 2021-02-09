@@ -23,6 +23,8 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 // ultra sonic sensor classes
 import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
@@ -43,6 +45,7 @@ public class Indexer extends SubsystemBase {
   private double m_pid_kP = 0.2;
   private double m_pid_kI = 0.001;
   private boolean m_bReadyToShoot = false;
+  private DoubleSolenoid m_stopperSolenoid;
 
   // setup ultra sonic sensor
   public AnalogInput m_Sensor_PC_Intake0 = new AnalogInput(0); // intake has presented powercell to indexer
@@ -65,6 +68,8 @@ public class Indexer extends SubsystemBase {
     m_topMotor.setInverted(true);
     m_bottomMotor.setInverted(true);
 
+    m_stopperSolenoid = new DoubleSolenoid(31, 0, 1);
+    m_stopperSolenoid.set(Value.kReverse);
     // Try to control how far the balls advance inside indexer
     m_topMotor.setIdleMode(IdleMode.kBrake);
     m_bottomMotor.setIdleMode(IdleMode.kBrake);
@@ -158,6 +163,12 @@ public class Indexer extends SubsystemBase {
     m_CompactPower = SmartDashboard.getNumber("Indexer/Compact Power", 0);
     m_dCompactRotations = SmartDashboard.getNumber("Indexer/Compact Rotations", 0);
     m_dReverseCompactRotations = SmartDashboard.getNumber("Indexer/Rev Compact Rotations", 0);
+
+    if (m_bReadyToShoot) {
+
+    } else {
+
+    }
   }
 
   // returns true when the index should capture the powercell
