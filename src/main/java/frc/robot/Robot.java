@@ -7,9 +7,6 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.helper.DriveHandlingSetup.DefaultHardSurfaceArcadeDrive;
-import frc.robot.helper.DriveHandlingSetup.DefaultHardSurfaceHandling;
-import frc.robot.helper.DriveHandlingSetup.HandlingBase;
 import frc.robot.subsystems.*;
 
 /**
@@ -28,7 +25,6 @@ public class Robot extends TimedRobot {
   public Intake m_intake = null;
   public Shooter m_shooter = null;
   public Hood m_hood = null;
-  private HandlingBase m_handlingBase;
 
   public Robot() {
     super();
@@ -46,14 +42,9 @@ public class Robot extends TimedRobot {
     // autonomous chooser on the dashboard.
     TheRobot.log("robotInit.");
 
-    m_handlingBase = new DefaultHardSurfaceArcadeDrive(); // change out handling base to set default handling
-    // other handling modes avialble in shuffleboard in drive tab
-
     // m_climber = new Climber();
     // m_controlPanel = new ControlPanel();
-    m_drive = new Drive(m_handlingBase);
-    m_drive.setDefaultCommand(m_handlingBase.getDefaultDriveCommand(m_drive)); // sets the default drive command
-
+    m_drive = new Drive();
     m_intake = new Intake();
     m_indexer = new Indexer();
     m_shooter = new Shooter();
@@ -101,7 +92,12 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
+    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
+    // schedule the autonomous command (example)
+    if (m_autonomousCommand != null) {
+      m_autonomousCommand.schedule();
+    }
   }
 
   /** This function is called periodically during autonomous. */
@@ -115,20 +111,20 @@ public class Robot extends TimedRobot {
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
-
+    if (m_autonomousCommand != null) {
+      m_autonomousCommand.cancel();
+    }
   }
 
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-
   }
 
   @Override
   public void testInit() {
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
-
   }
 
   /** This function is called periodically during test mode. */

@@ -28,31 +28,34 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Intake extends SubsystemBase {
-  private DoubleSolenoid m_intakeSolenoid = new DoubleSolenoid(31, 2, 4);// creates the solenoid on CAN id 15
+  private DoubleSolenoid intakeSolenoid = new DoubleSolenoid(31, 0, 1);// creates the solenoid on CAN id 15
   private CANSparkMax m_rollerMotor = null;
   private CANSparkMax m_feederMotor = null;
+  private CANEncoder intakeEncoder = null;
   private CANPIDController intakePIDController = null;
   private DigitalOutput m_LEDrelay = new DigitalOutput(1); // LED ring used for targeting in DIO port 1
 
-  private double pid_kP;
-  private double pid_kI;
-  private double pid_kD;
-  private double pid_kIzone;
-  private double pid_kFF;
-  private double pid_kMAX;
-  private double pid_kMIN;
+  private Double pid_kP;
+  private Double pid_kI;
+  private Double pid_kD;
+  private Double pid_kIzone;
+  private Double pid_kFF;
+  private Double pid_kMAX;
+  private Double pid_kMIN;
 
-  private double captureSpeed = 0.5; // the capture speed for the intake in RPM
-  private boolean m_bExtended;
+  private Double captureSpeed = 0.5; // the capture speed for the intake in RPM
+  private boolean m_bExtended = false;
 
   public Intake() {
     m_rollerMotor = new CANSparkMax(11, MotorType.kBrushless);
     m_feederMotor = new CANSparkMax(12, MotorType.kBrushless);
 
     m_rollerMotor.restoreFactoryDefaults();
+    intakeEncoder = new CANEncoder(m_rollerMotor);
 
-    m_intakeSolenoid.set(Value.kForward); // retract the intake
+    intakeSolenoid.set(Value.kForward); // retract the intake
 
+    intakeEncoder.setPosition(0);
     SmartDashboard.putNumber("Intake/CaptureSpeed", captureSpeed);
     SmartDashboard.putBoolean("Intake/Extended?", m_bExtended);
     /*
@@ -162,75 +165,61 @@ public class Intake extends SubsystemBase {
 
   // retracts the intake
   public void retract() {
-    this.IntakeMotorOff();
-    m_intakeSolenoid.set(Value.kForward);
+    intakeSolenoid.set(Value.kForward);
     m_bExtended = false;
-    TheRobot.log("Intake Retract!");
   }
 
   // extends the intake
   public void extend() {
-    m_intakeSolenoid.set(Value.kReverse);
+    intakeSolenoid.set(Value.kReverse);
     m_bExtended = true;
-    TheRobot.log("Intake Extended!");
-  }
-
-  // spins wheels backwards to unjam a ball after checking to see if the intake is
-  // extended
-  public void IntakeMotorReverse() {
-    if (m_bExtended == true) {
-      TheRobot.log("IntakeMotorReverse setting intake motor");
-      m_rollerMotor.set(-.5);
-      m_feederMotor.set(-.5);
-    } else {
-      m_rollerMotor.set(0);
-      m_feederMotor.set(0);
-      TheRobot.log("Please Extend intake to run");
-    }
   }
 
   // spins the intake to capture a ball
   public void capture() {
+
     // intakePIDController.setReference(captureSpeed, ControlType.kVelocity);
     TheRobot.log("Starting Intake Motor");
     m_rollerMotor.set(captureSpeed);
-    m_feederMotor.set(.5);
+
   }
 
-  // turns off intake motors
-  public void IntakeMotorOff() {
-    m_feederMotor.set(0);
-    m_rollerMotor.set(0);
-    TheRobot.log("motors stopped");
+  // Stops the capture process
+  public void stopCapture() {
+    // intakePIDController.setReference(0, ControlType.kVelocity);
+    m_rollerMotor.set(0.0);
   }
 
-  // sees if the intake is extended
+  // reverse spins the intake in case of jam
+  // return true if cleared
+  // return false if jam is still detected
+  public void clear() {
+
+    TheRobot.log("Clearing Intake Motor");
+    m_rollerMotor.set(-captureSpeed);
+  }
+
   public boolean isExtended() {
 
     return m_bExtended;
   }
 
-  // sets the state of the led ring
-  public void setLEDRing(Boolean Powered) {
+  public void setLEDRing(Boolean Powered) { // sets the state of the led ring
     m_LEDrelay.set(Powered);
   }
 
-  // starts the feeder wheels
   public void startFeederWheels() {
     m_feederMotor.set(0.5);
   }
 
-  // stops the feeder wheels
   public void stopFeederWheels() {
     m_feederMotor.set(0.0);
   }
 
-  // starts the roller wheels
   public void startIntakeRoller() {
     m_rollerMotor.set(0.5);
   }
 
-  // stops roller wheels
   public void stopIntakeRoller() {
     m_rollerMotor.set(0.0);
   }

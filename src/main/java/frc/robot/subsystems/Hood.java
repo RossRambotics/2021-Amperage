@@ -94,7 +94,7 @@ public class Hood extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-/*
+
     // read PID coefficients from SmartDashboard
     double p = SmartDashboard.getNumber("Hood/P Gain", 0);
     double i = SmartDashboard.getNumber("Hood/I Gain", 0);
@@ -168,7 +168,7 @@ public class Hood extends SubsystemBase {
 
     // Output to dashboard
     SmartDashboard.putNumber("Hood/Current Position", m_position_hood);
-    SmartDashboard.putNumber("Hood/Target Position", m_position_target);*/
+    SmartDashboard.putNumber("Hood/Target Position", m_position_target);
   }
 
   // shoots the balls

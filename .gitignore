@@ -77,7 +77,7 @@ hs_err_pid*
 ### macOS ###
 # General
 .DS_Store
-.Appledouble
+.AppleDouble
 .LSOverride
 
 # Icon must end with two \r
