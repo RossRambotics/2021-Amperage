@@ -68,8 +68,8 @@ public class Indexer extends SubsystemBase {
     m_topMotor.setInverted(true);
     m_bottomMotor.setInverted(true);
 
-    m_stopperSolenoid = new DoubleSolenoid(31, 0, 1);
-    m_stopperSolenoid.set(Value.kReverse);
+    m_stopperSolenoid = new DoubleSolenoid(31, 2, 4);
+    m_stopperSolenoid.set(Value.kForward);
     // Try to control how far the balls advance inside indexer
     m_topMotor.setIdleMode(IdleMode.kBrake);
     m_bottomMotor.setIdleMode(IdleMode.kBrake);
@@ -165,8 +165,10 @@ public class Indexer extends SubsystemBase {
     m_dReverseCompactRotations = SmartDashboard.getNumber("Indexer/Rev Compact Rotations", 0);
 
     if (m_bReadyToShoot) {
+      m_stopperSolenoid.set(Value.kReverse); // retracts compaction soleoid
 
     } else {
+      m_stopperSolenoid.set(Value.kForward); // extends retraction solenoid
 
     }
   }

@@ -28,7 +28,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Intake extends SubsystemBase {
-  private DoubleSolenoid m_intakeSolenoid = new DoubleSolenoid(31, 2, 4);// creates the solenoid on CAN id 15
+  private DoubleSolenoid m_intakeSolenoid = new DoubleSolenoid(31, 0, 1);// creates the solenoid on CAN id 15
   private CANSparkMax m_rollerMotor = null;
   private CANSparkMax m_feederMotor = null;
   private CANPIDController intakePIDController = null;
