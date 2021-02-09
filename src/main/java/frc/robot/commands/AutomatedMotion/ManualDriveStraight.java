@@ -17,7 +17,7 @@ public class ManualDriveStraight extends CommandBase {
     private Timer m_timer; // allows for the calculation of the derivative
 
     private double m_Kp = 0.005;
-    private double m_Ki = 0;
+    private double m_Ki = 0.01;
     private double m_Kd = 0.0013;
 
     public ManualDriveStraight(Drive drive, double callingJoystick) { // calling joystick corrosponds to port number

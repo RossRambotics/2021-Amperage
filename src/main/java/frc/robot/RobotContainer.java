@@ -34,6 +34,8 @@ import frc.robot.Robot;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   public Joystick m_smallJoystick;
+  public Joystick m_largeLeftJoystick;
+  public Joystick m_largeRightJoystick;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -42,6 +44,9 @@ public class RobotContainer {
     // Configure the button bindings
 
     m_smallJoystick = new Joystick(2); // leave as 2
+    m_largeRightJoystick = new Joystick(0);
+    m_largeLeftJoystick = new Joystick(1);
+
 
     configureButtonBindings();
   }
@@ -77,6 +82,13 @@ public class RobotContainer {
     JoystickButton selectButton = new JoystickButton(m_smallJoystick, 7);
 
     JoystickButton startButton = new JoystickButton(m_smallJoystick, 8);
+
+    JoystickButton ltop3button = new JoystickButton(m_largeLeftJoystick, 3);
+    ltop3button.whileHeld(new frc.robot.commands.AutomatedMotion.ManualDriveStraight(drive, 1));
+    JoystickButton rtop3button = new JoystickButton(m_largeRightJoystick, 3);
+    rtop3button.whileHeld(new frc.robot.commands.AutomatedMotion.ManualDriveStraight(drive, 0));
+
+    
   }
 
 }
