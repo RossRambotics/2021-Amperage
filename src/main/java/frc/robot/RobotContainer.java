@@ -17,11 +17,11 @@ import frc.robot.commands.ExampleCommand;
 
 import frc.robot.commands.*;
 import frc.robot.commands.AutomatedMotion.AutonomousMovementBase;
+import frc.robot.commands.AutomatedMotion.ManualDriveStraight;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.commands.RunTankDrive;
 
 import frc.robot.Robot;
 
@@ -34,14 +34,9 @@ import frc.robot.Robot;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private String m_defaultDriveMode = "TankDriveHandBrake";
+  public Joystick m_smallJoystick;
   private Joystick m_leftLargeJoystick;
   private Joystick m_rightLargeJoystick;
-  public Joystick m_smallJoystick;
-
-  private JoystickButton m_triggerRight;
-
-  private Drive m_drive;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -49,13 +44,9 @@ public class RobotContainer {
   public RobotContainer() {
     // Configure the button bindings
 
-    m_drive = TheRobot.getInstance().m_drive;
-
-    m_rightLargeJoystick = new Joystick(0);
+    m_smallJoystick = new Joystick(2); // leave as 2
     m_leftLargeJoystick = new Joystick(1);
-    m_smallJoystick = new Joystick(2);
-
-    m_triggerRight = new JoystickButton(m_rightLargeJoystick, 1);
+    m_rightLargeJoystick = new Joystick(0);
 
     configureButtonBindings();
   }
@@ -68,6 +59,7 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     Intake intake = TheRobot.getInstance().m_intake;
+    Drive drive = TheRobot.getInstance().m_drive;
 
     JoystickButton bButton = new JoystickButton(m_smallJoystick, 2);
     bButton.whenHeld(new frc.robot.commands.IntakeReverse(intake), true);
@@ -89,25 +81,13 @@ public class RobotContainer {
     JoystickButton selectButton = new JoystickButton(m_smallJoystick, 7);
 
     JoystickButton startButton = new JoystickButton(m_smallJoystick, 8);
+
+    JoystickButton leftTopForwardButton = new JoystickButton(m_leftLargeJoystick, 3);
+    leftTopForwardButton.whileHeld(new ManualDriveStraight(drive, 1));
+
+    JoystickButton rightTopForwardButton = new JoystickButton(m_rightLargeJoystick, 3);
+    rightTopForwardButton.whileHeld(new ManualDriveStraight(drive, 0));
+
   }
 
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
-  public Command getTelopDefaultDrive() {
-    // An ExampleCommand will run in autonomous
-
-    switch (m_defaultDriveMode) {
-      case "TankDrive":
-        return new RunTankDrive(m_drive);
-
-      case "TankDriveHandBrake":
-        return new RunTankDriveHandBreak(m_drive);
-
-      default:
-        return new RunTankDrive(m_drive);
-    }
-  }
 }

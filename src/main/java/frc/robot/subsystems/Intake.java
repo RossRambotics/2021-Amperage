@@ -28,22 +28,21 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Intake extends SubsystemBase {
-  private DoubleSolenoid intakeSolenoid = new DoubleSolenoid(31, 0, 1);// creates the solenoid on CAN id 15
+  private DoubleSolenoid m_intakeSolenoid = new DoubleSolenoid(31, 0, 1);// creates the solenoid on CAN id 15
   private CANSparkMax m_rollerMotor = null;
   private CANSparkMax m_feederMotor = null;
-  private CANEncoder intakeEncoder = null;
   private CANPIDController intakePIDController = null;
   private DigitalOutput m_LEDrelay = new DigitalOutput(1); // LED ring used for targeting in DIO port 1
 
-  private Double pid_kP;
-  private Double pid_kI;
-  private Double pid_kD;
-  private Double pid_kIzone;
-  private Double pid_kFF;
-  private Double pid_kMAX;
-  private Double pid_kMIN;
+  private double pid_kP;
+  private double pid_kI;
+  private double pid_kD;
+  private double pid_kIzone;
+  private double pid_kFF;
+  private double pid_kMAX;
+  private double pid_kMIN;
 
-  private Double captureSpeed = 0.5; // the capture speed for the intake in RPM
+  private double captureSpeed = 0.5; // the capture speed for the intake in RPM
   private boolean m_bExtended;
 
   public Intake() {
@@ -51,11 +50,9 @@ public class Intake extends SubsystemBase {
     m_feederMotor = new CANSparkMax(12, MotorType.kBrushless);
 
     m_rollerMotor.restoreFactoryDefaults();
-    intakeEncoder = new CANEncoder(m_rollerMotor);
 
-    intakeSolenoid.set(Value.kForward); // retract the intake
+    m_intakeSolenoid.set(Value.kForward); // retract the intake
 
-    intakeEncoder.setPosition(0);
     SmartDashboard.putNumber("Intake/CaptureSpeed", captureSpeed);
     SmartDashboard.putBoolean("Intake/Extended?", m_bExtended);
     /*
@@ -166,14 +163,14 @@ public class Intake extends SubsystemBase {
   // retracts the intake
   public void retract() {
     this.IntakeMotorOff();
-    intakeSolenoid.set(Value.kForward);
+    m_intakeSolenoid.set(Value.kForward);
     m_bExtended = false;
     TheRobot.log("Intake Retract!");
   }
 
   // extends the intake
   public void extend() {
-    intakeSolenoid.set(Value.kReverse);
+    m_intakeSolenoid.set(Value.kReverse);
     m_bExtended = true;
     TheRobot.log("Intake Extended!");
   }

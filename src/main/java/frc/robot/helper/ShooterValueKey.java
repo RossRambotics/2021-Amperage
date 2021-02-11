@@ -5,8 +5,7 @@ class ShooterValueKey // an look up value key with and its devation from the ori
     public Double key = null;
     public Double devationFromDistance = null;
 
-    ShooterValueKey(Double Key, Double DevationFromDistance)
-    {
+    ShooterValueKey(double Key, double DevationFromDistance) {
         key = Key;
         devationFromDistance = DevationFromDistance;
     }
