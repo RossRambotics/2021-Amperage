@@ -144,7 +144,7 @@ public class Shooter extends SubsystemBase {
 
   }
 
-  public double setModifiedkI(Double shooterRPM, Double unmodifiedPIDkI) {
+  public double setModifiedkI(double shooterRPM, double unmodifiedPIDkI) {
     double pidModifiedkI = (4000 / shooterRPM) * unmodifiedPIDkI;
 
     if (pidModifiedkI < 0.0000001) {

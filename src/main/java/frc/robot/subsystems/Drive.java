@@ -4,16 +4,19 @@
 
 package frc.robot.subsystems;
 
+import java.time.Year;
 import java.util.Map;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+import com.ctre.phoenix.sensors.PigeonIMU;
 
 import org.opencv.core.Mat;
 
 import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -22,51 +25,53 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.commands.DriveModes.UpdateHandlingCharacteristics;
+import frc.robot.helper.DriveHandlingSetup.DefaultHardSurfaceArcadeDrive;
+import frc.robot.helper.DriveHandlingSetup.DefaultHardSurfaceHandling;
+import frc.robot.helper.DriveHandlingSetup.HandlingBase;
 
 public class Drive extends SubsystemBase {
   /** Creates a new Drive. */
 
-  private Double m_maxDriveOutput = 0.5;
-  private Double m_deadZone = 0.15;
-  private Double m_fineHandlingZone = 0.8;
-  private Double m_fineHandlingMaxVeloctiy = 0.07;
+  public HandlingBase m_handlingValues;
 
-  // actually get these values
-  // ------------------------------------------------------------------
   // mps = wheel circumference * gearcoefficent * (steps / 100ms) * 1000ms / steps
   // per rotation
   // steps / 100ms = mps * .1 seconds * steps per rotation / wheel cicumference /
   // gear ratio
-  private Double m_maxVelocity = 20.0; // meters per second
-  private Double m_velocityCoefficent = 50000.0; // (encoder steps / 100 ms)
-  private Double m_wheelCircumference = 0.478; // meters - 6 inch diameter
-  private Double m_gearCoeffiecent = .0933; // 10.71 to 1 falcon rotation to wheel rotation
-  private Double m_stepsPerRotation = 2048.0; // encoder steps
-
-  private NetworkTableEntry m_maxDriveOutputEntry = null;
+  private double m_maxVelocity = 20.0; // meters per second
+  private double m_velocityCoefficent = 50000.0; // (encoder steps / 100 ms)
+  private double m_wheelCircumference = 0.478; // meters - 6 inch diameter
+  private double m_gearCoeffiecent = .0933; // 10.71 to 1 falcon rotation to wheel rotation
+  private double m_stepsPerRotation = 2048.0; // encoder steps
 
   private Joystick m_rightLargeJoystick;
   private Joystick m_leftLargeJoystick;
+  private Joystick m_smallJoystick;
 
   private WPI_TalonFX m_rightDriveTalon;
   private WPI_TalonFX m_leftDriveTalon;
   private WPI_TalonFX m_rightDriveTalonFollower;
   private WPI_TalonFX m_leftDriveTalonFollower;
-  private SpeedControllerGroup m_leftDriveGroup;
-  private SpeedControllerGroup m_rightDriveGroup;
   private TalonFXConfiguration m_leftTalonConfig;
   private TalonFXConfiguration m_rightTalonConfig;
 
+  // private PigeonIMU m_pigeon; // replaced by ADXRS450 gyro
+  private ADXRS450_Gyro m_gyro; // the gyro in the SPI port
+
   private String m_driveProfileSlot = "StraightDrive";
 
-  private DifferentialDrive m_differentialDrive;
+  public Drive(HandlingBase base) {
+    m_handlingValues = base;
+    System.out.println(base.getMaxDriveOutput());
 
-  public Drive() {
     // Joysticks
     m_rightLargeJoystick = new Joystick(0);
     m_leftLargeJoystick = new Joystick(1);
+    m_smallJoystick = new Joystick(2);
 
     // right side talons
     m_rightDriveTalon = new WPI_TalonFX(21);
@@ -90,43 +95,39 @@ public class Drive extends SubsystemBase {
     m_leftDriveTalon.setInverted(true);
     m_leftDriveTalonFollower.setInverted(true);
 
-    // speed controller groups
-    // m_leftDriveGroup = new SpeedControllerGroup(m_leftDriveTalon,
-    // m_leftDriveTalonFollower);
-    // m_rightDriveGroup = new SpeedControllerGroup(m_rightDriveTalon,
-    // m_rightDriveTalonFollower);
-
-    // create the differential drive
-    // m_differentialDrive = new DifferentialDrive(m_leftDriveGroup,
-    // m_rightDriveGroup);
+    // m_pigeon = new PigeonIMU(31);// new pigeon on 31; doesnt work with falcon 500
+    // -- replaced
+    m_gyro = new ADXRS450_Gyro();
+    m_gyro.reset();
 
     m_velocityCoefficent = getVelocityCoefficent();
-
     clearTalonEncoders();
-
-    // setPeakOutputs(m_maxDriveOutput);
     configureTalons();
     setProfileSlot();
     createShuffleBoardTab();
   }
 
   public void createShuffleBoardTab() {
-    ShuffleboardTab tab = Shuffleboard.getTab("Sub.Indexer");
+    ShuffleboardTab tab = Shuffleboard.getTab("Sub.Drive");
 
-    ShuffleboardLayout shooterCommands = tab.getLayout("Drive Calibration", BuiltInLayouts.kList).withSize(2, 2)
+    ShuffleboardLayout driveModeCommands = tab.getLayout("Set Drive Mode", BuiltInLayouts.kList).withSize(2, 3)
         .withProperties(Map.of("Label position", "HIDDEN")); // hide labels for commands
 
-    m_maxDriveOutputEntry = shooterCommands.add("MAX POWER!", 0.5).withWidget(BuiltInWidgets.kNumberSlider)
-        .withSize(4, 1).withProperties(Map.of("min", 0, "max", 1)).getEntry();
+    CommandBase driveModeSelectCommand = new UpdateHandlingCharacteristics(this, new DefaultHardSurfaceHandling());
+    driveModeSelectCommand.setName("Hard Surface Default");
+    SmartDashboard.putData(driveModeSelectCommand);
+    driveModeCommands.add(driveModeSelectCommand);
+
+    driveModeSelectCommand = new UpdateHandlingCharacteristics(this, new DefaultHardSurfaceArcadeDrive());
+    driveModeSelectCommand.setName("Hard Surface Arcade Default");
+    SmartDashboard.putData(driveModeSelectCommand);
+    driveModeCommands.add(driveModeSelectCommand);
   }
 
   @Override
   public void periodic() {
+    m_handlingValues.refreshNetworkTablesValues();
 
-    if (m_maxDriveOutput != m_maxDriveOutputEntry.getDouble(0.5)) {
-      m_maxDriveOutput = m_maxDriveOutputEntry.getDouble(0.5);
-      setPeakOutputs(m_maxDriveOutput);
-    }
   }
 
   @Override
@@ -134,26 +135,55 @@ public class Drive extends SubsystemBase {
     // This method will be called once per scheduler run during simulation
   }
 
-  public void tankDrive(Double leftSpeed, Double rightSpeed) {
+  public void tankDrive(double leftSpeed, double rightSpeed) {
     // m_differentialDrive.tankDrive(leftSpeed, rightSpeed); <-Dumb
 
-    System.out.println(rightSpeed);
-    System.out.println(rightSpeed * m_velocityCoefficent);
+    System.out.println("Left: " + leftSpeed + " Right: " + rightSpeed);
     m_rightDriveTalon.set(ControlMode.Velocity, rightSpeed * m_velocityCoefficent);
     m_leftDriveTalon.set(ControlMode.Velocity, leftSpeed * m_velocityCoefficent);
   }
 
-  private void setPeakOutputs(Double peakOutput) // sets the max peak outputs on a motor to prevent a brownout
-  {
-    m_leftDriveTalon.configPeakOutputForward(peakOutput);
-    m_leftDriveTalon.configPeakOutputReverse(-peakOutput);
-    m_leftDriveTalonFollower.configPeakOutputForward(peakOutput); // you must set this on followers too...
-    m_leftDriveTalonFollower.configPeakOutputReverse(-peakOutput); // you must set this on followers too...
+  public double getPigeonYaw() {
+    return m_gyro.getAngle();
+  }
 
-    m_rightDriveTalon.configPeakOutputForward(peakOutput);
-    m_rightDriveTalon.configPeakOutputReverse(-peakOutput);
-    m_rightDriveTalonFollower.configPeakOutputForward(peakOutput); // you must set this on followers too...
-    m_rightDriveTalonFollower.configPeakOutputReverse(-peakOutput); // you must set this on followers too...
+  public void arcadeDrive(double x, double y) {
+
+    if (Math.abs(x) < m_handlingValues.getArcadeLowTurnZone()) { // adjust to make a fine turning zone
+      x = m_handlingValues.getArcadeLowTurnCoefficent() * x; // makes the robot turnable at low speeds
+    } else {
+      x = m_handlingValues.getArcadeHighTurnCoefficent() * x + m_handlingValues.getArcadeLowMaxTurn(); // MAXPOWER
+    }
+
+    double leftSpeed = y - x; // acrade drive algorithm
+    double rightSpeed = y + x;
+
+    if (leftSpeed > 0) {
+      leftSpeed = Math.pow(leftSpeed, 2);
+      if (leftSpeed > 1) {
+        leftSpeed = 1;
+      }
+    } else {
+      leftSpeed = -Math.pow(leftSpeed, 2);
+      if (leftSpeed < -1) {
+        leftSpeed = -1;
+      }
+    }
+
+    if (rightSpeed > 0) {
+      rightSpeed = Math.pow(rightSpeed, 2);
+      if (rightSpeed > 1) {
+        rightSpeed = 1;
+      }
+    } else {
+      rightSpeed = -Math.pow(rightSpeed, 2);
+      if (rightSpeed < -1) {
+        rightSpeed = -1;
+      }
+    }
+
+    m_rightDriveTalon.set(ControlMode.Velocity, rightSpeed * m_velocityCoefficent); // sets speeds
+    m_leftDriveTalon.set(ControlMode.Velocity, leftSpeed * m_velocityCoefficent);
   }
 
   private void clearTalonEncoders() // resets the talon encoder positions to 0
@@ -165,18 +195,19 @@ public class Drive extends SubsystemBase {
   }
 
   private void configureTalons() {
-    m_leftTalonConfig.peakOutputForward = 0.5; // configures the peak outputs
-    m_leftTalonConfig.peakOutputReverse = -0.5;
-    m_rightTalonConfig.peakOutputForward = 0.5;
-    m_rightTalonConfig.peakOutputReverse = -0.5;
+    m_leftTalonConfig.peakOutputForward = m_handlingValues.getMaxDriveOutput(); // configures the peak outputs
+    m_leftTalonConfig.peakOutputReverse = -m_handlingValues.getMaxDriveOutput();
+    m_rightTalonConfig.peakOutputForward = m_handlingValues.getMaxDriveOutput();
+    m_rightTalonConfig.peakOutputReverse = -m_handlingValues.getMaxDriveOutput();
 
-    m_leftTalonConfig.slot0.kP = 0.1; // configures the slot0 pids -> switch slots to control different modes
-    m_leftTalonConfig.slot0.kI = 0;
-    m_leftTalonConfig.slot0.kD = 0;
+    // configures the slot0 pids -> switch slots to control different modes
+    m_leftTalonConfig.slot0.kP = m_handlingValues.getTalonTankDriveKp();
+    m_leftTalonConfig.slot0.kI = m_handlingValues.getTalonTankDriveKi();
+    m_leftTalonConfig.slot0.kD = m_handlingValues.getTalonTankDriveKd();
 
-    m_rightTalonConfig.slot0.kP = 0.1;
-    m_rightTalonConfig.slot0.kI = 0;
-    m_rightTalonConfig.slot0.kD = 0;
+    m_rightTalonConfig.slot0.kP = m_handlingValues.getTalonTankDriveKp();
+    m_rightTalonConfig.slot0.kI = m_handlingValues.getTalonTankDriveKi();
+    m_rightTalonConfig.slot0.kD = m_handlingValues.getTalonTankDriveKd();
 
     m_leftDriveTalon.configAllSettings(m_leftTalonConfig);
     m_rightDriveTalon.configAllSettings(m_rightTalonConfig);
@@ -230,27 +261,21 @@ public class Drive extends SubsystemBase {
     return m_wheelCircumference * m_gearCoeffiecent / m_stepsPerRotation;
   }
 
-  public double getDecelerationDistance(Double velocity) // velocity in steps / 100ms
-  {
-    double mpsVelocity = m_gearCoeffiecent * m_wheelCircumference * velocity * 10 / m_stepsPerRotation;
-    double a = 500.0;
-
-    double stoppingDistance = Math.pow(mpsVelocity, 2) * a;
-
-    return stoppingDistance;
-  }
-
   public double getLeftJoystickY() {
     double y = m_leftLargeJoystick.getY();
 
-    if (Math.abs(y) > m_deadZone) {
-      if (Math.abs(y) < m_fineHandlingZone) {
-        double fineHandlingCoefficent = m_fineHandlingMaxVeloctiy / (m_fineHandlingZone - m_deadZone);
-        return fineHandlingCoefficent * y;
+    if (Math.abs(y) > m_handlingValues.getTankDeadZone()) { // enforces joystick deadzone
+      if (Math.abs(y) < m_handlingValues.getTankFineHandlingZone()) { // low velocity for superior handling
+        return m_handlingValues.getTankFineHandlingCoefficent() * y;
+      } else if (y < 0) { // handles negative
+        return Math
+            .pow((y + m_handlingValues.getTankFineHandlingZone()) * m_handlingValues.getTankHighPowerCoefficent(), 3)
+            - m_handlingValues.getTankFineHandlingMaxVelocity(); // high POWER
+      } else {
+        return Math
+            .pow((y - m_handlingValues.getTankFineHandlingZone()) * m_handlingValues.getTankHighPowerCoefficent(), 3)
+            + m_handlingValues.getTankFineHandlingMaxVelocity(); // high POWER
       }
-
-      double highPowerCoefficent = (1 - .1) / (1 - m_fineHandlingZone);
-      return Math.pow(y * highPowerCoefficent, 3) + 0.1;
     }
 
     return 0;
@@ -259,17 +284,29 @@ public class Drive extends SubsystemBase {
   public double getRightJoystickY() {
     double y = m_rightLargeJoystick.getY();
 
-    if (Math.abs(y) > m_deadZone) {
-      if (Math.abs(y) < m_fineHandlingZone) {
-        double fineHandlingCoefficent = m_fineHandlingMaxVeloctiy / (m_fineHandlingZone - m_deadZone);
-        return fineHandlingCoefficent * y;
+    if (Math.abs(y) > m_handlingValues.getTankDeadZone()) { // enforces joystick deadzone
+      if (Math.abs(y) < m_handlingValues.getTankFineHandlingZone()) { // low velocity for superior handling
+        return m_handlingValues.getTankFineHandlingCoefficent() * y;
+      } else if (y < 0) { // handles negative
+        return Math
+            .pow((y + m_handlingValues.getTankFineHandlingZone()) * m_handlingValues.getTankHighPowerCoefficent(), 3)
+            - m_handlingValues.getTankFineHandlingMaxVelocity(); // high POWER
+      } else {
+        return Math
+            .pow((y - m_handlingValues.getTankFineHandlingZone()) * m_handlingValues.getTankHighPowerCoefficent(), 3)
+            + m_handlingValues.getTankFineHandlingMaxVelocity(); // high POWER
       }
-
-      double highPowerCoefficent = (1 - .1) / (1 - m_fineHandlingZone);
-      return Math.pow(y * highPowerCoefficent, 3) + 0.1;
     }
 
     return 0;
+  }
+
+  public double getSmallJoystickX() {
+    return m_smallJoystick.getX();
+  }
+
+  public double getSmallJoystickY() {
+    return m_smallJoystick.getY();
   }
 
   public boolean getLeftJoystickTrigger() {
@@ -278,6 +315,12 @@ public class Drive extends SubsystemBase {
 
   public boolean getrightJoystickTrigger() {
     return m_rightLargeJoystick.getRawButton(1);
+  }
+
+  public void updateHandlingBase(HandlingBase base) {
+    // updates the drive handling characteristics and refreshes talon configs
+    m_handlingValues = base;
+    configureTalons();
   }
 
 }
