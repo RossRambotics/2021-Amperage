@@ -10,6 +10,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.TheRobot;
 import frc.robot.commands.Indexer.CheckPowercell;
+
+import java.util.Map;
+
+import com.revrobotics.CANEncoder;
+import com.revrobotics.CANPIDController;
+import com.revrobotics.CANSparkMax;
+
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
@@ -17,14 +24,14 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import frc.robot.commands.IndexerCheckForNewPowerCell;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Indexer extends SubsystemBase {
   private double m_TopMotorPower = 1;
   private double m_CompactPower = 0.10;
   private double m_dCompactRotations = 1.0;
   private double m_dReverseCompactRotations = 0.5;
-  private CANSparkMax m_bottomMotor = null;
+  private CANSparkMax m_btmMotor = null;
   private CANSparkMax m_topMotor = null;
   private CANEncoder m_encoderBottom = null;
   private CANPIDController m_pidControllerBottom = null;
@@ -41,38 +48,6 @@ public class Indexer extends SubsystemBase {
   public AnalogInput m_Sensor_PC_Index2 = new AnalogInput(2); // reverse compact sensor
   public AnalogInput m_Sensor_PC_Index3 = new AnalogInput(3); // indexer full sensor
 
-  // public AnalogInput m_Sensor_PC_Capture = new AnalogInput(1); // ball as been
-  // captured in indexer
-
-  /**
-   * Creates a new Indexer.
-   */
-  public Indexer() {
-
-
-import java.util.Map;
-
-    m_stopperSolenoid = new DoubleSolenoid(31, 2, 4);
-    m_stopperSolenoid.set(Value.kForward);
-    // Try to control how far the balls advance inside indexer
-    m_topMotor.setIdleMode(IdleMode.kBrake);
-    m_bottomMotor.setIdleMode(IdleMode.kBrake);
-    // m_topMotor.setOpenLoopRampRate(1.0);
-    // m_bottomMotor.setOpenLoopRampRate(1.0);
-
-public class Indexer extends SubsystemBase {
-
-  private AnalogInput m_indexerlight = new AnalogInput(1);
-  private AnalogInput m_backtoplight = new AnalogInput(0);
-  private AnalogInput m_fronttoplight = new AnalogInput(4);
-  public CANSparkMax m_indexerMotor = new CANSparkMax(12, MotorType.kBrushless);
-
-  // public CANSparkMax m_intake = new CANSparkMax(11, MotorType.kBrushless);
-  public CANSparkMax m_topMotor = new CANSparkMax(3, MotorType.kBrushless);
-  public CANSparkMax m_btmMotor = new CANSparkMax(4, MotorType.kBrushless);
-
-  // public CANSparkMax m_shooter = new CANSparkMax(1, MotorType.kBrushless);
-  // public CANSparkMax m_shooter2 = new CANSparkMax(2, MotorType.kBrushless);
   /** Creates a new Indexer. */
   public Indexer() {
 
@@ -149,9 +124,9 @@ public class Indexer extends SubsystemBase {
   }
 
   public boolean checkIndexerSensor() {
-    TheRobot.log("FirstSensor: " + m_indexerlight.getValue());
+    TheRobot.log("FirstSensor: " + m_Sensor_PC_Intake0.getValue());
 
-    if (m_indexerlight.getValue() < 10) {
+    if (m_Sensor_PC_Intake0.getValue() < 10) {
       SmartDashboard.putBoolean("Indexer/IndexerLight", true);
       return true;
     } else {
@@ -161,7 +136,7 @@ public class Indexer extends SubsystemBase {
   }
 
   public boolean checkBackTopLight() {
-    if (m_backtoplight.getValue() < 10) {
+    if (m_Sensor_PC_Index1.getValue() < 10) {
       SmartDashboard.putBoolean("Indexer/BackTopLight", true);
       return true;
     } else {
@@ -171,7 +146,7 @@ public class Indexer extends SubsystemBase {
   }
 
   public boolean checkFrontTopLight() {
-    if (m_fronttoplight.getValue() < 10) {
+    if (m_Sensor_PC_Index3.getValue() < 10) {
       SmartDashboard.putBoolean("Indexer/FrontTopLight", true);
       return true;
     } else {
@@ -185,15 +160,14 @@ public class Indexer extends SubsystemBase {
   // returns true if the balls finished moving
   public boolean advance() {
     // set the indexer motors to run
-    m_bottomMotor.set(m_TopMotorPower);
+    m_btmMotor.set(m_TopMotorPower);
     m_topMotor.set(-m_TopMotorPower);
     return false;
   }
-  
+
   public void shoot() {
 
   }
-
 
   public void stop() {
     m_topMotor.set(0);
