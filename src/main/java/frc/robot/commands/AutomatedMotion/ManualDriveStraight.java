@@ -16,8 +16,8 @@ public class ManualDriveStraight extends CommandBase {
     private double m_previousYaw; // from the previous execute loop
     private Timer m_timer; // allows for the calculation of the derivative
 
-    private double m_Kp = 0.005;
-    private double m_Ki = 0;
+    private double m_Kp = 0.006;
+    private double m_Ki = 0.02;
     private double m_Kd = 0.0013;
 
     public ManualDriveStraight(Drive drive, double callingJoystick) { // calling joystick corrosponds to port number
@@ -43,8 +43,6 @@ public class ManualDriveStraight extends CommandBase {
         double secondsSinceLastLoop = m_timer.get(); // gets the loop time
         m_timer.reset();
 
-        System.out.println(currentYaw);
-
         // calculated the error correction
         double dCorrection = m_Kd * (currentYaw - m_previousYaw) / secondsSinceLastLoop; // degrees over seconds
         double pCorrection = m_Kp * (currentYaw - m_initalYaw);
@@ -55,12 +53,15 @@ public class ManualDriveStraight extends CommandBase {
         // if this value is negative speed up left motor or slow right
         // note both motors and joystcicks are inverted ;)
 
-        System.out.println("Total Correction: " + totalCorrection);
         double joystickValue = 0;
         if (m_callingJoystick == 0) {
             joystickValue = m_drive.getRightJoystickY();
         } else {
             joystickValue = m_drive.getLeftJoystickY();
+        }
+
+        if (joystickValue == 0) { // adds deadzone to prevent the bot from moving while stopped
+            return;
         }
 
         if (joystickValue > 0) { // if the robot is moving backward

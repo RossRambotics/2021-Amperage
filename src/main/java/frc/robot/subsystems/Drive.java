@@ -36,7 +36,7 @@ import frc.robot.helper.DriveHandlingSetup.HandlingBase;
 public class Drive extends SubsystemBase {
   /** Creates a new Drive. */
 
-  private HandlingBase m_handlingValues;
+  public HandlingBase m_handlingValues;
 
   // mps = wheel circumference * gearcoefficent * (steps / 100ms) * 1000ms / steps
   // per rotation
@@ -126,6 +126,7 @@ public class Drive extends SubsystemBase {
 
   @Override
   public void periodic() {
+    m_handlingValues.refreshNetworkTablesValues();
 
   }
 
@@ -258,16 +259,6 @@ public class Drive extends SubsystemBase {
   public double getDistancePerStep() // meters / step
   {
     return m_wheelCircumference * m_gearCoeffiecent / m_stepsPerRotation;
-  }
-
-  public double getDecelerationDistance(double velocity) // velocity in steps / 100ms
-  {
-    double mpsVelocity = m_gearCoeffiecent * m_wheelCircumference * velocity * 10 / m_stepsPerRotation;
-    double a = 500.0;
-
-    double stoppingDistance = Math.pow(mpsVelocity, 2) * a;
-
-    return stoppingDistance;
   }
 
   public double getLeftJoystickY() {

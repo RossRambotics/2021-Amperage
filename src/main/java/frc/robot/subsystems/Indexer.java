@@ -32,7 +32,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.robot.commands.IndexerCheckForNewPowerCell;
 
 public class Indexer extends SubsystemBase {
-  private double m_TopMotorPower = 0.25;
+  private double m_TopMotorPower = 1;
   private double m_CompactPower = 0.10;
   private double m_dCompactRotations = 1.0;
   private double m_dReverseCompactRotations = 0.5;
@@ -164,7 +164,7 @@ public class Indexer extends SubsystemBase {
     m_dCompactRotations = SmartDashboard.getNumber("Indexer/Compact Rotations", 0);
     m_dReverseCompactRotations = SmartDashboard.getNumber("Indexer/Rev Compact Rotations", 0);
 
-    if (m_bReadyToShoot) {
+    if (m_bReadyToShoot) { // control indexer compaction cylinder
       m_stopperSolenoid.set(Value.kReverse); // retracts compaction soleoid
 
     } else {
@@ -218,7 +218,7 @@ public class Indexer extends SubsystemBase {
   public boolean advance() {
     // set the indexer motors to run
     m_bottomMotor.set(m_TopMotorPower);
-    m_topMotor.set(m_TopMotorPower);
+    m_topMotor.set(-m_TopMotorPower);
     return false;
   }
 

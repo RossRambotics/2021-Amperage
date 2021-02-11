@@ -17,6 +17,7 @@ import frc.robot.commands.ExampleCommand;
 
 import frc.robot.commands.*;
 import frc.robot.commands.AutomatedMotion.AutonomousMovementBase;
+import frc.robot.commands.AutomatedMotion.ManualDriveStraight;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -34,6 +35,8 @@ import frc.robot.Robot;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   public Joystick m_smallJoystick;
+  private Joystick m_leftLargeJoystick;
+  private Joystick m_rightLargeJoystick;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -42,6 +45,8 @@ public class RobotContainer {
     // Configure the button bindings
 
     m_smallJoystick = new Joystick(2); // leave as 2
+    m_leftLargeJoystick = new Joystick(1);
+    m_rightLargeJoystick = new Joystick(0);
 
     configureButtonBindings();
   }
@@ -70,13 +75,19 @@ public class RobotContainer {
     JoystickButton yButton = new JoystickButton(m_smallJoystick, 4);
 
     JoystickButton xButton = new JoystickButton(m_smallJoystick, 3);
-    xButton.whenPressed(new frc.robot.commands.AutomatedMotion.ManualDriveStraight(drive, 1));
 
     JoystickButton aButton = new JoystickButton(m_smallJoystick, 1);
 
     JoystickButton selectButton = new JoystickButton(m_smallJoystick, 7);
 
     JoystickButton startButton = new JoystickButton(m_smallJoystick, 8);
+
+    JoystickButton leftTopForwardButton = new JoystickButton(m_leftLargeJoystick, 3);
+    leftTopForwardButton.whileHeld(new ManualDriveStraight(drive, 1));
+
+    JoystickButton rightTopForwardButton = new JoystickButton(m_rightLargeJoystick, 3);
+    rightTopForwardButton.whileHeld(new ManualDriveStraight(drive, 0));
+
   }
 
 }
