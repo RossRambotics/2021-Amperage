@@ -8,20 +8,8 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
-// Rev Spark Max classes
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.ControlType;
-import com.revrobotics.CANSparkMax.IdleMode;
-
-import java.util.Map;
-
-import com.revrobotics.CANEncoder;
-import com.revrobotics.CANPIDController;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
-// ultra sonic sensor classes
+import frc.robot.TheRobot;
+import frc.robot.commands.Indexer.CheckPowercell;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
@@ -61,12 +49,8 @@ public class Indexer extends SubsystemBase {
    */
   public Indexer() {
 
-    m_bottomMotor = new CANSparkMax(3, MotorType.kBrushless);
-    m_topMotor = new CANSparkMax(4, MotorType.kBrushless);
-    m_bottomMotor.restoreFactoryDefaults();
-    m_topMotor.restoreFactoryDefaults();
-    m_topMotor.setInverted(true);
-    m_bottomMotor.setInverted(true);
+
+import java.util.Map;
 
     m_stopperSolenoid = new DoubleSolenoid(31, 2, 4);
     m_stopperSolenoid.set(Value.kForward);
@@ -76,33 +60,25 @@ public class Indexer extends SubsystemBase {
     // m_topMotor.setOpenLoopRampRate(1.0);
     // m_bottomMotor.setOpenLoopRampRate(1.0);
 
-    m_encoderBottom = m_bottomMotor.getEncoder();
-    m_encoderBottom.setPosition(0);
-    m_pidControllerBottom = m_bottomMotor.getPIDController();
-    m_pidControllerBottom.setP(m_pid_kP * 1.25); // bottom moter needs a little extra
+public class Indexer extends SubsystemBase {
 
-    m_encoderTop = m_topMotor.getEncoder();
-    m_encoderTop.setPosition(0);
-    m_pidControllerTop = m_topMotor.getPIDController();
-    m_pidControllerTop.setP(m_pid_kP);
+  private AnalogInput m_indexerlight = new AnalogInput(1);
+  private AnalogInput m_backtoplight = new AnalogInput(0);
+  private AnalogInput m_fronttoplight = new AnalogInput(4);
+  public CANSparkMax m_indexerMotor = new CANSparkMax(12, MotorType.kBrushless);
 
-    // display variables on SmartDashboard
-    SmartDashboard.putBoolean("Indexer/Sensor_0_Intake0", false);
-    SmartDashboard.putBoolean("Indexer/Sensor_1_Index1", false);
-    SmartDashboard.putBoolean("Indexer/Sensor_2_Index2", false);
-    SmartDashboard.putBoolean("Indexer/Sensor_3_Index3", false);
-    SmartDashboard.putNumber("Indexer/Sensor_0_Intake Raw", m_Sensor_PC_Intake0.getValue());
-    SmartDashboard.putNumber("Indexer/Top Motor Power", m_TopMotorPower);
-    SmartDashboard.putNumber("Indexer/Compact Power", m_CompactPower);
-    SmartDashboard.putNumber("Indexer/Compact Rotations", m_dCompactRotations);
-    SmartDashboard.putNumber("Indexer/Compact Rev Rotations", m_dReverseCompactRotations);
+  // public CANSparkMax m_intake = new CANSparkMax(11, MotorType.kBrushless);
+  public CANSparkMax m_topMotor = new CANSparkMax(3, MotorType.kBrushless);
+  public CANSparkMax m_btmMotor = new CANSparkMax(4, MotorType.kBrushless);
 
-    SmartDashboard.putNumber("Indexer/Compact Encoder Top", m_encoderTop.getPosition());
-    SmartDashboard.putNumber("Indexer/Compact Encoder Bottom", m_encoderBottom.getPosition());
-    SmartDashboard.putNumber("Indexer/Compact Kp", m_pid_kP);
+  // public CANSparkMax m_shooter = new CANSparkMax(1, MotorType.kBrushless);
+  // public CANSparkMax m_shooter2 = new CANSparkMax(2, MotorType.kBrushless);
+  /** Creates a new Indexer. */
+  public Indexer() {
 
-    CommandBase c = new SequentialCommandGroup(new WaitCommand(0.25), new IndexerCheckForNewPowerCell(this));
-    c.setName("Indexer Def Cmd");
+    // setting default command to check for powercell
+    CommandBase c = new SequentialCommandGroup(new WaitCommand(0.1), new CheckPowercell(this));
+    c.setName("Indexer's DefCMD");
     this.setDefaultCommand(c);
 
     this.createShuffleBoardTab();
@@ -133,7 +109,6 @@ public class Indexer extends SubsystemBase {
 
   @Override
   public void periodic() {
-
     // This method will be called once per scheduler run
 
     // display variables on SmartDashboard
@@ -173,43 +148,36 @@ public class Indexer extends SubsystemBase {
     }
   }
 
-  // returns true when the index should capture the powercell
-  // returns false when no powercell is present
-  public boolean SenseIntakePC0() {
-    boolean b;
+  public boolean checkIndexerSensor() {
+    TheRobot.log("FirstSensor: " + m_indexerlight.getValue());
 
-    if (m_Sensor_PC_Intake0.getValue() > 10) {
-      b = false;
+    if (m_indexerlight.getValue() < 10) {
+      SmartDashboard.putBoolean("Indexer/IndexerLight", true);
+      return true;
     } else {
-      b = true;
+      SmartDashboard.putBoolean("Indexer/IndexerLight", false);
+      return false;
     }
-    return b;
   }
 
-  // returns true when the index advance new powercell
-  // returns false when indexer/intake is clear
-  public boolean SenseIndex1() {
-    boolean b;
-
-    if (m_Sensor_PC_Index1.getValue() > 10) {
-      b = false;
+  public boolean checkBackTopLight() {
+    if (m_backtoplight.getValue() < 10) {
+      SmartDashboard.putBoolean("Indexer/BackTopLight", true);
+      return true;
     } else {
-      b = true;
+      SmartDashboard.putBoolean("Indexer/BackTopLight", false);
+      return false;
     }
-    return b;
   }
 
-  // returns true when the reverse compactor sensor is hit
-  // returns false when indexer is clear
-  public boolean SenseIndex2() {
-    boolean b;
-
-    if (m_Sensor_PC_Index2.getValue() > 10) {
-      b = false;
+  public boolean checkFrontTopLight() {
+    if (m_fronttoplight.getValue() < 10) {
+      SmartDashboard.putBoolean("Indexer/FrontTopLight", true);
+      return true;
     } else {
-      b = true;
+      SmartDashboard.putBoolean("Indexer/FrontTopLight", false);
+      return false;
     }
-    return b;
   }
 
   // moves the balls to the next sensor
@@ -221,68 +189,15 @@ public class Indexer extends SubsystemBase {
     m_topMotor.set(-m_TopMotorPower);
     return false;
   }
+  
+  public void shoot() {
 
-  // runs until all of the balls are shot out
-  // returns false if not all of the balls are out
-  // returns true is all of the balls are out
-  public boolean shoot() {
-    // set the indexer motors to run
-    m_bottomMotor.set(0.5);
-    m_topMotor.set(0.5);
-
-    // TODO detect whether there are balls remaining
-    return false;
   }
+
 
   public void stop() {
-    // stops the indexer motors
     m_topMotor.set(0);
-    m_bottomMotor.set(0);
+    m_btmMotor.set(0);
   }
 
-  // makes the balls go backward out of the intake
-  // returns false if the balls did not move back
-  // returns true of the balls did move backwards
-  public boolean clear() {
-    m_bottomMotor.set(-0.25);
-    m_topMotor.set(-0.25);
-    return false;
-  }
-
-  public void resetEncoders() {
-    m_encoderTop.setPosition(0);
-    m_encoderBottom.setPosition(0);
-  }
-
-  // move the balls using the top and bottom motors
-  public void compact() {
-    // reset encoders and advance distance
-
-    m_pidControllerBottom.setReference(m_dCompactRotations, ControlType.kPosition);
-    m_pidControllerTop.setReference(m_dCompactRotations, ControlType.kPosition);
-  }
-
-  public void reverseCompact() {
-    // m_pidControllerBottom.setReference(m_dReverseCompactRotations,
-    // ControlType.kPosition);
-    // m_pidControllerTop.setReference(m_dReverseCompactRotations,
-    // ControlType.kPosition);
-
-    m_bottomMotor.set(-0.1);
-    m_topMotor.set(-0.1);
-
-  }
-
-  // returns true when the indexer is full
-  // returns false when indexer has room for more!
-  public boolean isFull() {
-    boolean b;
-
-    if (m_Sensor_PC_Index3.getValue() > 10) {
-      b = false;
-    } else {
-      b = true;
-    }
-    return b;
-  }
 }

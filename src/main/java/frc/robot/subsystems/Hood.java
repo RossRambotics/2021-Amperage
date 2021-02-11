@@ -4,11 +4,21 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 // Rev Spark Max classes
 import com.revrobotics.CANSparkMax;
+
+import java.util.Map;
+
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANPIDController;
@@ -33,13 +43,15 @@ public class Hood extends SubsystemBase {
 
   private double m_pid_kP, m_pid_kI, m_pid_kD, m_pid_kIz, m_pid_kFF;
   private double m_pid_kMaxOutput, m_pid_kMinOutput, m_pid_maxRPM;
-  private double m_dTargetAngle = 0;
+  private NetworkTableEntry m_dTargetAngle = null;
   private double m_dLowTargetMode = 75.0; // degress for hood for low power port
+
+  private ShuffleboardTab m_shuffleboardTab = Shuffleboard.getTab("Sub.Hood");
 
   // 55/18 --- ratio of the 2 sprockets
   // * 4 --- 4:1 gear box
   // / 360 --- degrees per rotation of the hood
-  private static final double kRotationsPerDegree = ((55.0 / 18.0) * 4.0) / 360.0;
+  private static final double kRotationsPerDegree = ((55.0 / 18.0) * 4.0 * 5.0) / 360.0;
 
   /**
    * Creates a new Shooter.
@@ -86,89 +98,94 @@ public class Hood extends SubsystemBase {
     SmartDashboard.putNumber("Hood/Min Output", m_pid_kMinOutput);
     SmartDashboard.putNumber("Hood/Motor Power", m_motorHood.get());
     SmartDashboard.putNumber("Hood/Angle Manual", 0);
-    SmartDashboard.putNumber("Hood/Target Angle", m_dTargetAngle);
+    // SmartDashboard.putNumber("Hood/Target Angle", m_dTargetAngle);
     SmartDashboard.putNumber("Hood/Angle", m_position_target / Hood.kRotationsPerDegree);
+
+    this.createShuffleBoardTab();
+
+  }
+
+  public void createShuffleBoardTab() {
+    ShuffleboardTab tab = m_shuffleboardTab;
+    ShuffleboardLayout hoodCommands = tab.getLayout("Commands", BuiltInLayouts.kList).withSize(2, 2)
+        .withProperties(Map.of("Label position", "HIDDEN")); // hide labels for commands
+
+    CommandBase c = new frc.robot.commands.Test.Hood.ExtendHood(this);
+    c.setName("Extend Hood");
+    SmartDashboard.putData(c);
+    hoodCommands.add(c);
+
+    c = new frc.robot.commands.Test.Hood.RetractHood(this);
+    c.setName("Retract Hood");
+    SmartDashboard.putData(c);
+    hoodCommands.add(c);
+
+    // c = new frc.robot.commands.Test.Shooter.StopShooter(this);
+    // c.setName("Stop Shooter");
+    // SmartDashboard.putData(c);
+    // shooterCommands.add(c);
+
+    m_dTargetAngle = m_shuffleboardTab.add("Hood Angle", 0).withWidget(BuiltInWidgets.kNumberSlider).withSize(4, 1)
+        .withPosition(2, 0).withProperties(Map.of("min", 0, "max", 75)).getEntry();
 
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-/*
-    // read PID coefficients from SmartDashboard
-    double p = SmartDashboard.getNumber("Hood/P Gain", 0);
-    double i = SmartDashboard.getNumber("Hood/I Gain", 0);
-    double d = SmartDashboard.getNumber("Hood/D Gain", 0);
-    double iz = SmartDashboard.getNumber("Hood/I Zone", 0);
-    double ff = SmartDashboard.getNumber("Hood/Feed Forward", 0);
-    double max = SmartDashboard.getNumber("Hood/Max Output", 0);
-    double min = SmartDashboard.getNumber("Hood/Min Output", 0);
-    double manualHoodAngle = SmartDashboard.getNumber("Hood/Angle Manual", 0);
-    SmartDashboard.putNumber("Hood/Target Angle", m_dTargetAngle);
-    SmartDashboard.putNumber("Hood/Angle", m_position_target / Hood.kRotationsPerDegree);
-
-    // if PID coefficients on SmartDashboard have changed, write new values to
-    // controller
-    if ((p != m_pid_kP)) {
-      m_pidController.setP(p);
-      m_pid_kP = p;
-    }
-    if ((i != m_pid_kI)) {
-      m_pidController.setI(i);
-      m_pid_kI = i;
-    }
-    if ((d != m_pid_kD)) {
-      m_pidController.setD(d);
-      m_pid_kD = d;
-    }
-    if ((iz != m_pid_kIz)) {
-      m_pidController.setIZone(iz);
-      m_pid_kIz = iz;
-    }
-    if ((ff != m_pid_kFF)) {
-      m_pidController.setFF(ff);
-      m_pid_kFF = ff;
-    }
-    if ((max != m_pid_kMaxOutput) || (min != m_pid_kMinOutput)) {
-      m_pidController.setOutputRange(min, max);
-      m_pid_kMinOutput = min;
-      m_pid_kMaxOutput = max;
-    }
-
-    // If a manual hood angle is specific go there
-    // Otherwise if the hood should be exteneded use the lookup table
-    // or retract
-    Robot r = TheRobot.getInstance();
-    if (manualHoodAngle > 0) {
-      m_position_target = manualHoodAngle * Hood.kRotationsPerDegree;
-      TheRobot.log("Hood target rot: " + TheRobot.toString(m_position_target));
-      TheRobot.log("Hood RperD: " + TheRobot.toString(Hood.kRotationsPerDegree));
-      TheRobot.log("Hood target deg: " + TheRobot.toString(manualHoodAngle));
-    } else if (r.m_shooter.isLowPortEnabled()) {
-      m_position_target = m_dLowTargetMode * Hood.kRotationsPerDegree;
-    } else if (m_extended == true) {
-      ShooterValueSet m_values = m_lookUpTable.getCurrentValues(false);
-      // ShooterValueSet m_values = new ShooterValueSet(45.0, 45.0);
-      m_dTargetAngle = m_values.hoodAngle;
-      m_position_target = m_dTargetAngle * Hood.kRotationsPerDegree;
-
-      // m_position_target = 55.0 * Hood.kRotationsPerDegree;
-      TheRobot.log("--------Hood Target:  " + TheRobot.toString(m_position_target));
-    } else {
-      m_position_target = 0.01;
-    }
-
-    // m_motorHood.set(0.25);
-    // TheRobot.log("Hood target: " + TheRobot.toString(m_position_target));
-    m_pidController.setReference(m_position_target, ControlType.kPosition);
-    // m_pidController.setReference(2, ControlType.kPosition);
-
-    // Get the position of the hood
-    m_position_hood = Math.abs(m_encoderHood.getPosition());
-
-    // Output to dashboard
-    SmartDashboard.putNumber("Hood/Current Position", m_position_hood);
-    SmartDashboard.putNumber("Hood/Target Position", m_position_target);*/
+    /*
+     * // read PID coefficients from SmartDashboard double p =
+     * SmartDashboard.getNumber("Hood/P Gain", 0); double i =
+     * SmartDashboard.getNumber("Hood/I Gain", 0); double d =
+     * SmartDashboard.getNumber("Hood/D Gain", 0); double iz =
+     * SmartDashboard.getNumber("Hood/I Zone", 0); double ff =
+     * SmartDashboard.getNumber("Hood/Feed Forward", 0); double max =
+     * SmartDashboard.getNumber("Hood/Max Output", 0); double min =
+     * SmartDashboard.getNumber("Hood/Min Output", 0); double manualHoodAngle =
+     * SmartDashboard.getNumber("Hood/Angle Manual", 0);
+     * SmartDashboard.putNumber("Hood/Target Angle", m_dTargetAngle);
+     * SmartDashboard.putNumber("Hood/Angle", m_position_target /
+     * Hood.kRotationsPerDegree);
+     * 
+     * // if PID coefficients on SmartDashboard have changed, write new values to //
+     * controller if ((p != m_pid_kP)) { m_pidController.setP(p); m_pid_kP = p; } if
+     * ((i != m_pid_kI)) { m_pidController.setI(i); m_pid_kI = i; } if ((d !=
+     * m_pid_kD)) { m_pidController.setD(d); m_pid_kD = d; } if ((iz != m_pid_kIz))
+     * { m_pidController.setIZone(iz); m_pid_kIz = iz; } if ((ff != m_pid_kFF)) {
+     * m_pidController.setFF(ff); m_pid_kFF = ff; } if ((max != m_pid_kMaxOutput) ||
+     * (min != m_pid_kMinOutput)) { m_pidController.setOutputRange(min, max);
+     * m_pid_kMinOutput = min; m_pid_kMaxOutput = max; }
+     * 
+     * // If a manual hood angle is specific go there // Otherwise if the hood
+     * should be exteneded use the lookup table // or retract Robot r =
+     * TheRobot.getInstance(); if (manualHoodAngle > 0) { m_position_target =
+     * manualHoodAngle * Hood.kRotationsPerDegree; TheRobot.log("Hood target rot: "
+     * + TheRobot.toString(m_position_target)); TheRobot.log("Hood RperD: " +
+     * TheRobot.toString(Hood.kRotationsPerDegree));
+     * TheRobot.log("Hood target deg: " + TheRobot.toString(manualHoodAngle)); }
+     * else if (r.m_shooter.isLowPortEnabled()) { m_position_target =
+     * m_dLowTargetMode * Hood.kRotationsPerDegree; } else if (m_extended == true) {
+     * ShooterValueSet m_values = m_lookUpTable.getCurrentValues(false); //
+     * ShooterValueSet m_values = new ShooterValueSet(45.0, 45.0); m_dTargetAngle =
+     * m_values.hoodAngle; m_position_target = m_dTargetAngle *
+     * Hood.kRotationsPerDegree;
+     * 
+     * // m_position_target = 55.0 * Hood.kRotationsPerDegree;
+     * TheRobot.log("--------Hood Target:  " +
+     * TheRobot.toString(m_position_target)); } else { m_position_target = 0.01; }
+     * 
+     * // m_motorHood.set(0.25); // TheRobot.log("Hood target: " +
+     * TheRobot.toString(m_position_target));
+     * m_pidController.setReference(m_position_target, ControlType.kPosition); //
+     * m_pidController.setReference(2, ControlType.kPosition);
+     * 
+     * // Get the position of the hood m_position_hood =
+     * Math.abs(m_encoderHood.getPosition());
+     * 
+     * // Output to dashboard SmartDashboard.putNumber("Hood/Current Position",
+     * m_position_hood); SmartDashboard.putNumber("Hood/Target Position",
+     * m_position_target);
+     */
   }
 
   // shoots the balls
@@ -201,17 +218,23 @@ public class Hood extends SubsystemBase {
   // returns true if retracted
   public boolean retract() {
     m_extended = false;
-    m_position_target = 0;
+
+    m_pidController.setReference(0, ControlType.kPosition);
+    TheRobot.log("Retract Hood.");
     return false;
   }
 
   // extends the hood
   // returns false if not exteneded
   // returns true if exteneded
-  public boolean extend() {
+  public void extend() {
     m_extended = true;
-    return false;
 
+    double angle = m_dTargetAngle.getDouble(0);
+    double position = angle * Hood.kRotationsPerDegree;
+    m_pidController.setReference(position, ControlType.kPosition);
+    TheRobot.log("Hood target angle: " + angle);
+    TheRobot.log("Hood target position: " + position);
   }
 
   public void stop() {
