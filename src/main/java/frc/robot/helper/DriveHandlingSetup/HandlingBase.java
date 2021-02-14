@@ -87,22 +87,23 @@ public class HandlingBase { // extend this class to create a unique set of handl
             m_fineHandlingZoneEntry = tab.add("Tank Fine Handling Zone", m_tankFineHandlingZone)
                     .withWidget(BuiltInWidgets.kNumberBar).withSize(2, 1).withProperties(Map.of("min", -1, "max", 1))
                     .withPosition(0, 2).getEntry();
-            m_maxDriveOutputEntry = tab.add("Tank Fine Handling Max Relative Velocity", m_tankFineHandlingMaxVelocity)
+            m_fineHandlingMaxVelocityEntry = tab
+                    .add("Tank Fine Handling Max Relative Velocity", m_tankFineHandlingMaxVelocity)
                     .withWidget(BuiltInWidgets.kNumberBar).withSize(2, 1).withProperties(Map.of("min", -1, "max", 1))
                     .withPosition(0, 3).getEntry();
 
             m_arcadeLowMaxTurnEntry = tab.add("Arcade Drive Low Turn Max Power", m_arcadeLowMaxTurn)
                     .withWidget(BuiltInWidgets.kNumberBar).withSize(2, 1).withProperties(Map.of("min", -1, "max", 1))
                     .withPosition(2, 0).getEntry();
-            m_arcadeLowMaxTurnEntry = tab.add("Arcade Drive Low Turn Zone", m_arcadeLowTurnZone)
+            m_arcadeLowTurnZoneEntry = tab.add("Arcade Drive Low Turn Zone", m_arcadeLowTurnZone)
                     .withWidget(BuiltInWidgets.kNumberBar).withSize(2, 1).withProperties(Map.of("min", -1, "max", 1))
                     .withPosition(2, 1).getEntry();
 
-            m_maxDriveOutputEntry = tab.add("Talon Tank Kp", m_talonTankDriveKp).withWidget(BuiltInWidgets.kTextView)
+            m_talonTankDriveKpEntry = tab.add("Talon Tank Kp", m_talonTankDriveKp).withWidget(BuiltInWidgets.kTextView)
                     .withSize(1, 1).withPosition(4, 0).getEntry();
-            m_maxDriveOutputEntry = tab.add("Talon Tank Ki", m_talonTankDriveKi).withWidget(BuiltInWidgets.kTextView)
+            m_talonTankDriveKiEntry = tab.add("Talon Tank Ki", m_talonTankDriveKi).withWidget(BuiltInWidgets.kTextView)
                     .withSize(1, 1).withPosition(4, 1).getEntry();
-            m_maxDriveOutputEntry = tab.add("Talon Tank Kd", m_talonTankDriveKd).withWidget(BuiltInWidgets.kTextView)
+            m_talonTankDriveKdEntry = tab.add("Talon Tank Kd", m_talonTankDriveKd).withWidget(BuiltInWidgets.kTextView)
                     .withSize(1, 1).withPosition(4, 2).getEntry();
 
             m_angleAdjustmentKpEntry = tab.add("Angle Adjustment Kp", m_angleAdjustmentkP)
@@ -137,7 +138,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
 
         m_angleAdjustmentkP = getAngleAdjustmentkP();
         m_angleAdjustmentkI = getAngleAdjustmentkI();
-        m_angleAdjustmentkP = getAngleAdjustmentkD();
+        m_angleAdjustmentkD = getAngleAdjustmentkD();
 
         m_straightVelocityControlkP = getStraightVelocityControlkP();
         m_straightVelocityControlkI = getStraightVelocityControlkI();

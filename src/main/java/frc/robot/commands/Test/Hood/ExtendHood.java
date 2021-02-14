@@ -5,6 +5,7 @@
 package frc.robot.commands.Test.Hood;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.TheRobot;
 import frc.robot.subsystems.Hood;
 
 public class ExtendHood extends CommandBase {
@@ -21,6 +22,7 @@ public class ExtendHood extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    TheRobot.log("Test.Hood.ExtendHood: Initialize");
     m_hood.extend();
   }
 

@@ -9,6 +9,8 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.IntakeReverse;
 import frc.robot.subsystems.Intake;
@@ -35,8 +37,8 @@ import frc.robot.Robot;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   public Joystick m_smallJoystick;
-  private Joystick m_leftLargeJoystick;
-  private Joystick m_rightLargeJoystick;
+  private Joystick m_leftLargeJoystick = null;
+  private Joystick m_rightLargeJoystick = null;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -45,8 +47,8 @@ public class RobotContainer {
     // Configure the button bindings
 
     m_smallJoystick = new Joystick(2); // leave as 2
-    m_leftLargeJoystick = new Joystick(1);
-    m_rightLargeJoystick = new Joystick(0);
+    // m_leftLargeJoystick = new Joystick(1);
+    // m_rightLargeJoystick = new Joystick(0);
 
     configureButtonBindings();
   }
@@ -60,33 +62,44 @@ public class RobotContainer {
   private void configureButtonBindings() {
     Intake intake = TheRobot.getInstance().m_intake;
     Drive drive = TheRobot.getInstance().m_drive;
+    Shooter shooter = TheRobot.getInstance().m_shooter;
+    Hood hood = TheRobot.getInstance().m_hood;
+    Indexer indexer = TheRobot.getInstance().m_indexer;
 
-    JoystickButton bButton = new JoystickButton(m_smallJoystick, 2);
-    bButton.whenHeld(new frc.robot.commands.IntakeReverse(intake), true);
+    // JoystickButton bButton = new JoystickButton(m_smallJoystick, 2);
+    // bButton.whenHeld(new frc.robot.commands.IntakeReverse(intake), true);
 
-    JoystickButton rbButton = new JoystickButton(m_smallJoystick, 6);
-    rbButton.whenPressed(new frc.robot.commands.IntakeExtend(intake), true);
-    rbButton.whenPressed(new frc.robot.commands.IntakeMotorOn(intake), true);
+    // JoystickButton rbButton = new JoystickButton(m_smallJoystick, 6);
+    // rbButton.whenPressed(new frc.robot.commands.IntakeExtend(intake), true);
+    // rbButton.whenPressed(new frc.robot.commands.IntakeMotorOn(intake), true);
 
-    JoystickButton lbButton = new JoystickButton(m_smallJoystick, 5);
-    lbButton.whenPressed(new frc.robot.commands.IntakeRetract(intake), true);
-    lbButton.whenPressed(new frc.robot.commands.IntakeMotorOff(intake), true);
+    // JoystickButton lbButton = new JoystickButton(m_smallJoystick, 5);
+    // lbButton.whenPressed(new frc.robot.commands.IntakeRetract(intake), true);
+    // lbButton.whenPressed(new frc.robot.commands.IntakeMotorOff(intake), true);
+
+    JoystickButton rightShoulderButton = new JoystickButton(m_smallJoystick, 6);
+    CommandBase cmd = new frc.robot.commands.Test.Hood.ExtendHood(hood);
+    cmd.andThen(new frc.robot.commands.Test.Shooter.StartShooter(shooter));
+    cmd.andThen(new WaitCommand(1));
+    cmd.andThen(new frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(2));
+    rightShoulderButton.whenPressed(cmd, true);
 
     JoystickButton yButton = new JoystickButton(m_smallJoystick, 4);
-
     JoystickButton xButton = new JoystickButton(m_smallJoystick, 3);
-
     JoystickButton aButton = new JoystickButton(m_smallJoystick, 1);
-
     JoystickButton selectButton = new JoystickButton(m_smallJoystick, 7);
-
     JoystickButton startButton = new JoystickButton(m_smallJoystick, 8);
 
-    JoystickButton leftTopForwardButton = new JoystickButton(m_leftLargeJoystick, 3);
-    leftTopForwardButton.whileHeld(new ManualDriveStraight(drive, 1));
+    if (m_leftLargeJoystick != null) {
 
-    JoystickButton rightTopForwardButton = new JoystickButton(m_rightLargeJoystick, 3);
-    rightTopForwardButton.whileHeld(new ManualDriveStraight(drive, 0));
+      JoystickButton leftTopForwardButton = new JoystickButton(m_leftLargeJoystick, 3);
+      leftTopForwardButton.whileHeld(new ManualDriveStraight(drive, 1));
+    }
+
+    if (m_rightLargeJoystick != null) {
+      JoystickButton rightTopForwardButton = new JoystickButton(m_rightLargeJoystick, 3);
+      rightTopForwardButton.whileHeld(new ManualDriveStraight(drive, 0));
+    }
 
   }
 
