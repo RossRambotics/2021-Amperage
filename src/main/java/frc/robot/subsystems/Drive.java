@@ -9,6 +9,7 @@ import java.util.Map;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
+import com.ctre.phoenix.motorcontrol.TalonFXSensorCollection;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.PigeonIMU;
@@ -47,6 +48,8 @@ public class Drive extends SubsystemBase {
   private double m_wheelCircumference = 0.478; // meters - 6 inch diameter
   private double m_gearCoeffiecent = .0933; // 10.71 to 1 falcon rotation to wheel rotation
   private double m_stepsPerRotation = 2048.0; // encoder steps
+  private double m_trackwidth = 0.556; // the robot trackwidth7
+  private double m_degreesFrameRotationPerStep; // the degrees of frameRoation per step
 
   private Joystick m_rightLargeJoystick;
   private Joystick m_leftLargeJoystick;
@@ -58,6 +61,8 @@ public class Drive extends SubsystemBase {
   private WPI_TalonFX m_leftDriveTalonFollower;
   private TalonFXConfiguration m_leftTalonConfig;
   private TalonFXConfiguration m_rightTalonConfig;
+  private TalonFXSensorCollection m_rightTalonSensors;
+  private TalonFXSensorCollection m_leftTalonSensors;
 
   // private PigeonIMU m_pigeon; // replaced by ADXRS450 gyro
   private ADXRS450_Gyro m_gyro; // the gyro in the SPI port
@@ -95,10 +100,16 @@ public class Drive extends SubsystemBase {
     m_leftDriveTalon.setInverted(true);
     m_leftDriveTalonFollower.setInverted(true);
 
+    // gets the sensors
+    m_rightTalonSensors = m_rightDriveTalon.getSensorCollection();
+    m_leftTalonSensors = m_leftDriveTalon.getSensorCollection();
+
     // m_pigeon = new PigeonIMU(31);// new pigeon on 31; doesnt work with falcon 500
     // -- replaced
     m_gyro = new ADXRS450_Gyro();
     m_gyro.reset();
+
+    m_degreesFrameRotationPerStep = getDegreesFrameRotationPerStep();
 
     m_velocityCoefficent = getVelocityCoefficent();
     clearTalonEncoders();
@@ -127,7 +138,7 @@ public class Drive extends SubsystemBase {
   @Override
   public void periodic() {
     m_handlingValues.refreshNetworkTablesValues();
-
+    // configureTalons();
   }
 
   @Override
@@ -138,9 +149,13 @@ public class Drive extends SubsystemBase {
   public void tankDrive(double leftSpeed, double rightSpeed) {
     // m_differentialDrive.tankDrive(leftSpeed, rightSpeed); <-Dumb
 
-    System.out.println("Left: " + leftSpeed + " Right: " + rightSpeed);
     m_rightDriveTalon.set(ControlMode.Velocity, rightSpeed * m_velocityCoefficent);
     m_leftDriveTalon.set(ControlMode.Velocity, leftSpeed * m_velocityCoefficent);
+  }
+
+  public void tankDriveRaw(double leftSpeed, double rightSpeed) { // tank drive but without velocity adjustment
+    m_rightDriveTalon.set(ControlMode.PercentOutput, rightSpeed);
+    m_leftDriveTalon.set(ControlMode.PercentOutput, leftSpeed);
   }
 
   public double getPigeonYaw() {
@@ -181,6 +196,9 @@ public class Drive extends SubsystemBase {
         rightSpeed = -1;
       }
     }
+
+    System.out.println("Left Velocity:" + leftSpeed * m_velocityCoefficent * getDistancePerStep() + " Right Velocity:"
+        + rightSpeed * m_velocityCoefficent * getDistancePerStep());
 
     m_rightDriveTalon.set(ControlMode.Velocity, rightSpeed * m_velocityCoefficent); // sets speeds
     m_leftDriveTalon.set(ControlMode.Velocity, leftSpeed * m_velocityCoefficent);
@@ -232,11 +250,15 @@ public class Drive extends SubsystemBase {
   }
 
   public double getLeftTalonEncoderPosition() {
-    return m_leftDriveTalon.getSensorCollection().getIntegratedSensorPosition(); // average of master and follower?
+    return m_leftTalonSensors.getIntegratedSensorPosition(); // average of master and follower?
   }
 
   public double getRightTalonEncoderPostion() {
-    return m_rightDriveTalon.getSensorCollection().getIntegratedSensorPosition(); // average of master and follower?
+    return -m_rightTalonSensors.getIntegratedSensorPosition(); // average of master and follower?
+  }
+
+  public double getAverageRobotEncoderVelocity() {
+    return (-m_leftTalonSensors.getIntegratedSensorVelocity() + m_rightTalonSensors.getIntegratedSensorVelocity()) / 2;
   }
 
   public void setTargetLeftTalonTargetPosition(double targetSteps) {
@@ -254,6 +276,45 @@ public class Drive extends SubsystemBase {
     // steps per rotation
     // steps / 100ms = mps * .1 seconds * steps per rotation / wheel cicumference /
     // gear ratio
+  }
+
+  public double getStepsPerFrameRotation() { // get the number of encoder steps it take the robot to make one full
+                                             // rotation
+    return m_trackwidth * 6.28 / getDistancePerStep();
+  }
+
+  public double getDegreesFrameRotationPerStep() { // get the degrees of robot roation per encoder step
+    return 360 * getDistancePerStep() / (6.28 * m_trackwidth);
+  }
+
+  public double[] getXYTranslationFromEncoderMovement(double rightMovement, double leftMovement,
+      double initialHeading) {
+    // returns translation in [X, Y, Final Heading]
+
+    double degreesOfRotation = Math.abs(leftMovement - rightMovement) * m_degreesFrameRotationPerStep; // the amount of
+                                                                                                       // degrees the
+                                                                                                       // robot rotated
+    double turnRadius = 28.647 * (leftMovement + rightMovement) / degreesOfRotation;
+    // 360 / degreesOfRotation* (leftMovement + rightMovement) / 2 / 2 / 3.14; //
+    // the radius of the turn made by the robot
+    double xRelativeMovement = turnRadius - Math.cos(degreesOfRotation) * turnRadius; // the x translation relative to
+                                                                                      // the initial heading of the
+                                                                                      // robot
+    // x is side to side
+    // left is negative, right is positive
+    double yRelativeMovement = Math.sin(degreesOfRotation) * turnRadius;
+    // y is forward and backward
+
+    if (rightMovement > leftMovement) { // give the x value the proper sign
+      // required because of the absolute value in the degrees of rotation calcualtion
+      xRelativeMovement = -xRelativeMovement;
+    }
+
+    // y is the direction the robot is initially at
+    // x is perpendicular to the robots direction of heading
+    // initial heading of zero is the robots initial direction of travel
+    // the rotation of heading is 0 to 360 in a counterclockwise direction
+    // double yAbsolute =
   }
 
   public double getDistancePerStep() // meters / step

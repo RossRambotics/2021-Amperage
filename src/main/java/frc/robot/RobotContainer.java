@@ -75,6 +75,7 @@ public class RobotContainer {
     JoystickButton yButton = new JoystickButton(m_smallJoystick, 4);
 
     JoystickButton xButton = new JoystickButton(m_smallJoystick, 3);
+    xButton.whenPressed(new frc.robot.commands.AutomatedMotion.AutonomousMovementBase(drive, 2, 2));
 
     JoystickButton aButton = new JoystickButton(m_smallJoystick, 1);
 

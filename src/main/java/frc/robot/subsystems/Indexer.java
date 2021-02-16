@@ -50,13 +50,13 @@ public class Indexer extends SubsystemBase {
 
   /** Creates a new Indexer. */
   public Indexer() {
-
-    // setting default command to check for powercell
-    CommandBase c = new SequentialCommandGroup(new WaitCommand(0.1), new CheckPowercell(this));
-    c.setName("Indexer's DefCMD");
-    this.setDefaultCommand(c);
-
-    this.createShuffleBoardTab();
+    /*
+     * // setting default command to check for powercell CommandBase c = new
+     * SequentialCommandGroup(new WaitCommand(0.1), new CheckPowercell(this));
+     * c.setName("Indexer's DefCMD"); this.setDefaultCommand(c);
+     * 
+     * this.createShuffleBoardTab();
+     */
   }
 
   public void createShuffleBoardTab() {
@@ -83,44 +83,38 @@ public class Indexer extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-
-    // display variables on SmartDashboard
-    boolean b = (m_Sensor_PC_Intake0.getValue() > 10) ? false : true;
-    SmartDashboard.putBoolean("Indexer/Sensor_0_Intake0", b);
-    SmartDashboard.putNumber("Indexer/Sensor_0_Intake Raw", m_Sensor_PC_Intake0.getValue());
-
-    b = (m_Sensor_PC_Index1.getValue() > 10) ? false : true;
-    SmartDashboard.putBoolean("Indexer/Sensor_1_Index1", b);
-
-    b = (m_Sensor_PC_Index2.getValue() > 10) ? false : true;
-    SmartDashboard.putBoolean("Indexer/Sensor_2_Index2", b);
-
-    b = (m_Sensor_PC_Index3.getValue() > 10) ? false : true;
-    SmartDashboard.putBoolean("Indexer/Sensor_3_Index3", b);
-
-    SmartDashboard.putNumber("Indexer/Compact Encoder Top", m_encoderTop.getPosition());
-    SmartDashboard.putNumber("Indexer/Compact Encoder Bottom", m_encoderBottom.getPosition());
-    double Kp = SmartDashboard.getNumber("Indexer/Compact Kp", 0);
-    if (Kp != m_pid_kP) {
-      m_pid_kP = Kp;
-      m_pidControllerTop.setP(m_pid_kP);
-      m_pidControllerBottom.setP(m_pid_kP);
-    }
-
-    m_TopMotorPower = SmartDashboard.getNumber("Indexer/Top Motor Power", 0);
-    m_CompactPower = SmartDashboard.getNumber("Indexer/Compact Power", 0);
-    m_dCompactRotations = SmartDashboard.getNumber("Indexer/Compact Rotations", 0);
-    m_dReverseCompactRotations = SmartDashboard.getNumber("Indexer/Rev Compact Rotations", 0);
-
-    if (m_bReadyToShoot) { // control indexer compaction cylinder
-      m_stopperSolenoid.set(Value.kReverse); // retracts compaction soleoid
-
-    } else {
-      m_stopperSolenoid.set(Value.kForward); // extends retraction solenoid
-
-    }
+  public void periodic() {/*
+                           * // This method will be called once per scheduler run
+                           * 
+                           * // display variables on SmartDashboard boolean b =
+                           * (m_Sensor_PC_Intake0.getValue() > 10) ? false : true;
+                           * SmartDashboard.putBoolean("Indexer/Sensor_0_Intake0", b);
+                           * SmartDashboard.putNumber("Indexer/Sensor_0_Intake Raw",
+                           * m_Sensor_PC_Intake0.getValue());
+                           * 
+                           * b = (m_Sensor_PC_Index1.getValue() > 10) ? false : true;
+                           * SmartDashboard.putBoolean("Indexer/Sensor_1_Index1", b);
+                           * 
+                           * b = (m_Sensor_PC_Index2.getValue() > 10) ? false : true;
+                           * SmartDashboard.putBoolean("Indexer/Sensor_2_Index2", b);
+                           * 
+                           * b = (m_Sensor_PC_Index3.getValue() > 10) ? false : true;
+                           * SmartDashboard.putBoolean("Indexer/Sensor_3_Index3", b);
+                           * 
+                           * SmartDashboard.putNumber("Indexer/Compact Encoder Top",
+                           * m_encoderTop.getPosition());
+                           * SmartDashboard.putNumber("Indexer/Compact Encoder Bottom",
+                           * m_encoderBottom.getPosition()); double Kp =
+                           * SmartDashboard.getNumber("Indexer/Compact Kp", 0); if (Kp != m_pid_kP) {
+                           * m_pid_kP = Kp; m_pidControllerTop.setP(m_pid_kP);
+                           * m_pidControllerBottom.setP(m_pid_kP); }
+                           * 
+                           * m_TopMotorPower = SmartDashboard.getNumber("Indexer/Top Motor Power", 0);
+                           * m_CompactPower = SmartDashboard.getNumber("Indexer/Compact Power", 0);
+                           * m_dCompactRotations = SmartDashboard.getNumber("Indexer/Compact Rotations",
+                           * 0); m_dReverseCompactRotations =
+                           * SmartDashboard.getNumber("Indexer/Rev Compact Rotations", 0);
+                           */
   }
 
   public boolean checkIndexerSensor() {
