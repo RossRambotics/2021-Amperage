@@ -331,6 +331,49 @@ public class Drive extends SubsystemBase {
     return new double[] { yAbsolute, xAbsolute, finalHeading };
   }
 
+  public double[] getXYTranslationFromEncoderGyroMovement(double rightMovement, double leftMovement,
+      double initialHeading, double finalHeading) {
+
+    // becuase I thought this was smart at the time Y is the direction parellel to
+    // the robot, X is perpendiular
+    // returns translation in [Y, X]
+
+    double degreesOfRotation = finalHeading - initialHeading; // the amount of
+                                                              // degrees the
+                                                              // robot rotated
+    double turnRadius = 28.647 * (leftMovement + rightMovement) / degreesOfRotation;
+    // 360 / degreesOfRotation* (leftMovement + rightMovement) / 2 / 2 / 3.14; //
+    // the radius of the turn made by the robot
+    double xRelativeMovement = turnRadius - Math.cos(degreesOfRotation) * turnRadius; // the x translation relative to
+                                                                                      // the initial heading of the
+                                                                                      // robot
+    // x is side to side
+    // left is negative, right is positive
+    double yRelativeMovement = Math.sin(degreesOfRotation) * turnRadius;
+    // y is forward and backward
+
+    if (rightMovement > leftMovement) { // give the x value the proper sign
+      // required because of the absolute value in the degrees of rotation calcualtion
+      xRelativeMovement = -xRelativeMovement;
+    }
+    // Rules:
+    // x is side to side
+    // left is negative, right is positive
+    // y is forward and backward
+    // y is the direction the robot is initially at
+    // x is perpendicular to the robots direction of heading
+    // x is 90 degrees clockwise from the inital heading in the positive direction
+    // x direction equals initialHeading - 90
+    // initial heading of zero is the robots initial direction of travel
+    // the rotation of heading is 0 to 360 in a counterclockwise direction
+    double yAbsolute = Math.cos(initialHeading) * yRelativeMovement + Math.cos(initialHeading - 90) * xRelativeMovement;
+    double xAbsolute = Math.sin(initialHeading) * xRelativeMovement + Math.cos(initialHeading - 90) * yRelativeMovement;
+    // I though about this backward -- x is sin and y is cos in this case
+    // --FACESMACK
+
+    return new double[] { yAbsolute, xAbsolute };
+  }
+
   public double getDistancePerStep() // meters / step
   {
     return m_wheelCircumference * m_gearCoeffiecent / m_stepsPerRotation;
