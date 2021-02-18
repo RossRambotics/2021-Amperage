@@ -33,6 +33,7 @@ import frc.robot.commands.DriveModes.UpdateHandlingCharacteristics;
 import frc.robot.helper.DriveHandlingSetup.DefaultHardSurfaceArcadeDrive;
 import frc.robot.helper.DriveHandlingSetup.DefaultHardSurfaceHandling;
 import frc.robot.helper.DriveHandlingSetup.HandlingBase;
+import frc.robot.helper.DriveHandlingSetup.TestHandling;
 
 public class Drive extends SubsystemBase {
   /** Creates a new Drive. */
@@ -131,6 +132,11 @@ public class Drive extends SubsystemBase {
 
     driveModeSelectCommand = new UpdateHandlingCharacteristics(this, new DefaultHardSurfaceArcadeDrive());
     driveModeSelectCommand.setName("Hard Surface Arcade Default");
+    SmartDashboard.putData(driveModeSelectCommand);
+    driveModeCommands.add(driveModeSelectCommand);
+
+    driveModeSelectCommand = new UpdateHandlingCharacteristics(this, new TestHandling());
+    driveModeSelectCommand.setName("Test Handling");
     SmartDashboard.putData(driveModeSelectCommand);
     driveModeCommands.add(driveModeSelectCommand);
   }
