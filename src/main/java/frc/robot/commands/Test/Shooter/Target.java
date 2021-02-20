@@ -52,7 +52,10 @@ public class Target extends CommandBase {
 
         m_lastAbsoluteEncoderTargetVelocityDifference = 0;
 
-        m_k
+        // updates the PID from shuffleboard
+        m_kp = m_drive.m_handlingValues.getTargettingTurnKP();
+        m_ki = m_drive.m_handlingValues.getTargettingTurnKI();
+        m_kd = m_drive.m_handlingValues.getTargettingTurnKD();
 
         m_timer.start();
         m_timer.reset();
