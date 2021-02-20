@@ -267,6 +267,11 @@ public class Drive extends SubsystemBase {
     return (-m_leftTalonSensors.getIntegratedSensorVelocity() + m_rightTalonSensors.getIntegratedSensorVelocity()) / 2;
   }
 
+  public double getAverageAbsoluteRobotEncoderVelocity() {
+    return (Math.abs(m_leftTalonSensors.getIntegratedSensorVelocity())
+        + Math.abs(m_rightTalonSensors.getIntegratedSensorVelocity())) / 2;
+  }
+
   public void setTargetLeftTalonTargetPosition(double targetSteps) {
     m_leftDriveTalon.set(ControlMode.Position, targetSteps);
   }
