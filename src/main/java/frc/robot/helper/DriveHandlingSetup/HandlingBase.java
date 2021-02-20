@@ -16,6 +16,7 @@ import frc.robot.subsystems.Drive;
 
 // Override getter functions for base values to change handling characteristics of the robot
 // Do not override getter functions for Calculated Values!!!
+// Only override functions ending in InitialValue!
 
 public class HandlingBase { // extend this class to create a unique set of handling characteristics
     public Boolean m_refreshShuffleBoard; // wether or not to refresh the shuffleboard each peroidic loop
@@ -37,11 +38,15 @@ public class HandlingBase { // extend this class to create a unique set of handl
     protected Double m_talonTankDriveKd; // Drive talon default PID KD
 
     protected Double m_angleAdjustmentkP; // the kp for the angle adjustment PIDs
-    protected Double m_angleAdjustmentkI; // the kp for the angle adjustment PIDs
-    protected Double m_angleAdjustmentkD; // the kp for the angle adjustment PIDs
+    protected Double m_angleAdjustmentkI; // the ki for the angle adjustment PIDs
+    protected Double m_angleAdjustmentkD; // the kd for the angle adjustment PIDs
+
+    protected Double m_targettingTurnKP; // the kp for the targetting turn
+    protected Double m_targettingTurnKI; // the ki for the targetting turn
+    protected Double m_targettingTurnKD; // the kd for the targetting turn
 
     protected Double m_straightVelocityControlkP; // the kP for velocity control in a straight line
-    protected Double m_straightVelocityControlkFF; // the kI for velocity control in a straight line
+    protected Double m_straightVelocityControlkI; // the kI for velocity control in a straight line
     protected Double m_straightVelocityControlkD; // the kD for velocity control in a straight line
 
     private Double m_tankFineHandlingCoefficent; // Calculated value
@@ -69,6 +74,10 @@ public class HandlingBase { // extend this class to create a unique set of handl
     private NetworkTableEntry m_striaghtVelocityControlkPEntry; // Network Table Entry for Shuffleboard
     private NetworkTableEntry m_striaghtVelocityControlkFFEntry; // Network Table Entry for Shuffleboard
     private NetworkTableEntry m_striaghtVelocityControlkDEntry; // Network Table Entry for Shuffleboard
+
+    private NetworkTableEntry m_targettingTurnKPEntry; // Network Table Entry for Shuffleboard
+    private NetworkTableEntry m_targettingTurnKIEntry; // Network Table Entry for Shuffleboard
+    private NetworkTableEntry m_targettingTurnKDEntry; // Network Table Entry for Shuffleboard
 
     public HandlingBase() {
         setBaseMemberVariables();
@@ -115,10 +124,17 @@ public class HandlingBase { // extend this class to create a unique set of handl
 
             m_striaghtVelocityControlkPEntry = tab.add("Straight Line Kp", m_straightVelocityControlkP)
                     .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(6, 0).getEntry();
-            m_striaghtVelocityControlkFFEntry = tab.add("Straight Line Kff", m_straightVelocityControlkFF)
+            m_striaghtVelocityControlkFFEntry = tab.add("Straight Line Ki", m_straightVelocityControlkI)
                     .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(6, 1).getEntry();
             m_striaghtVelocityControlkDEntry = tab.add("Straight Line Kd", m_straightVelocityControlkD)
                     .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(6, 2).getEntry();
+
+            m_targettingTurnKPEntry = tab.add("Targetting Turn Kp", m_targettingTurnKP)
+                    .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(7, 1).getEntry();
+            m_targettingTurnKIEntry = tab.add("Targetting Turn Ki", m_targettingTurnKI)
+                    .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(7, 1).getEntry();
+            m_targettingTurnKDEntry = tab.add("Targetting Turn Ki", m_targettingTurnKD)
+                    .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(7, 1).getEntry();
         }
     }
 
@@ -141,8 +157,12 @@ public class HandlingBase { // extend this class to create a unique set of handl
         m_angleAdjustmentkD = getAngleAdjustmentkD();
 
         m_straightVelocityControlkP = getStraightVelocityControlkP();
-        m_straightVelocityControlkFF = getStraightVelocityControlkFF();
+        m_straightVelocityControlkI = getStraightVelocityControlkI();
         m_straightVelocityControlkD = getStraightVelocityControlkD();
+
+        m_targettingTurnKP = getTargettingTurnKP();
+        m_targettingTurnKI = getTargettingTurnKI();
+        m_targettingTurnKD = getTargettingTurnKD();
 
         m_defaultDriveCommandName = getDefaultDriveCommandName();
         m_tabName = getTabName();
@@ -182,8 +202,12 @@ public class HandlingBase { // extend this class to create a unique set of handl
         m_angleAdjustmentkD = m_angleAdjustmentKdEntry.getDouble(m_angleAdjustmentkD);
 
         m_straightVelocityControlkP = m_striaghtVelocityControlkPEntry.getDouble(m_straightVelocityControlkP);
-        m_straightVelocityControlkFF = m_striaghtVelocityControlkFFEntry.getDouble(m_straightVelocityControlkFF);
+        m_straightVelocityControlkI = m_striaghtVelocityControlkFFEntry.getDouble(m_straightVelocityControlkI);
         m_straightVelocityControlkD = m_striaghtVelocityControlkDEntry.getDouble(m_straightVelocityControlkD);
+
+        m_targettingTurnKP = m_targettingTurnKPEntry.getDouble(m_targettingTurnKP);
+        m_targettingTurnKI = m_targettingTurnKIEntry.getDouble(m_targettingTurnKI);
+        m_targettingTurnKD = m_targettingTurnKDEntry.getDouble(m_targettingTurnKD);
 
         setCalculatedMemberVariables(); // must redo the math :(
     }
@@ -268,11 +292,23 @@ public class HandlingBase { // extend this class to create a unique set of handl
         return 0.1;
     }
 
-    protected double getStraightVelocityControlkFFInitailValue() {
+    protected double getStraightVelocityControlkIInitailValue() {
         return 70000000;
     }
 
     protected double getStraightVelocityControlkDInitailValue() {
+        return 0.0;
+    }
+
+    protected double getTargettingTurnKPInitialValue() {
+        return 0.0;
+    }
+
+    protected double getTargettingTurnKIInitialValue() {
+        return 0.0;
+    }
+
+    protected double getTargettingTurnKDInitialValue() {
         return 0.0;
     }
 
@@ -416,12 +452,12 @@ public class HandlingBase { // extend this class to create a unique set of handl
         return getStraightVelocityControlkPInitailValue();
     }
 
-    public double getStraightVelocityControlkFF() {
-        if (m_straightVelocityControlkFF != null) {
-            return m_straightVelocityControlkFF;
+    public double getStraightVelocityControlkI() {
+        if (m_straightVelocityControlkI != null) {
+            return m_straightVelocityControlkI;
         }
 
-        return getStraightVelocityControlkFFInitailValue();
+        return getStraightVelocityControlkIInitailValue();
     }
 
     public double getStraightVelocityControlkD() {
@@ -431,4 +467,29 @@ public class HandlingBase { // extend this class to create a unique set of handl
 
         return getStraightVelocityControlkDInitailValue();
     }
+
+    public double getTargettingTurnKP() {
+        if (m_targettingTurnKP != null) {
+            return m_targettingTurnKP;
+        }
+
+        return getTargettingTurnKPInitialValue();
+    }
+
+    public double getTargettingTurnKI() {
+        if (m_targettingTurnKI != null) {
+            return m_targettingTurnKI;
+        }
+
+        return getTargettingTurnKIInitialValue();
+    }
+
+    public double getTargettingTurnKD() {
+        if (m_targettingTurnKD != null) {
+            return m_targettingTurnKD;
+        }
+
+        return getTargettingTurnKDInitialValue();
+    }
+
 }

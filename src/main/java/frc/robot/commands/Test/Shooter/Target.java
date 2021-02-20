@@ -52,6 +52,8 @@ public class Target extends CommandBase {
 
         m_lastAbsoluteEncoderTargetVelocityDifference = 0;
 
+        m_k
+
         m_timer.start();
         m_timer.reset();
     }

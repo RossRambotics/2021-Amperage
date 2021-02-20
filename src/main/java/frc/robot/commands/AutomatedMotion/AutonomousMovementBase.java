@@ -94,7 +94,7 @@ public class AutonomousMovementBase extends CommandBase {
     }
 
     double pValue = m_drive.m_handlingValues.getStraightVelocityControlkP() * (targetVelocity - currentVelocity);
-    double iValue = m_drive.m_handlingValues.getStraightVelocityControlkFF() * m_straightErrorSum;
+    double iValue = m_drive.m_handlingValues.getStraightVelocityControlkI() * m_straightErrorSum;
 
     double straightValue = pValue + iValue;// - dValue - ffValue;
     /*
