@@ -64,6 +64,8 @@ public class RobotContainer {
     Intake intake = TheRobot.getInstance().m_intake;
     Drive drive = TheRobot.getInstance().m_drive;
     Indexer indexer = TheRobot.getInstance().m_indexer;
+    Shooter shooter = TheRobot.getInstance().m_shooter;
+    Hood hood = TheRobot.getInstance().m_hood;
 
     JoystickButton bButton = new JoystickButton(m_smallJoystick, 2);
     bButton.whenHeld(new frc.robot.commands.Indexer.UnloadIndexer(indexer, intake), true);
@@ -72,13 +74,16 @@ public class RobotContainer {
     yButton.whenPressed(new frc.robot.commands.IntakeRetract(intake), true);
     yButton.whenPressed(new frc.robot.commands.IntakeMotorOff(intake), true);
 
-    JoystickButton rightShoulderButton = new JoystickButton(m_smallJoystick, 6);
-    CommandBase cmd = new SequentialCommandGroup(new frc.robot.commands.Test.Hood.ExtendHood(hood),
-        new frc.robot.commands.Test.Shooter.StartShooter(shooter), new WaitCommand(3),
-        new frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(3),
-        new frc.robot.commands.Test.Shooter.StopShooter(shooter));
-    rightShoulderButton.whenPressed(cmd, true);
-    
+    /*
+     * JoystickButton rightShoulderButton = new JoystickButton(m_smallJoystick, 6);
+     * CommandBase cmd = new SequentialCommandGroup(new
+     * frc.robot.commands.Test.Hood.ExtendHood(hood), new
+     * frc.robot.commands.Test.Shooter.StartShooter(shooter), new WaitCommand(3),
+     * new frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(3), new
+     * frc.robot.commands.Test.Shooter.StopShooter(shooter));
+     * rightShoulderButton.whenPressed(cmd, true);
+     */
+
     JoystickButton xButton = new JoystickButton(m_smallJoystick, 3);
     xButton.whenPressed(new frc.robot.commands.Test.Shooter.Target(drive));
 
