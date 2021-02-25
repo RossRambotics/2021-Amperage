@@ -28,13 +28,17 @@ public class RunArcadeDrive extends CommandBase {
   @Override
   public void execute() {
     if (m_drive.getSmallJoystickLeftShoulder() && m_drive.getSmallJoystickRightShoulder()) {
-      m_drive.arcadeDrive(m_drive.getSmallJoystickX(), m_drive.getSmallJoystickY(), 2);
+      m_drive.arcadeDrive(m_drive.getSmallJoystickX(), m_drive.getSmallJoystickY(), "FullBrake");
     } else if (m_drive.getSmallJoystickLeftShoulder()) {
-      m_drive.arcadeDrive(m_drive.getSmallJoystickX(), m_drive.getSmallJoystickY(), -1);
+      m_drive.arcadeDrive(m_drive.getSmallJoystickX(), m_drive.getSmallJoystickY(), "LeftBrake");
     } else if (m_drive.getSmallJoystickRightShoulder()) {
-      m_drive.arcadeDrive(m_drive.getSmallJoystickX(), m_drive.getSmallJoystickY(), 1);
+      m_drive.arcadeDrive(m_drive.getSmallJoystickX(), m_drive.getSmallJoystickY(), "RightBrake");
+    } else if (m_drive.getSmallJoystickLeftRadialTurnButton()) { // radial turn left
+      m_drive.arcadeDrive(m_drive.getSmallJoystickX(), m_drive.getSmallJoystickY(), "LeftRadial");
+    } else if (m_drive.getSmallJoystickRightRadialTurnButton()) { // radial turn right
+      m_drive.arcadeDrive(m_drive.getSmallJoystickX(), m_drive.getSmallJoystickY(), "RightRadial");
     } else {
-      m_drive.arcadeDrive(m_drive.getSmallJoystickX(), m_drive.getSmallJoystickY(), 0);
+      m_drive.arcadeDrive(m_drive.getSmallJoystickX(), m_drive.getSmallJoystickY(), "Normal");
     }
   }
 

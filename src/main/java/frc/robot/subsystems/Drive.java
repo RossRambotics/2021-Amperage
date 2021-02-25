@@ -138,7 +138,7 @@ public class Drive extends SubsystemBase {
     driveModeCommands.add(driveModeSelectCommand);
 
     driveModeSelectCommand = new UpdateHandlingCharacteristics(this, new TyArcadeDrive());
-    driveModeSelectCommand.setName("TY Arcade Drive");
+    driveModeSelectCommand.setName("Ty Arcade Drive");
     SmartDashboard.putData(driveModeSelectCommand);
     driveModeCommands.add(driveModeSelectCommand);
 
@@ -206,7 +206,7 @@ public class Drive extends SubsystemBase {
     return m_gyro.getAngle();
   }
 
-  public void arcadeDrive(double x, double y, int brakeSide) {
+  public void arcadeDrive(double x, double y, String brakeSide) {
     // brakeSide = -1 stop left, 1 stop right, 0 normal opperation, 2 brake all
     if (Math.abs(x) < m_handlingValues.getArcadeLowTurnZone()) { // adjust to make a fine turning zone
       x = m_handlingValues.getArcadeLowTurnCoefficent() * x; // makes the robot turnable at low speeds
@@ -250,17 +250,23 @@ public class Drive extends SubsystemBase {
      */
 
     switch (brakeSide) {
-      case -1:
+      case "LeftBrake":
         leftSpeed = 0;
         break;
-      case 1:
+      case "RightBrake":
         rightSpeed = 0;
         break;
-      case 2:
+      case "FullBrake":
         rightSpeed = 0;
         leftSpeed = 0;
         break;
-      case 0:
+      case "LeftRadial":
+        leftSpeed = rightSpeed * m_handlingValues.getRadialTurnCoefficent();
+        break;
+      case "RightRadial":
+        rightSpeed = leftSpeed * m_handlingValues.getRadialTurnCoefficent();
+        break;
+      case "Normal":
       default:
     }
 
@@ -496,6 +502,22 @@ public class Drive extends SubsystemBase {
 
   public double getSmallJoystickY() {
     return m_smallJoystick.getY();
+  }
+
+  public boolean getSmallJoystickLeftRadialTurnButton() { // returns a boolean from the trigger axis
+    if (m_smallJoystick.getRawAxis(5) > 0.5) {
+      return true;
+    }
+
+    return false;
+  }
+
+  public boolean getSmallJoystickRightRadialTurnButton() { // returns a boolean from the trigger axis
+    if (m_smallJoystick.getRawAxis(6) > 0.5) {
+      return true;
+    }
+
+    return false;
   }
 
   public boolean getLeftJoystickTrigger() {
