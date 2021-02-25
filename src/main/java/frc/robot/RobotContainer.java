@@ -65,21 +65,16 @@ public class RobotContainer {
     JoystickButton bButton = new JoystickButton(m_smallJoystick, 2);
     bButton.whenHeld(new frc.robot.commands.Indexer.UnloadIndexer(indexer, intake), true);
 
-    /*
-     * JoystickButton rbButton = new JoystickButton(m_smallJoystick, 6);
-     * rbButton.whenPressed(new frc.robot.commands.IntakeExtend(intake), true);
-     * rbButton.whenPressed(new frc.robot.commands.IntakeMotorOn(intake), true);
-     * 
-     * JoystickButton lbButton = new JoystickButton(m_smallJoystick, 5);
-     * lbButton.whenPressed(new frc.robot.commands.IntakeRetract(intake), true);
-     * lbButton.whenPressed(new frc.robot.commands.IntakeMotorOff(intake), true);
-     */
     JoystickButton yButton = new JoystickButton(m_smallJoystick, 4);
+    yButton.whenPressed(new frc.robot.commands.IntakeRetract(intake), true);
+    yButton.whenPressed(new frc.robot.commands.IntakeMotorOff(intake), true);
 
     JoystickButton xButton = new JoystickButton(m_smallJoystick, 3);
     xButton.whenPressed(new frc.robot.commands.Test.Shooter.Target(drive));
 
     JoystickButton aButton = new JoystickButton(m_smallJoystick, 1);
+    aButton.whenPressed(new frc.robot.commands.IntakeExtend(intake), true);
+    aButton.whenPressed(new frc.robot.commands.IntakeMotorOn(intake), true);
 
     JoystickButton selectButton = new JoystickButton(m_smallJoystick, 7);
 
