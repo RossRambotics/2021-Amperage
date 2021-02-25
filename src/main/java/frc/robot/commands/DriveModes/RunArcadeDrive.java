@@ -27,7 +27,15 @@ public class RunArcadeDrive extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_drive.arcadeDrive(m_drive.getSmallJoystickX(), m_drive.getSmallJoystickY());
+    if (m_drive.getSmallJoystickLeftTrigger() && m_drive.getSmallJoystickRightTrigger()) {
+      m_drive.arcadeDrive(m_drive.getSmallJoystickX(), m_drive.getSmallJoystickY(), 2);
+    } else if (m_drive.getSmallJoystickLeftTrigger()) {
+      m_drive.arcadeDrive(m_drive.getSmallJoystickX(), m_drive.getSmallJoystickY(), -1);
+    } else if (m_drive.getSmallJoystickRightTrigger()) {
+      m_drive.arcadeDrive(m_drive.getSmallJoystickX(), m_drive.getSmallJoystickY(), 1);
+    } else {
+      m_drive.arcadeDrive(m_drive.getSmallJoystickX(), m_drive.getSmallJoystickY(), 0);
+    }
   }
 
   // Called once the command ends or is interrupted.

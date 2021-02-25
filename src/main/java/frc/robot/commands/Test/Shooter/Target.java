@@ -1,5 +1,6 @@
 package frc.robot.commands.Test.Shooter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.wpi.first.networktables.NetworkTable;
@@ -14,14 +15,15 @@ public class Target extends CommandBase {
     private Drive m_drive = null;
     private Timer m_timer; // used for calculating rotational velocity
 
-    private double m_deadzoneAngle = 1;// the maximum error that the command will return with
+    private double m_deadzoneAngle = 0.2;// the maximum error that the command will return with
     private double m_kp = 0.1;
     private double m_kd = 0;
     private double m_ki = 0.001;
 
     private double m_targetHeading; // the target position for the robot
     private double m_frameCount;
-    private double m_lastAbsoluteEncoderTargetVelocityDifference;
+    private double m_lastAbsoluteRotationalTargetVelocityDifference;
+    private double m_lastHeading; // the last gyro heading of the robot
     private List<Double> m_errorPointsList; // used for calculating the I value
 
     private NetworkTable m_targettingTable;
@@ -33,6 +35,8 @@ public class Target extends CommandBase {
     public Target(Drive drive) {
         m_drive = drive;
         m_timer = new Timer();
+
+        m_errorPointsList = new ArrayList();
 
         m_targettingTable = NetworkTableInstance.getDefault().getTable("Shuffleboard")
                 .getSubTable("TargettingContours");
@@ -46,11 +50,13 @@ public class Target extends CommandBase {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-        m_targetHeading = m_drive.getPigeonYaw() + m_targetAngleEntry.getDouble(0); // may need to flip the sign of the
-                                                                                    // gyro
+        double currentYaw = m_drive.getGyroYaw();
+        m_targetHeading = currentYaw + m_targetAngleEntry.getDouble(0); // may need to flip the sign of the
+                                                                        // gyro
         m_frameCount = m_frameCounterEntry.getDouble(0); // gets the inital frame count
 
-        m_lastAbsoluteEncoderTargetVelocityDifference = 0;
+        m_lastAbsoluteRotationalTargetVelocityDifference = 0;
+        m_lastHeading = currentYaw;
 
         // updates the PID from shuffleboard
         m_kp = m_drive.m_handlingValues.getTargettingTurnKP();
@@ -64,26 +70,28 @@ public class Target extends CommandBase {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        double relativeTargetHeading = m_targetHeading - m_drive.getPigeonYaw(); // gets the relative target heading
-                                                                                 // based of the last frame aviable
+        double currentYaw = m_drive.getGyroYaw();
+        double relativeTargetHeading = m_targetHeading - currentYaw; // gets the relative target heading
+                                                                     // based of the last frame aviable
         double timeSinceLastLoop = m_timer.get(); // the time since the robot last went through the excute loop
         m_timer.reset();
 
         if (m_frameCount != m_frameCounterEntry.getDouble(0)) { // if the frame count has updated
-            m_targetHeading = m_drive.getPigeonYaw() + m_targetAngleEntry.getDouble(0); // may need to flip the sign of
-                                                                                        // the gyro
+            m_targetHeading = currentYaw + m_targetAngleEntry.getDouble(0); // may need to flip the sign of
+                                                                            // the gyro
             relativeTargetHeading = m_targetAngleEntry.getDouble(0); // the realtive target heading is the target angle
                                                                      // from the robot
         }
 
-        double absoluteEncoderTargetVelocityDifference = (getTargetVelocityFromTargetRelativeHeading(
-                relativeTargetHeading) - m_drive.getAverageAbsoluteRobotEncoderVelocity());
+        double gyroVelocity = (currentYaw - m_lastHeading) / timeSinceLastLoop;
+        double absoluteRotationalVelocityDifference = (getTargetVelocityFromTargetRelativeHeading(relativeTargetHeading)
+                - Math.abs(gyroVelocity));
         // the differnce between the absolute value of the target velocity and the
         // absolute value of the robot's velocity
 
         // calculate rolling sum for the error sum -- avoids accumulation of error from
         // when the relative heading was extreme
-        m_errorPointsList.add(absoluteEncoderTargetVelocityDifference);
+        m_errorPointsList.add(absoluteRotationalVelocityDifference);
         if (m_errorPointsList.size() > 6) { // when the data in the rolling average is too great...
             m_errorPointsList.remove(0); // remove the oldest error point
         }
@@ -92,23 +100,27 @@ public class Target extends CommandBase {
             errorSum = errorSum + m_errorPointsList.get(i);
         }
 
-        double pValue = m_kp * absoluteEncoderTargetVelocityDifference;
+        double pValue = m_kp * absoluteRotationalVelocityDifference;
         double iValue = m_ki * errorSum;
-        double dValue = m_kd
-                * (absoluteEncoderTargetVelocityDifference - m_lastAbsoluteEncoderTargetVelocityDifference); // the
-                                                                                                             // change
-                                                                                                             // in robot
-                                                                                                             // velocity
-                                                                                                             // per time
+        double dValue = m_kd * (absoluteRotationalVelocityDifference - m_lastAbsoluteRotationalTargetVelocityDifference)
+                / timeSinceLastLoop; // the
+        // change
+        // in robot
+        // velocity
+        // per time
         double turnValue = pValue + iValue - dValue; // the power to be set to the motors
 
+        System.out.println("pValue: " + pValue + " dValue: " + dValue + " errorSum: " + iValue);
+        System.out.println("Realtive Target Heading: " + relativeTargetHeading + " GyroVelocity: " + gyroVelocity);
+        System.out.println("Gyro Heading: " + currentYaw + " TargetAngle: " + m_targetAngleEntry.getDouble(0));
         if (relativeTargetHeading > 0) { // may need to flip depending on motor direction
-            m_drive.tankDriveRaw(turnValue, -turnValue);
-        } else {
             m_drive.tankDriveRaw(-turnValue, turnValue);
+        } else {
+            m_drive.tankDriveRaw(turnValue, -turnValue);
         }
 
-        m_lastAbsoluteEncoderTargetVelocityDifference = absoluteEncoderTargetVelocityDifference;
+        m_lastHeading = currentYaw;
+        m_lastAbsoluteRotationalTargetVelocityDifference = absoluteRotationalVelocityDifference;
     }
 
     // Called once the command ends or is interrupted.
@@ -134,15 +146,15 @@ public class Target extends CommandBase {
         return false;
     }
 
-    private double getTargetVelocityFromTargetRelativeHeading(double relativeTargetHeading) {
-        double fastVelocity = 1000;
-        double slowVelocity = 500;
-        double slowZone = 5;
+    private double getTargetVelocityFromTargetRelativeHeading(double relativeTargetHeading) { // degrees /second
+        double fastVelocity = 80;
+        double slowVelocity = 12;
+        double slowZone = 15;
         // inverting to change direction is taken care of in motor power assignment
 
         if (Math.abs(relativeTargetHeading) < slowZone) {
 
-            return slowVelocity + -(fastVelocity - slowVelocity) * relativeTargetHeading / slowZone;
+            return slowVelocity + (fastVelocity - slowVelocity) * Math.abs(relativeTargetHeading) / slowZone;
         }
 
         return fastVelocity;

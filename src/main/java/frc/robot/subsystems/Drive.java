@@ -30,10 +30,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.commands.DriveModes.UpdateHandlingCharacteristics;
-import frc.robot.helper.DriveHandlingSetup.DefaultHardSurfaceArcadeDrive;
-import frc.robot.helper.DriveHandlingSetup.DefaultHardSurfaceHandling;
-import frc.robot.helper.DriveHandlingSetup.HandlingBase;
-import frc.robot.helper.DriveHandlingSetup.TestHandling;
+import frc.robot.helper.DriveHandlingSetup.*;
 
 public class Drive extends SubsystemBase {
   /** Creates a new Drive. */
@@ -44,7 +41,6 @@ public class Drive extends SubsystemBase {
   // per rotation
   // steps / 100ms = mps * .1 seconds * steps per rotation / wheel cicumference /
   // gear ratio
-  private double m_maxVelocity = 20.0; // meters per second
   private double m_velocityCoefficent = 50000.0; // (encoder steps / 100 ms)
   private double m_wheelCircumference = 0.478; // meters - 6 inch diameter
   private double m_gearCoeffiecent = .0933; // 10.71 to 1 falcon rotation to wheel rotation
@@ -113,6 +109,7 @@ public class Drive extends SubsystemBase {
     m_degreesFrameRotationPerStep = getDegreesFrameRotationPerStep();
 
     m_velocityCoefficent = getVelocityCoefficent();
+
     clearTalonEncoders();
     configureTalons();
     setProfileSlot();
@@ -135,10 +132,41 @@ public class Drive extends SubsystemBase {
     SmartDashboard.putData(driveModeSelectCommand);
     driveModeCommands.add(driveModeSelectCommand);
 
-    driveModeSelectCommand = new UpdateHandlingCharacteristics(this, new TestHandling());
-    driveModeSelectCommand.setName("Test Handling");
+    driveModeSelectCommand = new UpdateHandlingCharacteristics(this, new TyTankDrive());
+    driveModeSelectCommand.setName("Ty Tank Drive");
     SmartDashboard.putData(driveModeSelectCommand);
     driveModeCommands.add(driveModeSelectCommand);
+
+    driveModeSelectCommand = new UpdateHandlingCharacteristics(this, new TyArcadeDrive());
+    driveModeSelectCommand.setName("TY Arcade Drive");
+    SmartDashboard.putData(driveModeSelectCommand);
+    driveModeCommands.add(driveModeSelectCommand);
+
+    driveModeSelectCommand = new UpdateHandlingCharacteristics(this, new ChesterTankDrive());
+    driveModeSelectCommand.setName("Chester Tank Drive");
+    SmartDashboard.putData(driveModeSelectCommand);
+    driveModeCommands.add(driveModeSelectCommand);
+
+    driveModeSelectCommand = new UpdateHandlingCharacteristics(this, new AndrewArcadeDrive());
+    driveModeSelectCommand.setName("Andrew Arcade Drive");
+    SmartDashboard.putData(driveModeSelectCommand);
+    driveModeCommands.add(driveModeSelectCommand);
+
+    driveModeSelectCommand = new UpdateHandlingCharacteristics(this, new WillArcadeDrive());
+    driveModeSelectCommand.setName("Will Arcade Drive");
+    SmartDashboard.putData(driveModeSelectCommand);
+    driveModeCommands.add(driveModeSelectCommand);
+
+    driveModeSelectCommand = new UpdateHandlingCharacteristics(this, new WillTankDrive());
+    driveModeSelectCommand.setName("Will Tank Drive");
+    SmartDashboard.putData(driveModeSelectCommand);
+    driveModeCommands.add(driveModeSelectCommand);
+
+    driveModeSelectCommand = new UpdateHandlingCharacteristics(this, new RyanArcadeDrive());
+    driveModeSelectCommand.setName("Ryan Arcade Drive");
+    SmartDashboard.putData(driveModeSelectCommand);
+    driveModeCommands.add(driveModeSelectCommand);
+
   }
 
   @Override
@@ -155,6 +183,8 @@ public class Drive extends SubsystemBase {
   public void tankDrive(double leftSpeed, double rightSpeed) {
     // m_differentialDrive.tankDrive(leftSpeed, rightSpeed); <-Dumb
 
+    m_velocityCoefficent = getVelocityCoefficent();
+
     m_rightDriveTalon.set(ControlMode.Velocity, rightSpeed * m_velocityCoefficent);
     m_leftDriveTalon.set(ControlMode.Velocity, leftSpeed * m_velocityCoefficent);
   }
@@ -164,12 +194,20 @@ public class Drive extends SubsystemBase {
     m_leftDriveTalon.set(ControlMode.PercentOutput, leftSpeed);
   }
 
-  public double getPigeonYaw() {
+  public boolean getSmallJoystickLeftTrigger() {
+    return m_smallJoystick.getRawButton(5);
+  }
+
+  public boolean getSmallJoystickRightTrigger() {
+    return m_smallJoystick.getRawButton(6);
+  }
+
+  public double getGyroYaw() {
     return m_gyro.getAngle();
   }
 
-  public void arcadeDrive(double x, double y) {
-
+  public void arcadeDrive(double x, double y, int brakeSide) {
+    // brakeSide = -1 stop left, 1 stop right, 0 normal opperation, 2 brake all
     if (Math.abs(x) < m_handlingValues.getArcadeLowTurnZone()) { // adjust to make a fine turning zone
       x = m_handlingValues.getArcadeLowTurnCoefficent() * x; // makes the robot turnable at low speeds
     } else {
@@ -203,8 +241,25 @@ public class Drive extends SubsystemBase {
       }
     }
 
+    m_velocityCoefficent = getVelocityCoefficent();
+
     System.out.println("Left Velocity:" + leftSpeed * m_velocityCoefficent * getDistancePerStep() + " Right Velocity:"
         + rightSpeed * m_velocityCoefficent * getDistancePerStep());
+
+    switch (brakeSide) {
+      case -1:
+        leftSpeed = 0;
+        break;
+      case 1:
+        rightSpeed = 0;
+        break;
+      case 2:
+        rightSpeed = 0;
+        leftSpeed = 0;
+        break;
+      case 0:
+      default:
+    }
 
     m_rightDriveTalon.set(ControlMode.Velocity, rightSpeed * m_velocityCoefficent); // sets speeds
     m_leftDriveTalon.set(ControlMode.Velocity, leftSpeed * m_velocityCoefficent);
@@ -282,7 +337,8 @@ public class Drive extends SubsystemBase {
 
   public double getVelocityCoefficent() // gets the scaling factor to translate the joystick input to the velcoity input
   {
-    return (m_maxVelocity * 0.1 * m_stepsPerRotation / m_gearCoeffiecent / m_wheelCircumference);
+    System.out.println(m_handlingValues.getMaxVelocity());
+    return (m_handlingValues.getMaxVelocity() * 0.1 * m_stepsPerRotation / m_gearCoeffiecent / m_wheelCircumference);
     // mps = wheel circumference * gearcoefficent * (steps / 100 ms) * 1000ms /
     // steps per rotation
     // steps / 100ms = mps * .1 seconds * steps per rotation / wheel cicumference /
@@ -393,6 +449,7 @@ public class Drive extends SubsystemBase {
   public double getLeftJoystickY() {
     double y = m_leftLargeJoystick.getY();
 
+    System.out.println(m_handlingValues.getTankFineHandlingMaxVelocity());
     if (Math.abs(y) > m_handlingValues.getTankDeadZone()) { // enforces joystick deadzone
       if (Math.abs(y) < m_handlingValues.getTankFineHandlingZone()) { // low velocity for superior handling
         return m_handlingValues.getTankFineHandlingCoefficent() * y;
@@ -431,7 +488,7 @@ public class Drive extends SubsystemBase {
   }
 
   public double getSmallJoystickX() {
-    return m_smallJoystick.getX();
+    return m_smallJoystick.getRawAxis(4);
   }
 
   public double getSmallJoystickY() {

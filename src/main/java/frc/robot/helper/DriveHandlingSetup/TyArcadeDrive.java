@@ -1,6 +1,6 @@
 package frc.robot.helper.DriveHandlingSetup;
 
-public class DefaultHardSurfaceHandling extends HandlingBase {
+public class TyArcadeDrive extends HandlingBase {
     @Override
     public double getMaxDriveOutputInitialValue() {
         return 0.5;
@@ -8,11 +8,11 @@ public class DefaultHardSurfaceHandling extends HandlingBase {
 
     @Override
     public String getDefaultDriveCommandNameInitialValue() {
-        return "TankDriveHandBrake";
+        return "ArcadeDrive";
     }
 
     @Override
     public String getTabName() {
-        return "A2";
+        return "TAA";
     }
 }

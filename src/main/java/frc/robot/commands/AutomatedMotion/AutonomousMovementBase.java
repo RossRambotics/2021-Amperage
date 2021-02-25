@@ -49,7 +49,7 @@ public class AutonomousMovementBase extends CommandBase {
   public void initialize() {
     m_intialStepsLeft = m_drive.getLeftTalonEncoderPosition();
     m_intialStepsRight = m_drive.getRightTalonEncoderPostion();
-    m_initalYaw = m_drive.getPigeonYaw();
+    m_initalYaw = m_drive.getGyroYaw();
     m_previousYaw = m_initalYaw;
 
     m_targetFinalStepsLeft = m_intialStepsLeft + m_targetMeters / m_drive.getDistancePerStep();
@@ -68,6 +68,7 @@ public class AutonomousMovementBase extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    double currentYaw = m_drive.getGyroYaw();
     double currentDistanceRemaining = ((m_drive.getLeftTalonEncoderPosition() - m_targetFinalStepsLeft)
         + (m_drive.getRightTalonEncoderPostion() - m_targetFinalStepsRight)) / 2;
     double targetVelocity = getTargetVelocityFromDistanceRemaining(currentDistanceRemaining); // velocities in 1 per
@@ -109,7 +110,6 @@ public class AutonomousMovementBase extends CommandBase {
     straightValue = Math.max(-1, straightValue);
 
     // Makes it drive straight
-    double currentYaw = m_drive.getPigeonYaw();
     double secondsSinceLastLoop = m_turnTimer.get();
     m_turnTimer.reset();
     double dCorrection = m_turnKd * (currentYaw - m_previousYaw) / secondsSinceLastLoop; // degrees over seconds

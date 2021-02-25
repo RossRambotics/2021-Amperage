@@ -32,14 +32,14 @@ public class ManualDriveStraight extends CommandBase {
     public void initialize() {
         m_timer.start();
         m_timer.reset(); // start the timer over again
-        m_initalYaw = m_drive.getPigeonYaw();
+        m_initalYaw = m_drive.getGyroYaw();
         m_previousYaw = m_initalYaw; // so it has a reasonable value
     }
 
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        double currentYaw = m_drive.getPigeonYaw();
+        double currentYaw = m_drive.getGyroYaw();
         double secondsSinceLastLoop = m_timer.get(); // gets the loop time
         m_timer.reset();
 

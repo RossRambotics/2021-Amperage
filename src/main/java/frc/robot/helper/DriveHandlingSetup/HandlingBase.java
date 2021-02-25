@@ -29,6 +29,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
     protected Double m_tankDeadZone; // the deadzone in the joysticks for tankdrive
     protected Double m_tankFineHandlingZone; // the zone in the tank drive algorithm dedicated for precise driving
     protected Double m_tankFineHandlingMaxVelocity; // maximum relative velocity avaliable for tank fine handling
+    protected Double m_maxVelocity; // in MPS
 
     protected Double m_arcadeLowTurnZone; // the percentage in the x values of the arcade
     protected Double m_arcadeLowMaxTurn; // percentage of turning wieght avaliable in the arcade low turn zone
@@ -59,6 +60,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
     private NetworkTableEntry m_deadZoneEntry; // Network Table Entry for Shuffleboard
     private NetworkTableEntry m_fineHandlingZoneEntry; // Network Table Entry for Shuffleboard
     private NetworkTableEntry m_fineHandlingMaxVelocityEntry; // Network Table Entry for Shuffleboard
+    private NetworkTableEntry m_maxVelocityEntry; // Network Table Entry for Shuffleboard
 
     private NetworkTableEntry m_arcadeLowTurnZoneEntry; // Network Table Entry for Shuffleboard
     private NetworkTableEntry m_arcadeLowMaxTurnEntry; // Network Table Entry for Shuffleboard
@@ -86,7 +88,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
     }
 
     private void createShuffleBoardTab() {
-        ShuffleboardTab tab = Shuffleboard.getTab("Sub.Handling " + m_tabName);
+        ShuffleboardTab tab = Shuffleboard.getTab(m_tabName);
 
         if (tab.getComponents().size() == 0) {// if the tab is not populated alredy
             m_maxDriveOutputEntry = tab.add("Max Power", m_maxDriveOutput).withWidget(BuiltInWidgets.kNumberSlider)
@@ -94,12 +96,14 @@ public class HandlingBase { // extend this class to create a unique set of handl
             m_deadZoneEntry = tab.add("Tank Dead Zone", m_tankDeadZone).withWidget(BuiltInWidgets.kNumberSlider)
                     .withSize(2, 1).withProperties(Map.of("min", -1, "max", 1)).withPosition(0, 1).getEntry();
             m_fineHandlingZoneEntry = tab.add("Tank Fine Handling Zone", m_tankFineHandlingZone)
-                    .withWidget(BuiltInWidgets.kNumberSlider).withSize(2, 1).withProperties(Map.of("min", -1, "max", 1))
-                    .withPosition(0, 2).getEntry();
+                    .withWidget(BuiltInWidgets.kNumberSlider).withSize(2, 1)
+                    .withProperties(Map.of("min", -0.99, "max", 0.99)).withPosition(0, 2).getEntry();
             m_fineHandlingMaxVelocityEntry = tab
                     .add("Tank Fine Handling Max Relative Velocity", m_tankFineHandlingMaxVelocity)
                     .withWidget(BuiltInWidgets.kNumberSlider).withSize(2, 1).withProperties(Map.of("min", -1, "max", 1))
                     .withPosition(0, 3).getEntry();
+            m_maxVelocityEntry = tab.add("Max Velocity", m_maxVelocity).withWidget(BuiltInWidgets.kTextView)
+                    .withSize(1, 1).withPosition(2, 2).getEntry();
 
             m_arcadeLowMaxTurnEntry = tab.add("Arcade Drive Low Turn Max Power", m_arcadeLowMaxTurn)
                     .withWidget(BuiltInWidgets.kNumberSlider).withSize(2, 1).withProperties(Map.of("min", -1, "max", 1))
@@ -130,11 +134,11 @@ public class HandlingBase { // extend this class to create a unique set of handl
                     .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(6, 2).getEntry();
 
             m_targettingTurnKPEntry = tab.add("Targetting Turn Kp", m_targettingTurnKP)
-                    .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(7, 1).getEntry();
+                    .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(7, 0).getEntry();
             m_targettingTurnKIEntry = tab.add("Targetting Turn Ki", m_targettingTurnKI)
                     .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(7, 1).getEntry();
-            m_targettingTurnKDEntry = tab.add("Targetting Turn Ki", m_targettingTurnKD)
-                    .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(7, 1).getEntry();
+            m_targettingTurnKDEntry = tab.add("Targetting Turn Kd", m_targettingTurnKD)
+                    .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(7, 2).getEntry();
         }
     }
 
@@ -144,6 +148,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
         m_tankDeadZone = getTankDeadZone();
         m_tankFineHandlingZone = getTankFineHandlingZone();
         m_tankFineHandlingMaxVelocity = getTankFineHandlingMaxVelocity();
+        m_maxVelocity = getMaxVelocity();
 
         m_arcadeLowMaxTurn = getArcadeLowMaxTurn();
         m_arcadeLowTurnZone = getArcadeLowTurnZone();
@@ -189,6 +194,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
         m_tankDeadZone = m_deadZoneEntry.getDouble(m_tankDeadZone);
         m_tankFineHandlingZone = m_fineHandlingZoneEntry.getDouble(m_tankFineHandlingZone);
         m_tankFineHandlingMaxVelocity = m_fineHandlingMaxVelocityEntry.getDouble(m_tankFineHandlingMaxVelocity);
+        m_maxVelocity = m_maxVelocityEntry.getDouble(20);
 
         m_arcadeLowMaxTurn = m_arcadeLowMaxTurnEntry.getDouble(m_arcadeLowMaxTurn);
         m_arcadeLowTurnZone = m_arcadeLowTurnZoneEntry.getDouble(m_arcadeLowTurnZone);
@@ -252,6 +258,10 @@ public class HandlingBase { // extend this class to create a unique set of handl
         return 0.2;
     }
 
+    protected double getMaxVelocityInitalValue() {
+        return 20;
+    }
+
     protected double getArcadeLowMaxTurnInitialValue() {
         return 0.25;
     }
@@ -301,11 +311,11 @@ public class HandlingBase { // extend this class to create a unique set of handl
     }
 
     protected double getTargettingTurnKPInitialValue() {
-        return 0.0;
+        return 0.03;
     }
 
     protected double getTargettingTurnKIInitialValue() {
-        return 0.0;
+        return 0.002;
     }
 
     protected double getTargettingTurnKDInitialValue() {
@@ -350,6 +360,14 @@ public class HandlingBase { // extend this class to create a unique set of handl
         }
 
         return getTankFineHandlingMaxVelocityInitialValue();
+    }
+
+    public double getMaxVelocity() {
+        if (m_maxVelocity != null) {
+            return m_maxVelocity;
+        }
+
+        return getMaxVelocityInitalValue();
     }
 
     public double getArcadeLowMaxTurn() {

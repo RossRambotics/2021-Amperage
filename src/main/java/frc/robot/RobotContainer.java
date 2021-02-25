@@ -60,18 +60,20 @@ public class RobotContainer {
   private void configureButtonBindings() {
     Intake intake = TheRobot.getInstance().m_intake;
     Drive drive = TheRobot.getInstance().m_drive;
+    Indexer indexer = TheRobot.getInstance().m_indexer;
 
     JoystickButton bButton = new JoystickButton(m_smallJoystick, 2);
-    bButton.whenHeld(new frc.robot.commands.IntakeReverse(intake), true);
+    bButton.whenHeld(new frc.robot.commands.Indexer.UnloadIndexer(indexer, intake), true);
 
-    JoystickButton rbButton = new JoystickButton(m_smallJoystick, 6);
-    rbButton.whenPressed(new frc.robot.commands.IntakeExtend(intake), true);
-    rbButton.whenPressed(new frc.robot.commands.IntakeMotorOn(intake), true);
-
-    JoystickButton lbButton = new JoystickButton(m_smallJoystick, 5);
-    lbButton.whenPressed(new frc.robot.commands.IntakeRetract(intake), true);
-    lbButton.whenPressed(new frc.robot.commands.IntakeMotorOff(intake), true);
-
+    /*
+     * JoystickButton rbButton = new JoystickButton(m_smallJoystick, 6);
+     * rbButton.whenPressed(new frc.robot.commands.IntakeExtend(intake), true);
+     * rbButton.whenPressed(new frc.robot.commands.IntakeMotorOn(intake), true);
+     * 
+     * JoystickButton lbButton = new JoystickButton(m_smallJoystick, 5);
+     * lbButton.whenPressed(new frc.robot.commands.IntakeRetract(intake), true);
+     * lbButton.whenPressed(new frc.robot.commands.IntakeMotorOff(intake), true);
+     */
     JoystickButton yButton = new JoystickButton(m_smallJoystick, 4);
 
     JoystickButton xButton = new JoystickButton(m_smallJoystick, 3);

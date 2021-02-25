@@ -23,7 +23,7 @@ public class TrackMotionGyro extends CommandBase {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-        m_initialHeading = m_drive.getPigeonYaw();
+        m_initialHeading = m_drive.getGyroYaw();
         m_currentHeading = m_initialHeading;
 
         m_currentLeftSteps = m_drive.getLeftTalonEncoderPosition();
@@ -37,7 +37,7 @@ public class TrackMotionGyro extends CommandBase {
 
         if (newRightSteps != m_currentRightSteps) { // only runs if the encoders have updated
             double newLeftSteps = m_drive.getLeftTalonEncoderPosition();
-            double newHeading = m_drive.getPigeonYaw();
+            double newHeading = m_drive.getGyroYaw();
 
             double[] relativePosition = m_drive.getXYTranslationFromEncoderGyroMovement(
                     newRightSteps - m_currentRightSteps, newLeftSteps - m_currentLeftSteps, m_currentHeading,
