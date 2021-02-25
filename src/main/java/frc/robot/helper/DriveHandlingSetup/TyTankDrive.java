@@ -1,6 +1,6 @@
 package frc.robot.helper.DriveHandlingSetup;
 
-public class DefaultHardSurfaceHandling extends HandlingBase {
+public class TyTankDrive extends HandlingBase {
     @Override
     public double getMaxDriveOutputInitialValue() {
         return 0.5;
@@ -12,7 +12,17 @@ public class DefaultHardSurfaceHandling extends HandlingBase {
     }
 
     @Override
+    protected double getTankFineHandlingMaxVelocityInitialValue() {
+        return 0.15;
+    }
+
+    @Override
     public String getTabName() {
-        return "A2";
+        return "TAT";
+    }
+
+    @Override
+    public double getMaxVelocityInitialValue() {
+        return 13;
     }
 }

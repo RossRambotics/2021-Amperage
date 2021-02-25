@@ -13,6 +13,6 @@ public class DefaultHardSurfaceArcadeDrive extends HandlingBase {
 
     @Override
     public String getTabName() {
-        return "HardSurfaceDefault";
+        return "A3";
     }
 }

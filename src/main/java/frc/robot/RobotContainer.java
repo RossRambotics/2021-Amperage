@@ -63,20 +63,14 @@ public class RobotContainer {
   private void configureButtonBindings() {
     Intake intake = TheRobot.getInstance().m_intake;
     Drive drive = TheRobot.getInstance().m_drive;
-    Shooter shooter = TheRobot.getInstance().m_shooter;
-    Hood hood = TheRobot.getInstance().m_hood;
     Indexer indexer = TheRobot.getInstance().m_indexer;
 
-    // JoystickButton bButton = new JoystickButton(m_smallJoystick, 2);
-    // bButton.whenHeld(new frc.robot.commands.IntakeReverse(intake), true);
+    JoystickButton bButton = new JoystickButton(m_smallJoystick, 2);
+    bButton.whenHeld(new frc.robot.commands.Indexer.UnloadIndexer(indexer, intake), true);
 
-    // JoystickButton rbButton = new JoystickButton(m_smallJoystick, 6);
-    // rbButton.whenPressed(new frc.robot.commands.IntakeExtend(intake), true);
-    // rbButton.whenPressed(new frc.robot.commands.IntakeMotorOn(intake), true);
-
-    // JoystickButton lbButton = new JoystickButton(m_smallJoystick, 5);
-    // lbButton.whenPressed(new frc.robot.commands.IntakeRetract(intake), true);
-    // lbButton.whenPressed(new frc.robot.commands.IntakeMotorOff(intake), true);
+    JoystickButton yButton = new JoystickButton(m_smallJoystick, 4);
+    yButton.whenPressed(new frc.robot.commands.IntakeRetract(intake), true);
+    yButton.whenPressed(new frc.robot.commands.IntakeMotorOff(intake), true);
 
     JoystickButton rightShoulderButton = new JoystickButton(m_smallJoystick, 6);
     CommandBase cmd = new SequentialCommandGroup(new frc.robot.commands.Test.Hood.ExtendHood(hood),
@@ -84,10 +78,14 @@ public class RobotContainer {
         new frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(3),
         new frc.robot.commands.Test.Shooter.StopShooter(shooter));
     rightShoulderButton.whenPressed(cmd, true);
-
-    JoystickButton yButton = new JoystickButton(m_smallJoystick, 4);
+    
     JoystickButton xButton = new JoystickButton(m_smallJoystick, 3);
+    xButton.whenPressed(new frc.robot.commands.Test.Shooter.Target(drive));
+
     JoystickButton aButton = new JoystickButton(m_smallJoystick, 1);
+    aButton.whenPressed(new frc.robot.commands.IntakeExtend(intake), true);
+    aButton.whenPressed(new frc.robot.commands.IntakeMotorOn(intake), true);
+
     JoystickButton selectButton = new JoystickButton(m_smallJoystick, 7);
     JoystickButton startButton = new JoystickButton(m_smallJoystick, 8);
 
