@@ -194,11 +194,11 @@ public class Drive extends SubsystemBase {
     m_leftDriveTalon.set(ControlMode.PercentOutput, leftSpeed);
   }
 
-  public boolean getSmallJoystickLeftTrigger() {
+  public boolean getSmallJoystickLeftShoulder() {
     return m_smallJoystick.getRawButton(5);
   }
 
-  public boolean getSmallJoystickRightTrigger() {
+  public boolean getSmallJoystickRightShoulder() {
     return m_smallJoystick.getRawButton(6);
   }
 
@@ -502,8 +502,16 @@ public class Drive extends SubsystemBase {
     return m_leftLargeJoystick.getRawButton(1);
   }
 
-  public boolean getrightJoystickTrigger() {
+  public boolean getRightJoystickTrigger() {
     return m_rightLargeJoystick.getRawButton(1);
+  }
+
+  public boolean getLeftJoystickRadialTurnButton() {
+    return m_leftLargeJoystick.getRawButton(3);
+  }
+
+  public boolean getRightJoystickRadialTurnButton() {
+    return m_rightLargeJoystick.getRawButton(5);
   }
 
   public void updateHandlingBase(HandlingBase base) {

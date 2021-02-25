@@ -28,14 +28,20 @@ public class RunTankDriveHandBrake extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (m_drive.getrightJoystickTrigger() && m_drive.getLeftJoystickTrigger()) {
+    if (m_drive.getRightJoystickTrigger() && m_drive.getLeftJoystickTrigger()) { // handbrake full stop
       m_drive.tankDrive(0.0, 0.0);
-    } else if (m_drive.getLeftJoystickTrigger()) {
+    } else if (m_drive.getLeftJoystickTrigger()) { // handbrake stop left
       m_drive.tankDrive(0.0, m_drive.getRightJoystickY());
-    } else if (m_drive.getrightJoystickTrigger()) {
+    } else if (m_drive.getRightJoystickTrigger()) { // handbrake stop right
       m_drive.tankDrive(m_drive.getLeftJoystickY(), 0.0);
+    } else if (m_drive.getLeftJoystickRadialTurnButton()) { // radial turn left
+      m_drive.tankDrive(m_drive.getLeftJoystickY() * m_drive.m_handlingValues.getRadialTurnCoefficent(),
+          m_drive.getRightJoystickY());
+    } else if (m_drive.getRightJoystickRadialTurnButton()) { // radial turn right
+      m_drive.tankDrive(m_drive.getLeftJoystickY(),
+          m_drive.getRightJoystickY() * m_drive.m_handlingValues.getRadialTurnCoefficent());
     } else {
-      m_drive.tankDrive(m_drive.getLeftJoystickY(), m_drive.getRightJoystickY());
+      m_drive.tankDrive(m_drive.getLeftJoystickY(), m_drive.getRightJoystickY()); // normal
     }
   }
 
