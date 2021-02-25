@@ -261,6 +261,7 @@ public class Drive extends SubsystemBase {
         leftSpeed = 0;
         break;
       case "LeftRadial":
+        System.out.println("leftSpeed: " + leftSpeed + " rightSpeed: " + rightSpeed);
         leftSpeed = rightSpeed * m_handlingValues.getRadialTurnCoefficent();
         break;
       case "RightRadial":
@@ -505,7 +506,7 @@ public class Drive extends SubsystemBase {
   }
 
   public boolean getSmallJoystickLeftRadialTurnButton() { // returns a boolean from the trigger axis
-    if (m_smallJoystick.getRawAxis(5) > 0.5) {
+    if (m_smallJoystick.getRawAxis(2) > 0.5) {
       return true;
     }
 
@@ -513,7 +514,7 @@ public class Drive extends SubsystemBase {
   }
 
   public boolean getSmallJoystickRightRadialTurnButton() { // returns a boolean from the trigger axis
-    if (m_smallJoystick.getRawAxis(6) > 0.5) {
+    if (m_smallJoystick.getRawAxis(3) > 0.5) {
       return true;
     }
 

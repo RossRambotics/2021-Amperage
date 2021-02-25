@@ -124,7 +124,6 @@ public class HandlingBase { // extend this class to create a unique set of handl
                     .withWidget(BuiltInWidgets.kNumberSlider).withSize(2, 1).withProperties(Map.of("min", 0, "max", 1))
                     .withPosition(2, 2).getEntry();
 
-
             m_talonTankDriveKpEntry = tab.add("Talon Tank Kp", m_talonTankDriveKp).withWidget(BuiltInWidgets.kTextView)
                     .withSize(1, 1).withPosition(4, 0).getEntry();
             m_talonTankDriveKiEntry = tab.add("Talon Tank Ki", m_talonTankDriveKi).withWidget(BuiltInWidgets.kTextView)
@@ -281,7 +280,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
     }
 
     protected double getRadialTurnCoefficentInitalValue() {
-        return 0.2;
+        return 0.05;
     }
 
     protected double getArcadeLowMaxTurnInitialValue() {
@@ -425,7 +424,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
             return m_arcadeHighMaxTurnCoefficent;
         }
 
-        return m_arcadeHighMaxTurnCoefficent;
+        return getArcadeHighMaxTurnCoefficentInitalValue();
     }
 
     public double getArcadeLowTurnCoefficent() {
