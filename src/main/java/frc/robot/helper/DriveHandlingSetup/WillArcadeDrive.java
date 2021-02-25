@@ -17,17 +17,17 @@ public class WillArcadeDrive extends HandlingBase {
     }
 
     @Override
-    public double getMaxVelocity() {
+    public double getMaxVelocityInitialValue() {
         return 7;
     }
 
     @Override
-    public double getArcadeLowTurnCoefficent() {
+    public double getArcadeLowMaxTurnInitialValue() {
         return 0.15;
     }
 
     @Override
-    public double getArcadeLowTurnZone() {
+    public double getArcadeLowTurnZoneInitialValue() {
         return 0.9;
     }
 }

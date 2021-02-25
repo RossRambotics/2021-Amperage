@@ -30,6 +30,8 @@ public class HandlingBase { // extend this class to create a unique set of handl
     protected Double m_tankFineHandlingZone; // the zone in the tank drive algorithm dedicated for precise driving
     protected Double m_tankFineHandlingMaxVelocity; // maximum relative velocity avaliable for tank fine handling
     protected Double m_maxVelocity; // in MPS
+    protected Double m_arcadeHighMaxTurnCoefficent; // maximum turn relative to the high max turn;
+                                                    // 1 = full turn is max; 0 = low turn is max;
 
     protected Double m_arcadeLowTurnZone; // the percentage in the x values of the arcade
     protected Double m_arcadeLowMaxTurn; // percentage of turning wieght avaliable in the arcade low turn zone
@@ -64,6 +66,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
 
     private NetworkTableEntry m_arcadeLowTurnZoneEntry; // Network Table Entry for Shuffleboard
     private NetworkTableEntry m_arcadeLowMaxTurnEntry; // Network Table Entry for Shuffleboard
+    private NetworkTableEntry m_arcadeHighMaxTurnCoefficentEntry; // Network Table Entry for Shuffleboard
 
     private NetworkTableEntry m_talonTankDriveKpEntry; // Network Table Entry for Shuffleboard
     private NetworkTableEntry m_talonTankDriveKiEntry; // Network Table Entry for Shuffleboard
@@ -109,8 +112,8 @@ public class HandlingBase { // extend this class to create a unique set of handl
                     .withWidget(BuiltInWidgets.kNumberSlider).withSize(2, 1).withProperties(Map.of("min", -1, "max", 1))
                     .withPosition(2, 0).getEntry();
             m_arcadeLowTurnZoneEntry = tab.add("Arcade Drive Low Turn Zone", m_arcadeLowTurnZone)
-                    .withWidget(BuiltInWidgets.kNumberSlider).withSize(2, 1).withProperties(Map.of("min", -1, "max", 1))
-                    .withPosition(2, 1).getEntry();
+                    .withWidget(BuiltInWidgets.kNumberSlider).withSize(2, 1)
+                    .withProperties(Map.of("min", -0.99, "max", 0.99)).withPosition(2, 1).getEntry();
 
             m_talonTankDriveKpEntry = tab.add("Talon Tank Kp", m_talonTankDriveKp).withWidget(BuiltInWidgets.kTextView)
                     .withSize(1, 1).withPosition(4, 0).getEntry();
@@ -152,6 +155,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
 
         m_arcadeLowMaxTurn = getArcadeLowMaxTurn();
         m_arcadeLowTurnZone = getArcadeLowTurnZone();
+        m_arcadeHighMaxTurnCoefficent = getArcadeHighMaxTurnCoefficent();
 
         m_talonTankDriveKp = getTalonTankDriveKp();
         m_talonTankDriveKi = getTalonTankDriveKi();
@@ -180,7 +184,8 @@ public class HandlingBase { // extend this class to create a unique set of handl
                 / (1 - m_tankFineHandlingZone);
 
         m_arcadeLowTurnCoefficent = m_arcadeLowMaxTurn / m_arcadeLowTurnZone;
-        m_arcadeHighTurnCoefficent = (1 - m_arcadeLowMaxTurn) / (1 - m_arcadeLowTurnZone);
+        m_arcadeHighTurnCoefficent = m_arcadeHighMaxTurnCoefficent * (1 - m_arcadeLowMaxTurn)
+                / (1 - m_arcadeLowTurnZone);
     }
 
     public void refreshNetworkTablesValues() // refreshes values to the ones from network tables -> defaults must be
@@ -198,6 +203,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
 
         m_arcadeLowMaxTurn = m_arcadeLowMaxTurnEntry.getDouble(m_arcadeLowMaxTurn);
         m_arcadeLowTurnZone = m_arcadeLowTurnZoneEntry.getDouble(m_arcadeLowTurnZone);
+        m_arcadeHighMaxTurnCoefficent = m_arcadeHighMaxTurnCoefficentEntry.getDouble(m_arcadeHighMaxTurnCoefficent);
 
         m_talonTankDriveKp = m_talonTankDriveKpEntry.getDouble(m_talonTankDriveKp);
         m_talonTankDriveKi = m_talonTankDriveKiEntry.getDouble(m_talonTankDriveKi);
@@ -258,12 +264,16 @@ public class HandlingBase { // extend this class to create a unique set of handl
         return 0.2;
     }
 
-    protected double getMaxVelocityInitalValue() {
+    protected double getMaxVelocityInitialValue() {
         return 20;
     }
 
     protected double getArcadeLowMaxTurnInitialValue() {
         return 0.25;
+    }
+
+    protected double getArcadeHighMaxTurnCoefficentInitalValue() {
+        return 1;
     }
 
     protected double getArcadeLowTurnZoneInitialValue() {
@@ -367,7 +377,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
             return m_maxVelocity;
         }
 
-        return getMaxVelocityInitalValue();
+        return getMaxVelocityInitialValue();
     }
 
     public double getArcadeLowMaxTurn() {
@@ -384,6 +394,14 @@ public class HandlingBase { // extend this class to create a unique set of handl
         }
 
         return getArcadeLowTurnZoneInitialValue();
+    }
+
+    public double getArcadeHighMaxTurnCoefficent() {
+        if (m_arcadeHighMaxTurnCoefficent != null) {
+            return m_arcadeHighMaxTurnCoefficent;
+        }
+
+        return m_arcadeHighMaxTurnCoefficent;
     }
 
     public double getArcadeLowTurnCoefficent() {

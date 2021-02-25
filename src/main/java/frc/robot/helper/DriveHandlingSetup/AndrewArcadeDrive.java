@@ -12,7 +12,7 @@ public class AndrewArcadeDrive extends HandlingBase {
     }
 
     @Override
-    public double getMaxVelocity() {
+    protected double getMaxVelocityInitialValue() {
         return 7;
     }
 
@@ -22,12 +22,12 @@ public class AndrewArcadeDrive extends HandlingBase {
     }
 
     @Override
-    public double getArcadeLowMaxTurn() {
+    public double getArcadeLowMaxTurnInitialValue() {
         return .15;
     }
 
     @Override
-    public double getArcadeLowTurnZone() {
+    public double getArcadeLowTurnZoneInitialValue() {
         return 0.9;
     }
 }

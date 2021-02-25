@@ -243,8 +243,11 @@ public class Drive extends SubsystemBase {
 
     m_velocityCoefficent = getVelocityCoefficent();
 
-    System.out.println("Left Velocity:" + leftSpeed * m_velocityCoefficent * getDistancePerStep() + " Right Velocity:"
-        + rightSpeed * m_velocityCoefficent * getDistancePerStep());
+    /*
+     * System.out.println("Left Velocity:" + leftSpeed * m_velocityCoefficent *
+     * getDistancePerStep() + " Right Velocity:" + rightSpeed * m_velocityCoefficent
+     * * getDistancePerStep());
+     */
 
     switch (brakeSide) {
       case -1:
