@@ -42,7 +42,7 @@ public class Shooter extends SubsystemBase {
   private double m_RPM_target = 5000;
   private double m_RPM_target_range = 100;
 
-  private double m_pid_kIz, m_pid_kFF;
+  private double m_pid_kIz, m_dpid_kFF;
   private double m_dpid_kI_Modified = .00001;
   private double m_pid_kMaxOutput, m_pid_kMinOutput, m_pid_maxRPM;
   private boolean m_bTuning = false;
@@ -53,6 +53,7 @@ public class Shooter extends SubsystemBase {
   private NetworkTableEntry m_pid_kP = null;
   private NetworkTableEntry m_pid_kI = null;
   private NetworkTableEntry m_pid_kD = null;
+  private NetworkTableEntry m_pid_kFF = null;
 
   private double m_dLowPortRPM = 500;
   private boolean m_bToggleLowPort = false;
@@ -81,8 +82,8 @@ public class Shooter extends SubsystemBase {
     // m_dpid_kI_Modified = setModifiedk.(m_RPM_target, m_pid_kI);
     // m_pid_kD = 0.50;
     m_pid_kIz = 0;
-    m_pid_kFF = 6e-5;
-    m_pid_kMaxOutput = 1;
+    m_dpid_kFF = 0;
+    m_pid_kMaxOutput = 0.8;
     m_pid_kMinOutput = -1;
     m_pid_maxRPM = 5700;
 
@@ -91,7 +92,7 @@ public class Shooter extends SubsystemBase {
     // m_pidController.setI(m_pid_kI);
     // m_pidController.setD(m_pid_kD);
     m_pidController.setIZone(m_pid_kIz);
-    m_pidController.setFF(m_pid_kFF);
+    m_pidController.setFF(m_dpid_kFF);
     m_pidController.setOutputRange(m_pid_kMinOutput, m_pid_kMaxOutput);
 
     m_lookUpTable = new ShooterLookUp();
@@ -102,7 +103,7 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putNumber("Shooter/I Gain Modified", m_dpid_kI_Modified);
     // SmartDashboard.putNumber("Shooter/D Gain", m_pid_kD);
     SmartDashboard.putNumber("Shooter/I Zone", m_pid_kIz);
-    SmartDashboard.putNumber("Shooter/Feed Forward", m_pid_kFF);
+    SmartDashboard.putNumber("Shooter/Feed Forward", m_dpid_kFF);
     SmartDashboard.putNumber("Shooter/Max Output", m_pid_kMaxOutput);
     SmartDashboard.putNumber("Shooter/Min Output", m_pid_kMinOutput);
     SmartDashboard.putBoolean("Shooter/Tuning Mode", m_bTuning);
@@ -133,11 +134,13 @@ public class Shooter extends SubsystemBase {
     m_actualRPM = m_shuffleboardTab.add("Shooter Actual RPM", 4000).withWidget(BuiltInWidgets.kGraph)
         .withProperties(Map.of("Visible time", 10)).withSize(4, 4).withPosition(2, 1).getEntry();
 
-    m_pid_kP = m_shuffleboardTab.add("P Gain ", 1e-4).withSize(2, 1).withPosition(6, 0).getEntry();
+    m_pid_kP = m_shuffleboardTab.add("P Gain ", 2.0e-5).withSize(2, 1).withPosition(6, 0).getEntry();
 
-    m_pid_kI = m_shuffleboardTab.add("I Gain", 1.75e-7).withSize(2, 1).withPosition(6, 1).getEntry();
+    m_pid_kI = m_shuffleboardTab.add("I Gain", 1.0e-9).withSize(2, 1).withPosition(6, 1).getEntry();
 
-    m_pid_kD = m_shuffleboardTab.add("D Gain", 0.50).withSize(2, 1).withPosition(6, 2).getEntry();
+    m_pid_kD = m_shuffleboardTab.add("D Gain", 0).withSize(2, 1).withPosition(6, 2).getEntry();
+
+    m_pid_kFF = m_shuffleboardTab.add("FF Gain", 1.75e-4).withSize(2, 1).withPosition(6, 3).getEntry();
 
   }
 
@@ -274,6 +277,9 @@ public class Shooter extends SubsystemBase {
 
     double i = m_pid_kI.getDouble(0);
     m_pidController.setI(i);
+
+    double ff = m_pid_kFF.getDouble(0);
+    m_pidController.setFF(ff);
 
     m_pidController.setReference(velocity, ControlType.kVelocity);
     TheRobot.log("Shooter ready RPM_target:" + TheRobot.toString(velocity));

@@ -122,12 +122,8 @@ public class Indexer extends SubsystemBase {
   }
 
   public void shoot() {
-
-  }
-
-  public void reverse() {
-    m_topMotor.set(-0.2);
-    m_btmMotor.set(-0.2);
+    m_topMotor.set(0.30);
+    m_btmMotor.set(0.30);
   }
 
   public void advance() {
