@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.XboxController;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.IntakeReverse;
@@ -78,10 +79,10 @@ public class RobotContainer {
     // lbButton.whenPressed(new frc.robot.commands.IntakeMotorOff(intake), true);
 
     JoystickButton rightShoulderButton = new JoystickButton(m_smallJoystick, 6);
-    CommandBase cmd = new frc.robot.commands.Test.Hood.ExtendHood(hood);
-    cmd.andThen(new frc.robot.commands.Test.Shooter.StartShooter(shooter));
-    cmd.andThen(new WaitCommand(1));
-    cmd.andThen(new frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(2));
+    CommandBase cmd = new SequentialCommandGroup(new frc.robot.commands.Test.Hood.ExtendHood(hood),
+        new frc.robot.commands.Test.Shooter.StartShooter(shooter), new WaitCommand(3),
+        new frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(3),
+        new frc.robot.commands.Test.Shooter.StopShooter(shooter));
     rightShoulderButton.whenPressed(cmd, true);
 
     JoystickButton yButton = new JoystickButton(m_smallJoystick, 4);

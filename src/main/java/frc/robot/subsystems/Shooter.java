@@ -83,7 +83,7 @@ public class Shooter extends SubsystemBase {
     // m_pid_kD = 0.50;
     m_pid_kIz = 0;
     m_dpid_kFF = 0;
-    m_pid_kMaxOutput = 1;
+    m_pid_kMaxOutput = 0.8;
     m_pid_kMinOutput = -1;
     m_pid_maxRPM = 5700;
 
@@ -134,13 +134,13 @@ public class Shooter extends SubsystemBase {
     m_actualRPM = m_shuffleboardTab.add("Shooter Actual RPM", 4000).withWidget(BuiltInWidgets.kGraph)
         .withProperties(Map.of("Visible time", 10)).withSize(4, 4).withPosition(2, 1).getEntry();
 
-    m_pid_kP = m_shuffleboardTab.add("P Gain ", 3.64e-6).withSize(2, 1).withPosition(6, 0).getEntry();
+    m_pid_kP = m_shuffleboardTab.add("P Gain ", 2.0e-5).withSize(2, 1).withPosition(6, 0).getEntry();
 
     m_pid_kI = m_shuffleboardTab.add("I Gain", 1.0e-9).withSize(2, 1).withPosition(6, 1).getEntry();
 
     m_pid_kD = m_shuffleboardTab.add("D Gain", 0).withSize(2, 1).withPosition(6, 2).getEntry();
 
-    m_pid_kFF = m_shuffleboardTab.add("FF Gain", 1.95e-4).withSize(2, 1).withPosition(6, 3).getEntry();
+    m_pid_kFF = m_shuffleboardTab.add("FF Gain", 1.75e-4).withSize(2, 1).withPosition(6, 3).getEntry();
 
   }
 
