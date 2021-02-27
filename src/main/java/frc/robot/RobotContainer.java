@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.XboxController;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -48,8 +49,8 @@ public class RobotContainer {
     // Configure the button bindings
 
     m_smallJoystick = new Joystick(2); // leave as 2
-    // m_leftLargeJoystick = new Joystick(1);
-    // m_rightLargeJoystick = new Joystick(0);
+    m_leftLargeJoystick = new Joystick(1);
+    m_rightLargeJoystick = new Joystick(0);
 
     configureButtonBindings();
   }
@@ -74,18 +75,16 @@ public class RobotContainer {
     yButton.whenPressed(new frc.robot.commands.IntakeRetract(intake), true);
     yButton.whenPressed(new frc.robot.commands.IntakeMotorOff(intake), true);
 
-    /*
-     * JoystickButton rightShoulderButton = new JoystickButton(m_smallJoystick, 6);
-     * CommandBase cmd = new SequentialCommandGroup(new
-     * frc.robot.commands.Test.Hood.ExtendHood(hood), new
-     * frc.robot.commands.Test.Shooter.StartShooter(shooter), new WaitCommand(3),
-     * new frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(3), new
-     * frc.robot.commands.Test.Shooter.StopShooter(shooter));
-     * rightShoulderButton.whenPressed(cmd, true);
-     */
+    JoystickButton rightShoulderButton = new JoystickButton(m_smallJoystick, 6);
+    CommandBase cmd = new SequentialCommandGroup(new frc.robot.commands.Test.Hood.ExtendHood(hood),
+        new ParallelCommandGroup(new frc.robot.commands.Test.Shooter.StartShooter(shooter),
+            new frc.robot.commands.Test.Shooter.Target(drive)),
+        new WaitCommand(3), new frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(3),
+        new frc.robot.commands.Test.Shooter.StopShooter(shooter));
+    // rightShoulderButton.whenPressed(cmd, true);
 
     JoystickButton xButton = new JoystickButton(m_smallJoystick, 3);
-    xButton.whenPressed(new frc.robot.commands.Test.Shooter.Target(drive));
+    xButton.whenPressed(cmd);
 
     JoystickButton aButton = new JoystickButton(m_smallJoystick, 1);
     aButton.whenPressed(new frc.robot.commands.IntakeExtend(intake), true);
@@ -95,12 +94,13 @@ public class RobotContainer {
     JoystickButton startButton = new JoystickButton(m_smallJoystick, 8);
 
     if (m_leftLargeJoystick != null) {
-
       JoystickButton leftTopForwardButton = new JoystickButton(m_leftLargeJoystick, 3);
       leftTopForwardButton.whileHeld(new ManualDriveStraight(drive, 1));
     }
 
-    if (m_rightLargeJoystick != null) {
+    if (m_rightLargeJoystick != null)
+
+    {
       JoystickButton rightTopForwardButton = new JoystickButton(m_rightLargeJoystick, 3);
       rightTopForwardButton.whileHeld(new ManualDriveStraight(drive, 0));
     }

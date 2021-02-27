@@ -20,6 +20,8 @@ public class Target extends CommandBase {
     private double m_kd = 0;
     private double m_ki = 0.001;
 
+    private double m_creepBackPower = -0.03;
+
     private double m_targetHeading; // the target position for the robot
     private double m_frameCount;
     private double m_lastAbsoluteRotationalTargetVelocityDifference;
@@ -77,8 +79,9 @@ public class Target extends CommandBase {
         m_timer.reset();
 
         if (m_frameCount != m_frameCounterEntry.getDouble(0)) { // if the frame count has updated
+            m_frameCount = m_frameCounterEntry.getDouble(0); // updates the new frame count
             m_targetHeading = currentYaw + m_targetAngleEntry.getDouble(0); // may need to flip the sign of
-                                                                            // the gyro
+            // the gyro
             relativeTargetHeading = m_targetAngleEntry.getDouble(0); // the realtive target heading is the target angle
                                                                      // from the robot
         }
@@ -114,9 +117,9 @@ public class Target extends CommandBase {
         System.out.println("Realtive Target Heading: " + relativeTargetHeading + " GyroVelocity: " + gyroVelocity);
         System.out.println("Gyro Heading: " + currentYaw + " TargetAngle: " + m_targetAngleEntry.getDouble(0));
         if (relativeTargetHeading > 0) { // may need to flip depending on motor direction
-            m_drive.tankDriveRaw(-turnValue, turnValue);
+            m_drive.tankDriveRaw(-turnValue - m_creepBackPower, turnValue - m_creepBackPower);
         } else {
-            m_drive.tankDriveRaw(turnValue, -turnValue);
+            m_drive.tankDriveRaw(turnValue - m_creepBackPower, -turnValue - m_creepBackPower);
         }
 
         m_lastHeading = currentYaw;

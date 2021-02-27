@@ -25,4 +25,9 @@ public class WillTankDrive extends HandlingBase {
     public double getMaxVelocityInitialValue() {
         return 7;
     }
+
+    @Override
+    protected double getRadialTurnCoefficentInitalValue() {
+        return 0.1;
+    }
 }

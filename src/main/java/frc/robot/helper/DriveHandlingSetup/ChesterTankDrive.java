@@ -1,6 +1,9 @@
 package frc.robot.helper.DriveHandlingSetup;
 
+import frc.robot.subsystems.Drive;
+
 public class ChesterTankDrive extends HandlingBase {
+
     @Override
     public double getMaxDriveOutputInitialValue() {
         return 0.5;
@@ -19,5 +22,10 @@ public class ChesterTankDrive extends HandlingBase {
     @Override
     public String getTabName() {
         return "CPT";
+    }
+
+    @Override
+    protected double getRadialTurnCoefficentInitalValue() {
+        return 0.1;
     }
 }

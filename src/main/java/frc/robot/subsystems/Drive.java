@@ -19,6 +19,7 @@ import org.opencv.core.Mat;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
@@ -63,6 +64,7 @@ public class Drive extends SubsystemBase {
 
   // private PigeonIMU m_pigeon; // replaced by ADXRS450 gyro
   private ADXRS450_Gyro m_gyro; // the gyro in the SPI port
+  private PowerDistributionPanel m_PDP; // the PDP
 
   private String m_driveProfileSlot = "StraightDrive";
 
@@ -105,6 +107,8 @@ public class Drive extends SubsystemBase {
     // -- replaced
     m_gyro = new ADXRS450_Gyro();
     m_gyro.reset();
+
+    m_PDP = new PowerDistributionPanel(30);
 
     m_degreesFrameRotationPerStep = getDegreesFrameRotationPerStep();
 
@@ -173,6 +177,7 @@ public class Drive extends SubsystemBase {
   public void periodic() {
     m_handlingValues.refreshNetworkTablesValues();
     // configureTalons();
+
   }
 
   @Override
@@ -283,7 +288,7 @@ public class Drive extends SubsystemBase {
     m_rightDriveTalonFollower.getSensorCollection().setIntegratedSensorPosition(0, 100);
   }
 
-  private void configureTalons() {
+  public void configureTalons() {
     m_leftTalonConfig.peakOutputForward = m_handlingValues.getMaxDriveOutput(); // configures the peak outputs
     m_leftTalonConfig.peakOutputReverse = -m_handlingValues.getMaxDriveOutput();
     m_rightTalonConfig.peakOutputForward = m_handlingValues.getMaxDriveOutput();
@@ -530,11 +535,15 @@ public class Drive extends SubsystemBase {
   }
 
   public boolean getLeftJoystickRadialTurnButton() {
-    return m_leftLargeJoystick.getRawButton(3);
+    return m_leftLargeJoystick.getRawButton(4);
   }
 
   public boolean getRightJoystickRadialTurnButton() {
     return m_rightLargeJoystick.getRawButton(5);
+  }
+
+  public double getPDPVoltage() {
+    return m_PDP.getVoltage();
   }
 
   public void updateHandlingBase(HandlingBase base) {

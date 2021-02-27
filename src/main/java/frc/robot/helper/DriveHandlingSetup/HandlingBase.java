@@ -74,6 +74,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
     private NetworkTableEntry m_talonTankDriveKpEntry; // Network Table Entry for Shuffleboard
     private NetworkTableEntry m_talonTankDriveKiEntry; // Network Table Entry for Shuffleboard
     private NetworkTableEntry m_talonTankDriveKdEntry; // Network Table Entry for Shuffleboard
+    private NetworkTableEntry m_updateTalonConfigEntry; // Network Table Entry for Shuffleboard
 
     private NetworkTableEntry m_angleAdjustmentKpEntry; // Network Table Entry for Shuffleboard
     private NetworkTableEntry m_angleAdjustmentKiEntry; // Network Table Entry for Shuffleboard
@@ -109,7 +110,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
                     .withWidget(BuiltInWidgets.kNumberSlider).withSize(2, 1).withProperties(Map.of("min", 0, "max", 1))
                     .withPosition(0, 3).getEntry();
             m_maxVelocityEntry = tab.add("Max Velocity", m_maxVelocity).withWidget(BuiltInWidgets.kTextView)
-                    .withSize(1, 1).withPosition(4, 3).getEntry();
+                    .withSize(1, 1).withPosition(5, 3).getEntry();
             m_radialTurnCoefficentEntry = tab.add("Radial Turn Coefficent", m_radialTurnCoefficent)
                     .withWidget(BuiltInWidgets.kNumberSlider).withSize(2, 1).withProperties(Map.of("min", 0, "max", 1))
                     .withPosition(2, 3).getEntry();

@@ -25,4 +25,9 @@ public class TyTankDrive extends HandlingBase {
     public double getMaxVelocityInitialValue() {
         return 13;
     }
+
+    @Override
+    protected double getRadialTurnCoefficentInitalValue() {
+        return 0.1;
+    }
 }

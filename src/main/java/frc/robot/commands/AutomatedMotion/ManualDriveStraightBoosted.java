@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.Drive;
 
-public class ManualDriveStraight extends CommandBase {
+public class ManualDriveStraightBoosted extends CommandBase {
     @SuppressWarnings({ "PMD.UnusedPrivateField", "PMD.SingularField" })
 
     private final Drive m_drive;
@@ -20,7 +20,10 @@ public class ManualDriveStraight extends CommandBase {
     private double m_Ki = 0.02;
     private double m_Kd = 0.0013;
 
-    public ManualDriveStraight(Drive drive, double callingJoystick) { // calling joystick corrosponds to port number
+    private double m_boostCoefficent = .35; // relates the PDP volate to the max power the boost function can use
+
+    public ManualDriveStraightBoosted(Drive drive, double callingJoystick) { // calling joystick corrosponds to port
+                                                                             // number
         m_callingJoystick = callingJoystick;
         m_drive = drive;
         addRequirements(drive);
@@ -39,7 +42,6 @@ public class ManualDriveStraight extends CommandBase {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        System.out.println("Straight Drive");
         double currentYaw = m_drive.getGyroYaw();
         double secondsSinceLastLoop = m_timer.get(); // gets the loop time
         m_timer.reset();
@@ -54,44 +56,49 @@ public class ManualDriveStraight extends CommandBase {
         // if this value is negative speed up left motor or slow right
         // note both motors and joystcicks are inverted ;)
 
-        double joystickValue = 0;
+        double maxPower = m_drive.getPDPVoltage() * m_boostCoefficent;
+        double joystickValue = 0; // used to find the direction of movement
         if (m_callingJoystick == 0) {
             joystickValue = m_drive.getRightJoystickY();
         } else {
             joystickValue = m_drive.getLeftJoystickY();
         }
 
-        if (joystickValue == 0) { // adds deadzone to prevent the bot from moving while stopped
+        if (joystickValue > 0) {
+            maxPower = -maxPower;
+        }
+
+        if (maxPower == 0) { // adds deadzone to prevent the bot from moving while stopped
             return;
         }
 
-        if (joystickValue > 0) { // if the robot is moving backward
+        if (maxPower > 0) { // if the robot is moving backward
             if (totalCorrection > 0) {
-                double leftValue = joystickValue + totalCorrection;
+                double leftValue = maxPower + totalCorrection;
                 leftValue = Math.min(1, leftValue); // ensure the values are in the range
                 leftValue = Math.max(-1, leftValue);
 
-                m_drive.tankDrive(leftValue, joystickValue);// if total correction is positive slow left
+                m_drive.tankDrive(leftValue, maxPower);// if total correction is positive slow left
             } else {
-                double rightValue = joystickValue - totalCorrection;
+                double rightValue = maxPower - totalCorrection;
                 rightValue = Math.min(1, rightValue); // ensure the values are in the range
                 rightValue = Math.max(-1, rightValue);
 
-                m_drive.tankDrive(joystickValue, rightValue);// if total correction is positive slow right
+                m_drive.tankDrive(maxPower, rightValue);// if total correction is positive slow right
             }
         } else { // if the robot is moving forward
             if (totalCorrection > 0) {
-                double leftValue = joystickValue + totalCorrection;
+                double leftValue = maxPower + totalCorrection;
                 leftValue = Math.min(1, leftValue); // ensure the values are in the range
                 leftValue = Math.max(-1, leftValue);
 
-                m_drive.tankDrive(leftValue, joystickValue);// if total correction is positive slow left
+                m_drive.tankDrive(leftValue, maxPower);// if total correction is positive slow left
             } else {
-                double rightValue = joystickValue - totalCorrection;
+                double rightValue = maxPower - totalCorrection;
                 rightValue = Math.min(1, rightValue); // ensure the values are in the range
                 rightValue = Math.max(-1, rightValue);
 
-                m_drive.tankDrive(joystickValue, rightValue);// if total correction is positive slow right
+                m_drive.tankDrive(maxPower, rightValue);// if total correction is positive slow right
             }
         }
 
