@@ -145,8 +145,8 @@ public class Drive extends SubsystemBase {
     SmartDashboard.putData(driveModeSelectCommand);
     driveModeCommands.add(driveModeSelectCommand);
 
-    driveModeSelectCommand = new UpdateHandlingCharacteristics(this, new TyArcadeDrive());
-    driveModeSelectCommand.setName("Ty Arcade Drive");
+    driveModeSelectCommand = new UpdateHandlingCharacteristics(this, new DerekTankDrive());
+    driveModeSelectCommand.setName("Derek Tank Drive");
     SmartDashboard.putData(driveModeSelectCommand);
     driveModeCommands.add(driveModeSelectCommand);
 
@@ -170,7 +170,7 @@ public class Drive extends SubsystemBase {
     SmartDashboard.putData(driveModeSelectCommand);
     driveModeCommands.add(driveModeSelectCommand);
 
-    driveModeSelectCommand = new UpdateHandlingCharacteristics(this, new RyanArcadeDrive());
+    driveModeSelectCommand = new UpdateHandlingCharacteristics(this, new RyanTankDrive());
     driveModeSelectCommand.setName("Ryan Arcade Drive");
     SmartDashboard.putData(driveModeSelectCommand);
     driveModeCommands.add(driveModeSelectCommand);

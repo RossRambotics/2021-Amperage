@@ -2,7 +2,7 @@ package frc.robot.helper.DriveHandlingSetup;
 
 import frc.robot.subsystems.Drive;
 
-public class TyArcadeDrive extends HandlingBase {
+public class RyanTankDrive extends HandlingBase {
 
     @Override
     public double getMaxDriveOutputInitialValue() {
@@ -11,11 +11,21 @@ public class TyArcadeDrive extends HandlingBase {
 
     @Override
     public String getDefaultDriveCommandNameInitialValue() {
-        return "ArcadeDrive";
+        return "TankDriveHandBrake";
+    }
+
+    @Override
+    protected double getTankFineHandlingMaxVelocityInitialValue() {
+        return 0.1;
     }
 
     @Override
     public String getTabName() {
-        return "TAA";
+        return "RWT";
+    }
+
+    @Override
+    public double getMaxVelocityInitialValue() {
+        return 7;
     }
 }

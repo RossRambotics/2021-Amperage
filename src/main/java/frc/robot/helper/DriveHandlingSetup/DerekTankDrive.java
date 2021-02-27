@@ -1,9 +1,6 @@
 package frc.robot.helper.DriveHandlingSetup;
 
-import frc.robot.subsystems.Drive;
-
-public class RyanArcadeDrive extends HandlingBase {
-
+public class DerekTankDrive extends HandlingBase {
     @Override
     public double getMaxDriveOutputInitialValue() {
         return 0.5;
@@ -16,16 +13,21 @@ public class RyanArcadeDrive extends HandlingBase {
 
     @Override
     protected double getTankFineHandlingMaxVelocityInitialValue() {
-        return 0.1;
+        return 0.15;
     }
 
     @Override
     public String getTabName() {
-        return "RAD";
+        return "DMT";
     }
 
     @Override
     public double getMaxVelocityInitialValue() {
-        return 7;
+        return 13;
+    }
+
+    @Override
+    protected double getRadialTurnCoefficentInitalValue() {
+        return 0.08;
     }
 }
