@@ -237,6 +237,17 @@ public class Hood extends SubsystemBase {
     TheRobot.log("Hood target position: " + position);
   }
 
+  public void extendToTarget() {
+    m_extended = true;
+
+    // double angle = m_dTargetAngle.getDouble(0);
+    double angle = m_lookUpTable.getCurrentValues(true).hoodAngle;
+    double position = angle * Hood.kRotationsPerDegree;
+    m_pidController.setReference(position, ControlType.kPosition);
+    TheRobot.log("Hood target angle: " + angle);
+    TheRobot.log("Hood target position: " + position);
+  }
+
   public void stop() {
     // stops the shooter motors
     m_motorHood.set(0);
