@@ -25,8 +25,8 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.ControlType;
 import frc.robot.TheRobot;
-import frc.robot.helper.ShooterLookUp;
-import frc.robot.helper.ShooterValueSet;
+import frc.robot.helper.Targetting.ShooterLookUp;
+import frc.robot.helper.Targetting.ShooterValueSet;
 import frc.robot.Robot;
 
 public class Shooter extends SubsystemBase {

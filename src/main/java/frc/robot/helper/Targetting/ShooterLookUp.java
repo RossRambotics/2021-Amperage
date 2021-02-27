@@ -6,30 +6,37 @@ import java.util.List;
 import java.util.Map;
 
 import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class ShooterLookUp // changes distance to speed and hood angle
 {
-    private Double distanceFactor = 1.0; // allows for easy minor adjustments of shooter if needed (multiplier)
-    private NetworkTableInstance ntInst = null;
-    private NetworkTable ntTble = null;
-    private Map<Double, ShooterValueSet> valueTable = null; // table that assocaited distance to hood and speed values
-    private List<Double> keyArray = null;
+    private Double m_distanceFactor = 1.0; // allows for easy minor adjustments of shooter if needed (multiplier)
+    private NetworkTable m_targettingTable = null;
+    private Map<Double, ShooterValueSet> m_valueTable = null; // table that assocaited distance to hood and speed values
+    private List<Double> m_keyArray = null;
+    private NetworkTableEntry m_frameCounterEntry;
+    private NetworkTableEntry m_targetAngleEntry;
+    private NetworkTableEntry m_targetFoundEntry;
+    private NetworkTableEntry m_targetDistanceEntry;
 
     public ShooterLookUp() {
-        ntInst = NetworkTableInstance.getDefault();
-        ntTble = ntInst.getTable("ContourTable"); // gets the networktable where the target information is stored
-        ntTble.getEntry("TargetDistanceTest").setDouble(3.5);
+        m_targettingTable = NetworkTableInstance.getDefault().getTable("Shuffleboard")
+                .getSubTable("TargettingContours");
+        // m_targettingTable.getEntry("TargetDistanceTest").setDouble(3.5);
 
-        keyArray = new ArrayList<Double>();
-        valueTable = new HashMap<Double, ShooterValueSet>();
+        m_frameCounterEntry = m_targettingTable.getEntry("FrameCounter");
+        m_targetAngleEntry = m_targettingTable.getEntry("TargetAngle");
+        m_targetFoundEntry = m_targettingTable.getEntry("TargetFound");
+        m_targetDistanceEntry = m_targettingTable.getEntry("TargetDistance");
+
+        m_keyArray = new ArrayList<Double>();
+        m_valueTable = new HashMap<Double, ShooterValueSet>();
 
         fillTableVaules();
     }
 
-    private void fillTableVaules() // adds the key value pairs to the lookup table <KEY, HoodAngle, ShooterRPM>
-    {
-
+    private void fillTableVaules() { // adds the key value pairs to the lookup table <KEY, HoodAngle, ShooterRPM>
         addTableValue(2.5, 22.0, 4200.0);
         addTableValue(3.6, 30.0, 4200.0);
         addTableValue(5.5, 35.0, 5000.0);
@@ -37,32 +44,33 @@ public class ShooterLookUp // changes distance to speed and hood angle
         addTableValue(4.2, 33.0, 4400.0);
         addTableValue(4.7, 33.7, 4500.0);
         addTableValue(5.85, 32.5, 4500.0);
-
     }
 
     public boolean isTargetFound() {
-        boolean isFound = ntTble.getEntry("TargetFound").getBoolean(false);
+        return m_targetFoundEntry.getBoolean(false);
+    }
 
-        return isFound;
+    public NetworkTableEntry getTargetFoundEntry() {
+        return m_targetFoundEntry;
+    }
 
+    public NetworkTableEntry getTargetAngleEntry() {
+        return m_targetAngleEntry;
+    }
+
+    public NetworkTableEntry getFrameCounterEntry() {
+        return m_frameCounterEntry;
     }
 
     public double getTargetAngle() {
-        double d = ntTble.getEntry("TargetAngle").getDouble(0);
-
-        return d;
+        return m_targetAngleEntry.getDouble(0);
     }
-    // final NetworkTableInstance networkTableInstance =
-    // NetworkTableInstance.create();
-    // networkTableInstance.startClient("10.32.1.105");
-    // System.out.println("Network Tables Connected? " +
-    // Boolean.toString(networkTableInstance.isConnected()));
 
     private void addTableValue(Double Key, Double HoodAngle, Double ShooterSpeed) // appedns a set of values to the look
                                                                                   // up table system
     {
-        valueTable.put(Key, new ShooterValueSet(HoodAngle, ShooterSpeed));
-        keyArray.add(Key);
+        m_valueTable.put(Key, new ShooterValueSet(HoodAngle, ShooterSpeed));
+        m_keyArray.add(Key);
     }
 
     public ShooterValueSet getCurrentValues(Boolean Interpolate) // gets the hood and shooter speed values; interpolate
@@ -70,7 +78,7 @@ public class ShooterLookUp // changes distance to speed and hood angle
     {
         // -- remove line below & comment when value table is complete Double
         // distanceFromTarget = ntTble.getEntry("TargetDistance").getDouble(0);
-        Double distanceFromTarget = ntTble.getEntry("TargetDistance").getDouble(3.5);
+        Double distanceFromTarget = m_targetDistanceEntry.getDouble(3.5);
 
         if (Interpolate) {
             ShooterValueKey positveValueKey = findClosestPostiveKey(distanceFromTarget);
@@ -79,8 +87,8 @@ public class ShooterLookUp // changes distance to speed and hood angle
             return interpolate(positveValueKey, negativeValueKey);
         }
 
-        ShooterValueKey valueKey = findClosestKey(distanceFromTarget * distanceFactor);
-        return valueTable.get(valueKey.key); // returns the values that match the key
+        ShooterValueKey valueKey = findClosestKey(distanceFromTarget * m_distanceFactor);
+        return m_valueTable.get(valueKey.key); // returns the values that match the key
     }
 
     public ShooterValueSet getCustomValues(Double Distance, Boolean Interpolate) // interpolate ~ if true finds values
@@ -94,13 +102,13 @@ public class ShooterLookUp // changes distance to speed and hood angle
         }
 
         ShooterValueKey valueKey = findClosestKey(Distance);
-        return valueTable.get(valueKey.key); // returns the values that match the key
+        return m_valueTable.get(valueKey.key); // returns the values that match the key
     }
 
     private ShooterValueKey findClosestKey(Double Distance) {
         ShooterValueKey closestKey = new ShooterValueKey(0.0, -1.0); // the keys that is the closest to the distance
 
-        for (Double key : keyArray) // goes through each key and find the differnce between the key and distance
+        for (Double key : m_keyArray) // goes through each key and find the differnce between the key and distance
         {
             if (((Math.abs(Distance - key) < closestKey.devationFromDistance)) | closestKey.devationFromDistance < 0) {
                 closestKey.devationFromDistance = Math.abs(Distance - key);
@@ -115,7 +123,7 @@ public class ShooterLookUp // changes distance to speed and hood angle
     {
         ShooterValueKey closestKey = new ShooterValueKey(0.0, -1.0); // the key that is the closest to the distance
 
-        for (Double key : keyArray) // goes through each key and find the differnce between the key and distance
+        for (Double key : m_keyArray) // goes through each key and find the differnce between the key and distance
         {
             if ((((Distance - key <= 0) && (Math.abs(Distance - key) < closestKey.devationFromDistance))
                     | closestKey.devationFromDistance < 0)) {
@@ -132,7 +140,7 @@ public class ShooterLookUp // changes distance to speed and hood angle
         ShooterValueKey closestKey = new ShooterValueKey(0.0, -1.0); // the key that is the closest but nearer than the
                                                                      // distance
 
-        for (Double key : keyArray) // goes through each key and find the differnce between the key and distance
+        for (Double key : m_keyArray) // goes through each key and find the differnce between the key and distance
         {
             if ((((Distance - key >= 0) && (Math.abs(Distance - key) < closestKey.devationFromDistance))
                     | closestKey.devationFromDistance < 0)) {
@@ -150,8 +158,8 @@ public class ShooterLookUp // changes distance to speed and hood angle
         Double weight1 = Key2.devationFromDistance / (Key1.devationFromDistance + Key2.devationFromDistance);
         Double weight2 = 1 - weight1; // creates the weights for taking a wieghed average
 
-        ShooterValueSet valueSet1 = valueTable.get(Key1.key);
-        ShooterValueSet valueSet2 = valueTable.get(Key2.key);
+        ShooterValueSet valueSet1 = m_valueTable.get(Key1.key);
+        ShooterValueSet valueSet2 = m_valueTable.get(Key2.key);
 
         double hoodAngle = takeweightedAverage(valueSet1.hoodAngle, valueSet2.hoodAngle, weight1, weight2);
         double shooterRPM = takeweightedAverage(valueSet1.shooterRPM, valueSet2.shooterRPM, weight1, weight2);
@@ -167,8 +175,6 @@ public class ShooterLookUp // changes distance to speed and hood angle
     }
 
     public double getFrameCounter() {
-        double d = ntTble.getEntry("FrameCounter").getDouble(0);
-
-        return d;
+        return m_frameCounterEntry.getDouble(0);
     }
 }

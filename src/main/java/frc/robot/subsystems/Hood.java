@@ -25,15 +25,14 @@ import com.revrobotics.CANPIDController;
 import com.revrobotics.ControlType;
 
 import frc.robot.TheRobot;
-import frc.robot.helper.ShooterLookUp;
-import frc.robot.helper.ShooterValueSet;
+import frc.robot.helper.Targetting.ShooterLookUp;
+import frc.robot.helper.Targetting.ShooterValueSet;
 import frc.robot.Robot;
 
 public class Hood extends SubsystemBase {
   private CANSparkMax m_motorHood = null;
   private CANEncoder m_encoderHood = null;
   private CANPIDController m_pidController = null;
-
   private ShooterLookUp m_lookUpTable = null; // look up table for shooter values
 
   private boolean m_extended = false;
@@ -230,7 +229,8 @@ public class Hood extends SubsystemBase {
   public void extend() {
     m_extended = true;
 
-    double angle = m_dTargetAngle.getDouble(0);
+    // double angle = m_dTargetAngle.getDouble(0);
+    double angle = m_lookUpTable.getCurrentValues(true).hoodAngle;
     double position = angle * Hood.kRotationsPerDegree;
     m_pidController.setReference(position, ControlType.kPosition);
     TheRobot.log("Hood target angle: " + angle);

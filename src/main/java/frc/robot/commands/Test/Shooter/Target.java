@@ -40,11 +40,9 @@ public class Target extends CommandBase {
 
         m_errorPointsList = new ArrayList();
 
-        m_targettingTable = NetworkTableInstance.getDefault().getTable("Shuffleboard")
-                .getSubTable("TargettingContours");
-        m_targetAngleEntry = m_targettingTable.getEntry("TargetAngle");
-        m_targetFoundEntry = m_targettingTable.getEntry("TargetFound");
-        m_frameCounterEntry = m_targettingTable.getEntry("FrameCounter");
+        m_targetAngleEntry = m_drive.m_shooterLookUpTable.getTargetAngleEntry();
+        m_targetFoundEntry = m_drive.m_shooterLookUpTable.getTargetFoundEntry();
+        m_frameCounterEntry = m_drive.m_shooterLookUpTable.getFrameCounterEntry();
 
         this.addRequirements(drive);
     }

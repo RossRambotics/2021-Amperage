@@ -31,12 +31,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.commands.DriveModes.UpdateHandlingCharacteristics;
+import frc.robot.helper.Targetting.ShooterLookUp;
 import frc.robot.helper.DriveHandlingSetup.*;
 
 public class Drive extends SubsystemBase {
   /** Creates a new Drive. */
 
   public HandlingBase m_handlingValues;
+  public ShooterLookUp m_shooterLookUpTable;
 
   // mps = wheel circumference * gearcoefficent * (steps / 100ms) * 1000ms / steps
   // per rotation
@@ -70,7 +72,7 @@ public class Drive extends SubsystemBase {
 
   public Drive(HandlingBase base) {
     m_handlingValues = base;
-    System.out.println(base.getMaxDriveOutput());
+    System.out.println("MaxDrive: " + base.getMaxDriveOutput());
 
     // Joysticks
     m_rightLargeJoystick = new Joystick(0);
@@ -109,6 +111,8 @@ public class Drive extends SubsystemBase {
     m_gyro.reset();
 
     m_PDP = new PowerDistributionPanel(30);
+
+    m_shooterLookUpTable = new ShooterLookUp();
 
     m_degreesFrameRotationPerStep = getDegreesFrameRotationPerStep();
 

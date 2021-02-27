@@ -6,6 +6,7 @@ package frc.robot.commands.Test.Hood;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.TheRobot;
+import frc.robot.helper.Targetting.ShooterLookUp;
 import frc.robot.subsystems.Hood;
 
 public class ExtendHood extends CommandBase {
