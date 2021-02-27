@@ -20,6 +20,7 @@ import frc.robot.subsystems.Drive;
 
 public class HandlingBase { // extend this class to create a unique set of handling characteristics
     public Boolean m_refreshShuffleBoard; // wether or not to refresh the shuffleboard each peroidic loop
+    public boolean m_configureTalons = false; // wether or not to configure the talons
 
     private String m_tabName;
     protected String m_defaultDriveCommandName;
@@ -131,6 +132,8 @@ public class HandlingBase { // extend this class to create a unique set of handl
                     .withSize(1, 1).withPosition(4, 1).getEntry();
             m_talonTankDriveKdEntry = tab.add("Talon Tank Kd", m_talonTankDriveKd).withWidget(BuiltInWidgets.kTextView)
                     .withSize(1, 1).withPosition(4, 2).getEntry();
+            m_updateTalonConfigEntry = tab.add("Update Talons", m_configureTalons)
+                    .withWidget(BuiltInWidgets.kToggleButton).withSize(1, 1).withPosition(4, 3).getEntry();
 
             m_angleAdjustmentKpEntry = tab.add("Angle Adjustment Kp", m_angleAdjustmentkP)
                     .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(5, 0).getEntry();
@@ -171,6 +174,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
         m_talonTankDriveKp = getTalonTankDriveKp();
         m_talonTankDriveKi = getTalonTankDriveKi();
         m_talonTankDriveKd = getTalonTankDriveKd();
+        // m_configureTalons = getUpdateTalonConfig();
 
         m_angleAdjustmentkP = getAngleAdjustmentkP();
         m_angleAdjustmentkI = getAngleAdjustmentkI();
@@ -302,6 +306,10 @@ public class HandlingBase { // extend this class to create a unique set of handl
 
     protected double getTalonTankDriveKiInitialValue() {
         return 0;
+    }
+
+    protected boolean getUpdateTalonConfig() {
+        return m_updateTalonConfigEntry.getBoolean(false);
     }
 
     protected double getTalonTankDriveKdInitialValue() {

@@ -75,19 +75,20 @@ public class RobotContainer {
     yButton.whenPressed(new frc.robot.commands.IntakeRetract(intake), true);
     yButton.whenPressed(new frc.robot.commands.IntakeMotorOff(intake), true);
 
+    CommandBase cmd = new SequentialCommandGroup(new frc.robot.commands.Test.Hood.ExtendHood(hood),
+        new ParallelCommandGroup(new frc.robot.commands.Test.Shooter.StartShooter(shooter),
+            new frc.robot.commands.Test.Shooter.Target(drive)),
+        new WaitCommand(3), new frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(3),
+        new frc.robot.commands.Test.Shooter.StopShooter(shooter));
+
     /*
      * CommandBase cmd = new SequentialCommandGroup(new
-     * frc.robot.commands.Test.Hood.ExtendHood(hood), new ParallelCommandGroup(new
-     * frc.robot.commands.Test.Shooter.StartShooter(shooter), new
-     * frc.robot.commands.Test.Shooter.Target(drive)), new WaitCommand(3), new
-     * frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(3), new
-     * frc.robot.commands.Test.Shooter.StopShooter(shooter));
+     * frc.robot.commands.Test.Hood.ExtendHood(hood), new
+     * frc.robot.commands.Test.Shooter.StartShooter(shooter), new WaitCommand(3),
+     * new frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(3), new
+     * frc.robot.commands.Test.Shooter.StopShooter(shooter)); //
+     * rightShoulderButton.whenPressed(cmd, true);
      */
-    CommandBase cmd = new SequentialCommandGroup(new frc.robot.commands.Test.Hood.ExtendHood(hood),
-        new frc.robot.commands.Test.Shooter.StartShooter(shooter), new WaitCommand(3),
-        new frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(3),
-        new frc.robot.commands.Test.Shooter.StopShooter(shooter));
-    // rightShoulderButton.whenPressed(cmd, true);
 
     JoystickButton xButton = new JoystickButton(m_smallJoystick, 3);
     xButton.whenPressed(cmd);

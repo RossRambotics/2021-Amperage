@@ -180,7 +180,9 @@ public class Drive extends SubsystemBase {
   @Override
   public void periodic() {
     m_handlingValues.refreshNetworkTablesValues();
-    // configureTalons();
+    if (m_handlingValues.m_configureTalons) {
+      configureTalons();
+    }
 
   }
 
@@ -302,6 +304,8 @@ public class Drive extends SubsystemBase {
     m_leftTalonConfig.slot0.kP = m_handlingValues.getTalonTankDriveKp();
     m_leftTalonConfig.slot0.kI = m_handlingValues.getTalonTankDriveKi();
     m_leftTalonConfig.slot0.kD = m_handlingValues.getTalonTankDriveKd();
+
+    System.out.println(m_handlingValues.getTalonTankDriveKp());
 
     m_rightTalonConfig.slot0.kP = m_handlingValues.getTalonTankDriveKp();
     m_rightTalonConfig.slot0.kI = m_handlingValues.getTalonTankDriveKi();

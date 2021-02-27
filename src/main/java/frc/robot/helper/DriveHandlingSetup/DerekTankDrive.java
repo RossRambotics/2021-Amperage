@@ -28,6 +28,6 @@ public class DerekTankDrive extends HandlingBase {
 
     @Override
     protected double getRadialTurnCoefficentInitalValue() {
-        return 0.08;
+        return 0.11;
     }
 }
