@@ -3,11 +3,8 @@ package frc.robot.commands;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Drive;
 
@@ -19,8 +16,10 @@ public class Target extends CommandBase {
     private double m_kp = 0.1;
     private double m_kd = 0;
     private double m_ki = 0.001;
-
     private double m_creepBackPower = -0.03;
+
+    private int m_deadFramesCount = 0; // the amount of dead frames in a row currently
+    private int m_deadFramesMax = 3; // the amount of frames without a valid target before shutdown
 
     private double m_targetHeading; // the target position for the robot
     private double m_frameCount;
@@ -28,7 +27,6 @@ public class Target extends CommandBase {
     private double m_lastHeading; // the last gyro heading of the robot
     private List<Double> m_errorPointsList; // used for calculating the I value
 
-    private NetworkTable m_targettingTable;
     private NetworkTableEntry m_targetAngleEntry;
     private NetworkTableEntry m_targetFoundEntry;
     private NetworkTableEntry m_frameCounterEntry;
@@ -133,6 +131,12 @@ public class Target extends CommandBase {
     @Override
     public boolean isFinished() {
         if (!m_targetFoundEntry.getBoolean(false)) {
+            m_deadFramesCount++;
+        } else {
+            m_deadFramesCount = 0;
+        }
+
+        if (m_deadFramesCount > m_deadFramesMax) {
             System.out.println("Targetting Command: Shuffleboard says no target found !");
             m_drive.tankDriveRaw(0, 0);
             return true;
