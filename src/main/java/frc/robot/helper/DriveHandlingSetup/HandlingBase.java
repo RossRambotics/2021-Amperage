@@ -345,7 +345,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
     }
 
     protected double getTargettingTurnKPInitialValue() {
-        return 0.03;
+        return 0.006;
     }
 
     protected double getTargettingTurnKIInitialValue() {
