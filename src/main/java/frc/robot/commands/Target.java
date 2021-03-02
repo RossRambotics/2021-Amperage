@@ -113,9 +113,13 @@ public class Target extends CommandBase {
         System.out.println("Realtive Target Heading: " + relativeTargetHeading + " GyroVelocity: " + gyroVelocity);
         System.out.println("Gyro Heading: " + currentYaw + " TargetAngle: " + m_targetAngleEntry.getDouble(0));
         if (relativeTargetHeading > 0) { // may need to flip depending on motor direction
-            m_drive.tankDriveRaw(-turnValue - m_creepBackPower, turnValue - m_creepBackPower);
+            m_drive.setBrakeModeLeftDriveTalons(true);
+            m_drive.setBrakeModeRightDriveTalons(false);
+            m_drive.tankDriveRaw(0, turnValue - m_creepBackPower);
         } else {
-            m_drive.tankDriveRaw(turnValue - m_creepBackPower, -turnValue - m_creepBackPower);
+            m_drive.setBrakeModeLeftDriveTalons(false);
+            m_drive.setBrakeModeRightDriveTalons(true);
+            m_drive.tankDriveRaw(turnValue - m_creepBackPower, 0);
         }
 
         m_lastHeading = currentYaw;
@@ -125,6 +129,8 @@ public class Target extends CommandBase {
     // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {
+        m_drive.setBrakeModeLeftDriveTalons(false);
+        m_drive.setBrakeModeRightDriveTalons(false);
     }
 
     // Returns true when the command should end.
@@ -132,6 +138,7 @@ public class Target extends CommandBase {
     public boolean isFinished() {
         if (!m_targetFoundEntry.getBoolean(false)) {
             m_deadFramesCount++;
+            System.out.println(m_deadFramesCount);
         } else {
             m_deadFramesCount = 0;
         }

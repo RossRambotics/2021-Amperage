@@ -40,7 +40,7 @@ public class Shooter extends SubsystemBase {
 
   private double m_RPM_shooter = 0;
   private double m_RPM_target = 5000;
-  private double m_RPM_target_range = 100;
+  private double m_RPM_target_range = 300;
 
   private double m_pid_kIz, m_dpid_kFF;
   private double m_dpid_kI_Modified = .00001;
@@ -204,32 +204,27 @@ public class Shooter extends SubsystemBase {
     m_RPM_shooter = Math.abs(m_encoder1.getVelocity());
     m_actualRPM.setDouble(m_RPM_shooter);
 
+    updateShooterReadiness();
+
     // Output to dashboard
     SmartDashboard.putNumber("Shooter/Current RPM", m_RPM_shooter);
     SmartDashboard.putNumber("Shooter/Target RPM", m_RPM_target);
 
     SmartDashboard.putNumber("Shooter/I Gain Modified", m_dpid_kI_Modified);
   }
-
-  // shoots the balls
-  public void shoot() {
-    Robot r = TheRobot.getInstance();
-
-    // get distance to target
-    ShooterValueSet m_values = m_lookUpTable.getCurrentValues(true);
-    System.out.println(m_values.shooterRPM);
-    TheRobot.log("Target RPM: " + TheRobot.toString(m_values.shooterRPM.doubleValue()) + " Target Hood: "
-        + TheRobot.toString(m_values.hoodAngle.doubleValue()));
-
-    // tell shooter to come up to target speed based on distance
-    if (r.m_shooter.ready(m_values)) {
-      // start the indexer
-      r.m_indexer.shoot();
-    } else {
-      // stop the indexer
-      // r.m_indexer.stop();
-    }
-  }
+  /*
+   * // shoots the balls public void shoot() { Robot r = TheRobot.getInstance();
+   * 
+   * // get distance to target ShooterValueSet m_values =
+   * m_lookUpTable.getCurrentValues(true);
+   * System.out.println(m_values.shooterRPM); TheRobot.log("Target RPM: " +
+   * TheRobot.toString(m_values.shooterRPM.doubleValue()) + " Target Hood: " +
+   * TheRobot.toString(m_values.hoodAngle.doubleValue()));
+   * 
+   * // tell shooter to come up to target speed based on distance if
+   * (r.m_shooter.ready(m_values)) { // start the indexer r.m_indexer.shoot(); }
+   * else { // stop the indexer // r.m_indexer.stop(); } }
+   */
 
   // runs the shooter backwards in case of a jam
   // returns true if no jam detected
@@ -288,36 +283,33 @@ public class Shooter extends SubsystemBase {
   // returns true if the shooter is up-to-speed for the target distance
   // if distance is zero takes shooter to default speed
   // returns false if the shooter is not at target speed
-  public boolean ready(ShooterValueSet m_Values) {
-    // set the target RPM
-    m_RPM_target = m_Values.shooterRPM;
-    if (m_bTuning)
-      m_RPM_target = m_dTuningRPM;
-    if (m_bToggleLowPort)
-      m_RPM_target = m_dLowPortRPM; // If low power port enabled use low RPM
+  public boolean readyToTarget() {
+    m_RPM_target = m_lookUpTable.getCurrentValues(true).shooterRPM;
 
-    // set the PID Controller to hit the RPM
-    // m_pidController.setReference(m_RPM_target, ControlType.kVelocity);
+    double p = m_pid_kP.getDouble(0);
+    m_pidController.setP(p);
+
+    double d = m_pid_kD.getDouble(0);
+    m_pidController.setD(d);
+
+    double i = m_pid_kI.getDouble(0);
+    m_pidController.setI(i);
+
+    double ff = m_pid_kFF.getDouble(0);
+    m_pidController.setFF(ff);
+
+    m_pidController.setReference(m_RPM_target, ControlType.kVelocity);
     TheRobot.log("Shooter ready RPM_target:" + TheRobot.toString(m_RPM_target));
 
-    // See if motor RPM are within range tolerance
-    double range = m_RPM_target_range;
-    if (Math.abs(m_RPM_target - m_RPM_shooter) < range) {
-      Robot r = TheRobot.getInstance();
-
-      // If not targeting and shooter up to speed, then shoot! (return true)
-
-      // TODO fix this block of code in this version of Amperage code
-      /*
-       * if (r.m_drive.GetTargetingAligned() == false) { return true; }
-       * 
-       * // Since we are targeting, hold off shooting until we are on target // If on
-       * target and we are targeting than shoot! return
-       * r.m_drive.GetTargetingAligned();
-       */
-    }
-
     return false;
+  }
+
+  public void updateShooterReadiness() {
+    if (Math.abs(m_RPM_target - m_RPM_shooter) < m_RPM_target_range) {
+      setReadyToShoot(true);
+    } else {
+      setReadyToShoot(false);
+    }
   }
 
   public void setReadyToShoot(boolean b) {

@@ -9,6 +9,7 @@ import java.util.Map;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonFXSensorCollection;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
@@ -360,12 +361,21 @@ public class Drive extends SubsystemBase {
 
   public double getVelocityCoefficent() // gets the scaling factor to translate the joystick input to the velcoity input
   {
-    System.out.println(m_handlingValues.getMaxVelocity());
     return (m_handlingValues.getMaxVelocity() * 0.1 * m_stepsPerRotation / m_gearCoeffiecent / m_wheelCircumference);
     // mps = wheel circumference * gearcoefficent * (steps / 100 ms) * 1000ms /
     // steps per rotation
     // steps / 100ms = mps * .1 seconds * steps per rotation / wheel cicumference /
     // gear ratio
+  }
+
+  public void setBrakeModeLeftDriveTalons(boolean brake) { // turns on/off brake mode on left side
+    m_leftDriveTalon.setNeutralMode(NeutralMode.Brake);
+    m_leftDriveTalonFollower.setNeutralMode(NeutralMode.Brake);
+  }
+
+  public void setBrakeModeRightDriveTalons(boolean brake) { // turns on/off brake mode on right side
+    m_rightDriveTalon.setNeutralMode(NeutralMode.Brake);
+    m_rightDriveTalonFollower.setNeutralMode(NeutralMode.Brake);
   }
 
   public double getStepsPerFrameRotation() { // get the number of encoder steps it take the robot to make one full

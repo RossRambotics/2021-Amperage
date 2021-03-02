@@ -76,9 +76,8 @@ public class RobotContainer {
     yButton.whenPressed(new frc.robot.commands.IntakeMotorOff(intake), true);
 
     CommandBase cmd = new SequentialCommandGroup(new frc.robot.commands.ExtendHoodToTarget(hood),
-        // new ParallelCommandGroup(new
-        // frc.robot.commands.Test.Shooter.StartShooter(shooter),
-        new frc.robot.commands.Target(drive), new WaitCommand(3),
+        new ParallelCommandGroup(new frc.robot.commands.StartShooterTargeting(shooter),
+            new frc.robot.commands.Target(drive)),
         new frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(3),
         new frc.robot.commands.Test.Shooter.StopShooter(shooter));
 

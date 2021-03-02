@@ -345,15 +345,15 @@ public class HandlingBase { // extend this class to create a unique set of handl
     }
 
     protected double getTargettingTurnKPInitialValue() {
-        return 0.006;
+        return 0.01;
     }
 
     protected double getTargettingTurnKIInitialValue() {
-        return 0.002;
+        return 0.00;
     }
 
     protected double getTargettingTurnKDInitialValue() {
-        return 0.0;
+        return 0.0001;
     }
 
     public boolean getRefreshShuffleboard() {
