@@ -22,6 +22,7 @@ import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.*;
 import frc.robot.commands.AutomatedMotion.AutonomousMovementBase;
 import frc.robot.commands.AutomatedMotion.ManualDriveStraight;
+import frc.robot.commands.AutomatedMotion.Track;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -97,8 +98,10 @@ public class RobotContainer {
     aButton.whenPressed(new frc.robot.commands.IntakeExtend(intake), true);
     aButton.whenPressed(new frc.robot.commands.IntakeMotorOn(intake), true);
 
-    JoystickButton selectButton = new JoystickButton(m_smallJoystick, 7);
     JoystickButton startButton = new JoystickButton(m_smallJoystick, 8);
+    startButton.whenPressed(new Track(drive));
+
+    JoystickButton selectButton = new JoystickButton(m_smallJoystick, 7);
 
     if (m_leftLargeJoystick != null) {
       JoystickButton leftTopForwardButton = new JoystickButton(m_leftLargeJoystick, 3);
