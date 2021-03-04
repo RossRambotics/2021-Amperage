@@ -9,23 +9,26 @@ public class AutonomousMovementBaseII extends CommandBase {
     @SuppressWarnings({ "PMD.UnusedPrivateField", "PMD.SingularField" })
 
     private final Drive m_drive;
-    private double m_callingJoystick;
-
     private double m_initalYaw = 0; // aka the target direction
     private double m_errorSum = 0; // also known as the intgral of error
     private double m_previousYaw; // from the previous execute loop
     private Timer m_timer; // allows for the calculation of the derivative
+    private double m_targetFinalStepsLeft; // the intended steps at the end of the command
+    private double m_targetFinalStepsRight; // the intended steps at the end of the command
+    private double m_intialStepsRight; // the starting motor position
+    private double m_intialStepsLeft; // the starting motor position
+    private double m_targetMeters; // the target distance in meters
+    private double m_currentDistanceRemaining; // the current distance remaining
 
     private double m_Kp = 0.006;
     private double m_Ki = 0.02;
     private double m_Kd = 0.0013;
 
-    private double m_boostCoefficent = .35; // relates the PDP volate to the max power the boost function can use
-
-    public AutonomousMovementBaseII(Drive drive, double distance) { // calling joystick corrosponds to port
-                                                                             // number
-       // m_callingJoystick = callingJoystick;
+    public AutonomousMovementBaseII(Drive drive, double targetMeters) { 
+        m_targetMeters = targetMeters;
         m_drive = drive;
+
+       // m_callingJoystick = callingJoystick;
         addRequirements(drive);
         m_timer = new Timer();
     }
@@ -33,6 +36,15 @@ public class AutonomousMovementBaseII extends CommandBase {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
+
+        m_intialStepsLeft = m_drive.getLeftTalonEncoderPosition();
+        m_intialStepsRight = m_drive.getRightTalonEncoderPostion();
+        m_initalYaw = m_drive.getGyroYaw();
+        m_previousYaw = m_initalYaw;
+
+        m_targetFinalStepsLeft = m_intialStepsLeft + m_targetMeters / m_drive.getDistancePerStep();
+        m_targetFinalStepsRight = m_intialStepsRight + m_targetMeters / m_drive.getDistancePerStep();
+
         m_timer.start();
         m_timer.reset(); // start the timer over again
         m_initalYaw = m_drive.getGyroYaw();
@@ -46,6 +58,9 @@ public class AutonomousMovementBaseII extends CommandBase {
         double secondsSinceLastLoop = m_timer.get(); // gets the loop time
         m_timer.reset();
 
+        m_currentDistanceRemaining = ((m_drive.getLeftTalonEncoderPosition() - m_targetFinalStepsLeft)
+        + (m_drive.getRightTalonEncoderPostion() - m_targetFinalStepsRight)) / 2;
+        
         // calculated the error correction
         double dCorrection = m_Kd * (currentYaw - m_previousYaw) / secondsSinceLastLoop; // degrees over seconds
         double pCorrection = m_Kp * (currentYaw - m_initalYaw);
@@ -56,20 +71,9 @@ public class AutonomousMovementBaseII extends CommandBase {
         // if this value is negative speed up left motor or slow right
         // note both motors and joystcicks are inverted ;)
 
-        double maxPower = m_drive.getPDPVoltage() * m_boostCoefficent;
-        double joystickValue = 0; // used to find the direction of movement
-        if (m_callingJoystick == 0) {
-            joystickValue = m_drive.getRightJoystickY();
-        } else {
-            joystickValue = m_drive.getLeftJoystickY();
-        }
-
-        if (joystickValue > 0) {
-            maxPower = -maxPower;
-        }
-
-        if (maxPower == 0) { // adds deadzone to prevent the bot from moving while stopped
-            return;
+        double maxPower = 0.05;
+        if(m_targetMeters > 0){
+            maxPower = maxPower * -1;
         }
 
         if (maxPower > 0) { // if the robot is moving backward
@@ -109,11 +113,17 @@ public class AutonomousMovementBaseII extends CommandBase {
     // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {
+        
     }
 
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
+        System.out.println(m_currentDistanceRemaining);
+
+        if (Math.abs(m_currentDistanceRemaining) < 5000) {
+        return true;
+        }
         return false;
     }
 }

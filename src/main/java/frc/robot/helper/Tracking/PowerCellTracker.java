@@ -12,7 +12,7 @@ public class PowerCellTracker{
 
     private NetworkTable m_trackingTable;
 
-    private double m_powerCellCollectionThreshold = 0.7; // if the powercell distance is less than this begin collection
+    private double m_powerCellCollectionThreshold = 0.3; // if the powercell distance is less than this begin collection
 
     public PowerCellTracker()
     {
@@ -27,7 +27,7 @@ public class PowerCellTracker{
         return m_powerCellAngleEntry.getDouble(0);
     }
 
-    public double getPowerCellDistance(){
+    public double getPowerCellDistance(){ // scalar value between 0 and 1
         return m_powerCellDistanceEntry.getDouble(0);
     }
 

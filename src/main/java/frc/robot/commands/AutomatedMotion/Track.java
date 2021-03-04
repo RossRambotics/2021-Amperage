@@ -47,6 +47,7 @@ public class Track extends CommandBase {
         if(m_previousFrameCount != m_powerPowerCellTracker.getFrameCounter()){ // only sets a new target yaw when a new frame is ready
           m_targetYaw = currentYaw + m_powerPowerCellTracker.getPowerCellAngle(); // defines the target Yaw for the power cell tracker
           m_previousFrameCount = m_powerPowerCellTracker.getFrameCounter();
+
         }
 
         double secondsSinceLastLoop = m_timer.get(); // gets the loop time
@@ -55,12 +56,16 @@ public class Track extends CommandBase {
         // calculated the error correction
         double dCorrection = m_Kd * (currentYaw - m_previousYaw) / secondsSinceLastLoop; // degrees over seconds
         double pCorrection = m_Kp * (currentYaw - m_targetYaw);
-        double iCorrection = m_Ki * m_errorSum * secondsSinceLastLoop;
-        double totalCorrection = dCorrection + pCorrection + iCorrection;
+        //double iCorrection = m_Ki * m_errorSum * secondsSinceLastLoop;
+        double totalCorrection = dCorrection + pCorrection;// - iCorrection;
         //totalCorrection = -totalCorrection; // invert to correct for gyro direction
         // if this value is positive speed up right motor or slow left
         // if this value is negative speed up left motor or slow right
         // note both motors and joystcicks are inverted ;)
+
+        System.out.println("pValue: " + pCorrection + " dValue: " + dCorrection);// + " errorSum: " + iCorrection);
+        System.out.println("Realtive Target Heading: " + m_powerPowerCellTracker.getPowerCellAngle());
+        System.out.println("Gyro Heading: " + currentYaw + " TargetAngle: " + m_targetYaw);
 
         double basePower = 0.1; // the base value for moving to power cells
         //should move the robot in reverse
@@ -108,6 +113,12 @@ public class Track extends CommandBase {
     @Override
     public boolean isFinished() {
       if(!m_powerPowerCellTracker.getPowerCellFound()){ // if the powercell is not found  -- quit
+        System.out.println("No Power Cell found");
+        return true;
+      }
+
+      if(m_powerPowerCellTracker.startPowerCellCollectionSequence()){
+        System.out.println("Collecting PowerCell");
         return true;
       }
 
