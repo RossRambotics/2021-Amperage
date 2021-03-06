@@ -17,7 +17,7 @@ public class WillArcadeDrive extends HandlingBase {
     }
 
     @Override
-    public double getMaxVelocityInitialValue() {
+    public double getPowerCoefficentInitialValue() {
         return 7;
     }
 

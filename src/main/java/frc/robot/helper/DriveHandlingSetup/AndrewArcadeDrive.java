@@ -15,7 +15,7 @@ public class AndrewArcadeDrive extends HandlingBase {
     }
 
     @Override
-    protected double getMaxVelocityInitialValue() {
+    protected double getPowerCoefficentInitialValue() {
         return 7;
     }
 

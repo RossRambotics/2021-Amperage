@@ -22,7 +22,7 @@ public class WillTankDrive extends HandlingBase {
     }
 
     @Override
-    public double getMaxVelocityInitialValue() {
+    public double getPowerCoefficentInitialValue() {
         return 7;
     }
 

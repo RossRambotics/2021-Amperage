@@ -24,11 +24,11 @@ public class AutonomousMovementBaseII extends CommandBase {
     private double m_Ki = 0.02;
     private double m_Kd = 0.0013;
 
-    public AutonomousMovementBaseII(Drive drive, double targetMeters) { 
+    public AutonomousMovementBaseII(Drive drive, double targetMeters) {
         m_targetMeters = targetMeters;
         m_drive = drive;
 
-       // m_callingJoystick = callingJoystick;
+        // m_callingJoystick = callingJoystick;
         addRequirements(drive);
         m_timer = new Timer();
     }
@@ -59,8 +59,8 @@ public class AutonomousMovementBaseII extends CommandBase {
         m_timer.reset();
 
         m_currentDistanceRemaining = ((m_drive.getLeftTalonEncoderPosition() - m_targetFinalStepsLeft)
-        + (m_drive.getRightTalonEncoderPostion() - m_targetFinalStepsRight)) / 2;
-        
+                + (m_drive.getRightTalonEncoderPostion() - m_targetFinalStepsRight)) / 2;
+
         // calculated the error correction
         double dCorrection = m_Kd * (currentYaw - m_previousYaw) / secondsSinceLastLoop; // degrees over seconds
         double pCorrection = m_Kp * (currentYaw - m_initalYaw);
@@ -72,7 +72,7 @@ public class AutonomousMovementBaseII extends CommandBase {
         // note both motors and joystcicks are inverted ;)
 
         double maxPower = 0.05;
-        if(m_targetMeters > 0){
+        if (m_targetMeters > 0) {
             maxPower = maxPower * -1;
         }
 
@@ -113,7 +113,7 @@ public class AutonomousMovementBaseII extends CommandBase {
     // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {
-        
+
     }
 
     // Returns true when the command should end.
@@ -122,7 +122,7 @@ public class AutonomousMovementBaseII extends CommandBase {
         System.out.println(m_currentDistanceRemaining);
 
         if (Math.abs(m_currentDistanceRemaining) < 5000) {
-        return true;
+            return true;
         }
         return false;
     }

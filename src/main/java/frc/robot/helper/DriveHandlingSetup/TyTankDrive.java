@@ -22,7 +22,7 @@ public class TyTankDrive extends HandlingBase {
     }
 
     @Override
-    public double getMaxVelocityInitialValue() {
+    public double getPowerCoefficentInitialValue() {
         return 13;
     }
 

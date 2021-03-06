@@ -23,6 +23,7 @@ import frc.robot.commands.*;
 import frc.robot.commands.AutomatedMotion.AutonomousMovementBase;
 import frc.robot.commands.AutomatedMotion.AutonomousMovementBaseII;
 import frc.robot.commands.AutomatedMotion.ManualDriveStraight;
+import frc.robot.commands.AutomatedMotion.ManualDriveStraightBoosted;
 import frc.robot.commands.AutomatedMotion.Track;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.*;
@@ -100,27 +101,31 @@ public class RobotContainer {
     aButton.whenPressed(new frc.robot.commands.IntakeMotorOn(intake), true);
 
     JoystickButton startButton = new JoystickButton(m_smallJoystick, 8);
-    startButton.whenPressed(new SequentialCommandGroup(new Track(drive), new AutonomousMovementBaseII(drive, -.5),
-        new Track(drive), new AutonomousMovementBaseII(drive, -.5),
-        new Track(drive), new AutonomousMovementBaseII(drive, -.4), 
-        new AutonomousMovementBaseII(drive, .5), new frc.robot.commands.ExtendHoodToTarget(hood),
-        new ParallelCommandGroup(new frc.robot.commands.StartShooterTargeting(shooter),
-            new frc.robot.commands.Target(drive)),
-        new frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(3),
-        new frc.robot.commands.Test.Shooter.StopShooter(shooter)));
+    startButton.whenPressed(
+        new SequentialCommandGroup(new Track(drive), new AutonomousMovementBaseII(drive, -.5), new Track(drive),
+            new AutonomousMovementBaseII(drive, -.5), new Track(drive), new AutonomousMovementBaseII(drive, -.4),
+            new AutonomousMovementBaseII(drive, .5), new frc.robot.commands.ExtendHoodToTarget(hood),
+            new ParallelCommandGroup(new frc.robot.commands.StartShooterTargeting(shooter),
+                new frc.robot.commands.Target(drive)),
+            new frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(3),
+            new frc.robot.commands.Test.Shooter.StopShooter(shooter)));
 
     JoystickButton selectButton = new JoystickButton(m_smallJoystick, 7);
 
     if (m_leftLargeJoystick != null) {
       JoystickButton leftTopForwardButton = new JoystickButton(m_leftLargeJoystick, 3);
       leftTopForwardButton.whileHeld(new ManualDriveStraight(drive, 1));
+
+      JoystickButton leftTopBottomButton = new JoystickButton(m_leftLargeJoystick, 2);
+      leftTopBottomButton.whileHeld(new ManualDriveStraightBoosted(drive, 1));
     }
 
-    if (m_rightLargeJoystick != null)
-
-    {
+    if (m_rightLargeJoystick != null) {
       JoystickButton rightTopForwardButton = new JoystickButton(m_rightLargeJoystick, 3);
       rightTopForwardButton.whileHeld(new ManualDriveStraight(drive, 0));
+
+      JoystickButton rightTopBottomButton = new JoystickButton(m_rightLargeJoystick, 2);
+      rightTopBottomButton.whileHeld(new ManualDriveStraightBoosted(drive, 0));
     }
 
   }

@@ -20,7 +20,8 @@ public class ManualDriveStraightBoosted extends CommandBase {
     private double m_Ki = 0.02;
     private double m_Kd = 0.0013;
 
-    private double m_boostCoefficent = .35; // relates the PDP volate to the max power the boost function can use
+    private double m_boostCoefficent = .5; // relates the PDP volate to the max power the boost function can use
+    private double maxVoltage = 12; // the max battery voltage -- at least a baseline
 
     public ManualDriveStraightBoosted(Drive drive, double callingJoystick) { // calling joystick corrosponds to port
                                                                              // number
@@ -55,8 +56,7 @@ public class ManualDriveStraightBoosted extends CommandBase {
         // if this value is positive speed up right motor or slow left
         // if this value is negative speed up left motor or slow right
         // note both motors and joystcicks are inverted ;)
-
-        double maxPower = m_drive.getPDPVoltage() * m_boostCoefficent;
+        double maxPower = m_drive.getPDPVoltage() / 12 * m_boostCoefficent;
         double joystickValue = 0; // used to find the direction of movement
         if (m_callingJoystick == 0) {
             joystickValue = m_drive.getRightJoystickY();
@@ -64,7 +64,7 @@ public class ManualDriveStraightBoosted extends CommandBase {
             joystickValue = m_drive.getLeftJoystickY();
         }
 
-        if (joystickValue > 0) {
+        if (joystickValue < 0) {
             maxPower = -maxPower;
         }
 
@@ -78,13 +78,13 @@ public class ManualDriveStraightBoosted extends CommandBase {
                 leftValue = Math.min(1, leftValue); // ensure the values are in the range
                 leftValue = Math.max(-1, leftValue);
 
-                m_drive.tankDrive(leftValue, maxPower);// if total correction is positive slow left
+                m_drive.tankDriveRaw(leftValue, maxPower);// if total correction is positive slow left
             } else {
                 double rightValue = maxPower - totalCorrection;
                 rightValue = Math.min(1, rightValue); // ensure the values are in the range
                 rightValue = Math.max(-1, rightValue);
 
-                m_drive.tankDrive(maxPower, rightValue);// if total correction is positive slow right
+                m_drive.tankDriveRaw(maxPower, rightValue);// if total correction is positive slow right
             }
         } else { // if the robot is moving forward
             if (totalCorrection > 0) {
@@ -92,13 +92,13 @@ public class ManualDriveStraightBoosted extends CommandBase {
                 leftValue = Math.min(1, leftValue); // ensure the values are in the range
                 leftValue = Math.max(-1, leftValue);
 
-                m_drive.tankDrive(leftValue, maxPower);// if total correction is positive slow left
+                m_drive.tankDriveRaw(leftValue, maxPower);// if total correction is positive slow left
             } else {
                 double rightValue = maxPower - totalCorrection;
                 rightValue = Math.min(1, rightValue); // ensure the values are in the range
                 rightValue = Math.max(-1, rightValue);
 
-                m_drive.tankDrive(maxPower, rightValue);// if total correction is positive slow right
+                m_drive.tankDriveRaw(maxPower, rightValue);// if total correction is positive slow right
             }
         }
 

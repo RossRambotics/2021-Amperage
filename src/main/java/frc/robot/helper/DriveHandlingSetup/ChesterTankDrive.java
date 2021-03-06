@@ -15,7 +15,7 @@ public class ChesterTankDrive extends HandlingBase {
     }
 
     @Override
-    public double getMaxVelocityInitialValue() {
+    public double getPowerCoefficentInitialValue() {
         return 25;
     }
 

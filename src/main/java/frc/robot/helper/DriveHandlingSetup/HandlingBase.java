@@ -2,7 +2,9 @@ package frc.robot.helper.DriveHandlingSetup;
 
 import java.util.Map;
 
+import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -20,9 +22,10 @@ import frc.robot.subsystems.Drive;
 
 public class HandlingBase { // extend this class to create a unique set of handling characteristics
     public Boolean m_refreshShuffleBoard; // wether or not to refresh the shuffleboard each peroidic loop
-    public boolean m_configureTalons = false; // wether or not to configure the talons
 
     private String m_tabName;
+    private String m_automationTabName = "Automation Constants"; // the name for the automation tab
+
     protected String m_defaultDriveCommandName;
 
     protected Double m_maxDriveOutput; // the max power usable by any drive falcon
@@ -30,7 +33,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
     protected Double m_tankDeadZone; // the deadzone in the joysticks for tankdrive
     protected Double m_tankFineHandlingZone; // the zone in the tank drive algorithm dedicated for precise driving
     protected Double m_tankFineHandlingMaxVelocity; // maximum relative velocity avaliable for tank fine handling
-    protected Double m_maxVelocity; // in MPS
+    protected Double m_powerCoefficent; // in MPS
     protected Double m_radialTurnCoefficent; // the percent of velocity to provide to the inner wheel during a radial
                                              // turn
 
@@ -65,7 +68,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
     private NetworkTableEntry m_deadZoneEntry; // Network Table Entry for Shuffleboard
     private NetworkTableEntry m_fineHandlingZoneEntry; // Network Table Entry for Shuffleboard
     private NetworkTableEntry m_fineHandlingMaxVelocityEntry; // Network Table Entry for Shuffleboard
-    private NetworkTableEntry m_maxVelocityEntry; // Network Table Entry for Shuffleboard
+    private NetworkTableEntry m_powerCoefficentEntry; // Network Table Entry for Shuffleboard
     private NetworkTableEntry m_radialTurnCoefficentEntry; // Network Table Entry for Shuffleboard
 
     private NetworkTableEntry m_arcadeLowTurnZoneEntry; // Network Table Entry for Shuffleboard
@@ -75,15 +78,14 @@ public class HandlingBase { // extend this class to create a unique set of handl
     private NetworkTableEntry m_talonTankDriveKpEntry; // Network Table Entry for Shuffleboard
     private NetworkTableEntry m_talonTankDriveKiEntry; // Network Table Entry for Shuffleboard
     private NetworkTableEntry m_talonTankDriveKdEntry; // Network Table Entry for Shuffleboard
-    private NetworkTableEntry m_updateTalonConfigEntry; // Network Table Entry for Shuffleboard
 
     private NetworkTableEntry m_angleAdjustmentKpEntry; // Network Table Entry for Shuffleboard
     private NetworkTableEntry m_angleAdjustmentKiEntry; // Network Table Entry for Shuffleboard
     private NetworkTableEntry m_angleAdjustmentKdEntry; // Network Table Entry for Shuffleboard
 
-    private NetworkTableEntry m_striaghtVelocityControlkPEntry; // Network Table Entry for Shuffleboard
-    private NetworkTableEntry m_striaghtVelocityControlkFFEntry; // Network Table Entry for Shuffleboard
-    private NetworkTableEntry m_striaghtVelocityControlkDEntry; // Network Table Entry for Shuffleboard
+    private NetworkTableEntry m_straightVelocityControlkPEntry; // Network Table Entry for Shuffleboard
+    private NetworkTableEntry m_straightVelocityControlkIEntry; // Network Table Entry for Shuffleboard
+    private NetworkTableEntry m_straightVelocityControlkDEntry; // Network Table Entry for Shuffleboard
 
     private NetworkTableEntry m_targettingTurnKPEntry; // Network Table Entry for Shuffleboard
     private NetworkTableEntry m_targettingTurnKIEntry; // Network Table Entry for Shuffleboard
@@ -96,66 +98,98 @@ public class HandlingBase { // extend this class to create a unique set of handl
     }
 
     private void createShuffleBoardTab() {
-        ShuffleboardTab tab = Shuffleboard.getTab(m_tabName);
+        ShuffleboardTab driverTab = Shuffleboard.getTab(m_tabName);
+        ShuffleboardTab automationTab = Shuffleboard.getTab(m_automationTabName);
 
-        if (tab.getComponents().size() == 0) {// if the tab is not populated alredy
-            m_maxDriveOutputEntry = tab.add("Max Power", m_maxDriveOutput).withWidget(BuiltInWidgets.kNumberSlider)
-                    .withSize(2, 1).withProperties(Map.of("min", 0, "max", 1)).withPosition(0, 0).getEntry();
-            m_deadZoneEntry = tab.add("Tank Dead Zone", m_tankDeadZone).withWidget(BuiltInWidgets.kNumberSlider)
+        if (driverTab.getComponents().size() == 0) {// if the tab is not populated alredy
+            m_maxDriveOutputEntry = driverTab.add("Max Power", m_maxDriveOutput)
+                    .withWidget(BuiltInWidgets.kNumberSlider).withSize(2, 1).withProperties(Map.of("min", 0, "max", 1))
+                    .withPosition(0, 0).getEntry();
+            m_deadZoneEntry = driverTab.add("Tank Dead Zone", m_tankDeadZone).withWidget(BuiltInWidgets.kNumberSlider)
                     .withSize(2, 1).withProperties(Map.of("min", 0, "max", 1)).withPosition(0, 1).getEntry();
-            m_fineHandlingZoneEntry = tab.add("Tank Fine Handling Zone", m_tankFineHandlingZone)
+            m_fineHandlingZoneEntry = driverTab.add("Tank Fine Handling Zone", m_tankFineHandlingZone)
                     .withWidget(BuiltInWidgets.kNumberSlider).withSize(2, 1)
                     .withProperties(Map.of("min", 0, "max", 0.99)).withPosition(0, 2).getEntry();
-            m_fineHandlingMaxVelocityEntry = tab
+            m_fineHandlingMaxVelocityEntry = driverTab
                     .add("Tank Fine Handling Max Relative Velocity", m_tankFineHandlingMaxVelocity)
                     .withWidget(BuiltInWidgets.kNumberSlider).withSize(2, 1).withProperties(Map.of("min", 0, "max", 1))
                     .withPosition(0, 3).getEntry();
-            m_maxVelocityEntry = tab.add("Max Velocity", m_maxVelocity).withWidget(BuiltInWidgets.kTextView)
-                    .withSize(1, 1).withPosition(5, 3).getEntry();
-            m_radialTurnCoefficentEntry = tab.add("Radial Turn Coefficent", m_radialTurnCoefficent)
+            m_powerCoefficentEntry = driverTab.add("Max Velocity", m_powerCoefficent)
+                    .withWidget(BuiltInWidgets.kNumberSlider).withProperties(Map.of("min", 0, "max", 1)).withSize(1, 1)
+                    .withPosition(5, 3).getEntry();
+            m_radialTurnCoefficentEntry = driverTab.add("Radial Turn Coefficent", m_radialTurnCoefficent)
                     .withWidget(BuiltInWidgets.kNumberSlider).withSize(2, 1).withProperties(Map.of("min", 0, "max", 1))
                     .withPosition(2, 3).getEntry();
 
-            m_arcadeLowMaxTurnEntry = tab.add("Arcade Drive Low Turn Max Power", m_arcadeLowMaxTurn)
+            m_arcadeLowMaxTurnEntry = driverTab.add("Arcade Drive Low Turn Max Power", m_arcadeLowMaxTurn)
                     .withWidget(BuiltInWidgets.kNumberSlider).withSize(2, 1).withProperties(Map.of("min", 0, "max", 1))
                     .withPosition(2, 0).getEntry();
-            m_arcadeLowTurnZoneEntry = tab.add("Arcade Drive Low Turn Zone", m_arcadeLowTurnZone)
+            m_arcadeLowTurnZoneEntry = driverTab.add("Arcade Drive Low Turn Zone", m_arcadeLowTurnZone)
                     .withWidget(BuiltInWidgets.kNumberSlider).withSize(2, 1)
                     .withProperties(Map.of("min", 0, "max", 0.99)).withPosition(2, 1).getEntry();
-            m_arcadeHighMaxTurnCoefficentEntry = tab.add("Arcade High Turn Coefficent", m_arcadeHighMaxTurnCoefficent)
+            m_arcadeHighMaxTurnCoefficentEntry = driverTab
+                    .add("Arcade High Turn Coefficent", m_arcadeHighMaxTurnCoefficent)
                     .withWidget(BuiltInWidgets.kNumberSlider).withSize(2, 1).withProperties(Map.of("min", 0, "max", 1))
                     .withPosition(2, 2).getEntry();
 
-            m_talonTankDriveKpEntry = tab.add("Talon Tank Kp", m_talonTankDriveKp).withWidget(BuiltInWidgets.kTextView)
-                    .withSize(1, 1).withPosition(4, 0).getEntry();
-            m_talonTankDriveKiEntry = tab.add("Talon Tank Ki", m_talonTankDriveKi).withWidget(BuiltInWidgets.kTextView)
-                    .withSize(1, 1).withPosition(4, 1).getEntry();
-            m_talonTankDriveKdEntry = tab.add("Talon Tank Kd", m_talonTankDriveKd).withWidget(BuiltInWidgets.kTextView)
-                    .withSize(1, 1).withPosition(4, 2).getEntry();
-            m_updateTalonConfigEntry = tab.add("Update Talons", m_configureTalons)
-                    .withWidget(BuiltInWidgets.kToggleButton).withSize(1, 1).withPosition(4, 3).getEntry();
+            m_talonTankDriveKpEntry = driverTab.add("Talon Tank Kp", m_talonTankDriveKp)
+                    .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(4, 0).getEntry();
+            m_talonTankDriveKiEntry = driverTab.add("Talon Tank Ki", m_talonTankDriveKi)
+                    .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(4, 1).getEntry();
+            m_talonTankDriveKdEntry = driverTab.add("Talon Tank Kd", m_talonTankDriveKd)
+                    .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(4, 2).getEntry();
+        }
 
-            m_angleAdjustmentKpEntry = tab.add("Angle Adjustment Kp", m_angleAdjustmentkP)
+        if (automationTab.getComponents().size() == 0) { // makes sure the tab is not currently populated
+            m_angleAdjustmentKpEntry = automationTab.add("Angle Adjustment Kp", m_angleAdjustmentkP)
                     .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(5, 0).getEntry();
-            m_angleAdjustmentKiEntry = tab.add("Angle Adjustment Ki", m_angleAdjustmentkI)
+            m_angleAdjustmentKiEntry = automationTab.add("Angle Adjustment Ki", m_angleAdjustmentkI)
                     .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(5, 1).getEntry();
-            m_angleAdjustmentKdEntry = tab.add("Angle Adjustment Kd", m_angleAdjustmentkD)
+            m_angleAdjustmentKdEntry = automationTab.add("Angle Adjustment Kd", m_angleAdjustmentkD)
                     .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(5, 2).getEntry();
 
-            m_striaghtVelocityControlkPEntry = tab.add("Straight Line Kp", m_straightVelocityControlkP)
+            m_straightVelocityControlkPEntry = automationTab.add("Straight Line Kp", m_straightVelocityControlkP)
                     .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(6, 0).getEntry();
-            m_striaghtVelocityControlkFFEntry = tab.add("Straight Line Ki", m_straightVelocityControlkI)
+            m_straightVelocityControlkIEntry = automationTab.add("Straight Line Ki", m_straightVelocityControlkI)
                     .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(6, 1).getEntry();
-            m_striaghtVelocityControlkDEntry = tab.add("Straight Line Kd", m_straightVelocityControlkD)
+            m_straightVelocityControlkDEntry = automationTab.add("Straight Line Kd", m_straightVelocityControlkD)
                     .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(6, 2).getEntry();
 
-            m_targettingTurnKPEntry = tab.add("Targetting Turn Kp", m_targettingTurnKP)
-                    .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(7, 0).getEntry();
-            m_targettingTurnKIEntry = tab.add("Targetting Turn Ki", m_targettingTurnKI)
-                    .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(7, 1).getEntry();
-            m_targettingTurnKDEntry = tab.add("Targetting Turn Kd", m_targettingTurnKD)
-                    .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(7, 2).getEntry();
+            m_targettingTurnKDEntry = automationTab.add("Targetting Turn KD", m_targettingTurnKD).withPosition(7, 2)
+                    .withSize(1, 1).getEntry();
+            m_targettingTurnKIEntry = automationTab.add("Targetting Turn KI", m_targettingTurnKI).withPosition(7, 1)
+                    .withSize(1, 1).getEntry();
+            m_targettingTurnKPEntry = automationTab.add("Targetting Turn KP", m_targettingTurnKP).withPosition(7, 0)
+                    .withSize(1, 1).getEntry();
+        } else {
+            NetworkTable automationTable = NetworkTableInstance.getDefault().getTable("Shuffleboard")
+                    .getSubTable(m_automationTabName);
+
+            m_angleAdjustmentKpEntry = automationTable.getEntry("Angle Adjustment Kp");
+            m_angleAdjustmentKiEntry = automationTable.getEntry("Angle Adjustment Ki");
+            m_angleAdjustmentKdEntry = automationTable.getEntry("Angle Adjustment Kd");
+
+            m_angleAdjustmentKpEntry.setDouble(getAngleAdjustmentkP());
+            m_angleAdjustmentKiEntry.setDouble(getAngleAdjustmentkI());
+            m_angleAdjustmentKdEntry.setDouble(getAngleAdjustmentkD());
+
+            m_straightVelocityControlkPEntry = automationTable.getEntry("Straight Line Kp");
+            m_straightVelocityControlkIEntry = automationTable.getEntry("Straight Line Kp");
+            m_straightVelocityControlkDEntry = automationTable.getEntry("Straight Line Ki");
+
+            m_straightVelocityControlkPEntry.setDouble(getStraightVelocityControlkP());
+            m_straightVelocityControlkIEntry.setDouble(getStraightVelocityControlkP());
+            m_straightVelocityControlkDEntry.setDouble(getStraightVelocityControlkP());
+
+            m_targettingTurnKPEntry = automationTable.getEntry("Targetting Turn Kp");
+            m_targettingTurnKIEntry = automationTable.getEntry("Targetting Turn KI");
+            m_targettingTurnKDEntry = automationTable.getEntry("Targetting Turn KD");
+
+            m_targettingTurnKPEntry.setDouble(getTargettingTurnKP());
+            m_targettingTurnKIEntry.setDouble(getTargettingTurnKI());
+            m_targettingTurnKDEntry.setDouble(getTargettingTurnKD());
         }
+
     }
 
     private void setBaseMemberVariables() // sets all of the base member variable values
@@ -164,7 +198,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
         m_tankDeadZone = getTankDeadZone();
         m_tankFineHandlingZone = getTankFineHandlingZone();
         m_tankFineHandlingMaxVelocity = getTankFineHandlingMaxVelocity();
-        m_maxVelocity = getMaxVelocity();
+        m_powerCoefficent = getPowerCoefficent();
         m_radialTurnCoefficent = getRadialTurnCoefficent();
 
         m_arcadeLowMaxTurn = getArcadeLowMaxTurn();
@@ -214,7 +248,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
         m_tankDeadZone = m_deadZoneEntry.getDouble(m_tankDeadZone);
         m_tankFineHandlingZone = m_fineHandlingZoneEntry.getDouble(m_tankFineHandlingZone);
         m_tankFineHandlingMaxVelocity = m_fineHandlingMaxVelocityEntry.getDouble(m_tankFineHandlingMaxVelocity);
-        m_maxVelocity = m_maxVelocityEntry.getDouble(20);
+        m_powerCoefficent = m_powerCoefficentEntry.getDouble(20);
         m_radialTurnCoefficent = m_radialTurnCoefficentEntry.getDouble(m_radialTurnCoefficent);
 
         m_arcadeLowMaxTurn = m_arcadeLowMaxTurnEntry.getDouble(m_arcadeLowMaxTurn);
@@ -229,9 +263,9 @@ public class HandlingBase { // extend this class to create a unique set of handl
         m_angleAdjustmentkI = m_angleAdjustmentKiEntry.getDouble(m_angleAdjustmentkI);
         m_angleAdjustmentkD = m_angleAdjustmentKdEntry.getDouble(m_angleAdjustmentkD);
 
-        m_straightVelocityControlkP = m_striaghtVelocityControlkPEntry.getDouble(m_straightVelocityControlkP);
-        m_straightVelocityControlkI = m_striaghtVelocityControlkFFEntry.getDouble(m_straightVelocityControlkI);
-        m_straightVelocityControlkD = m_striaghtVelocityControlkDEntry.getDouble(m_straightVelocityControlkD);
+        m_straightVelocityControlkP = m_straightVelocityControlkPEntry.getDouble(m_straightVelocityControlkP);
+        m_straightVelocityControlkI = m_straightVelocityControlkIEntry.getDouble(m_straightVelocityControlkI);
+        m_straightVelocityControlkD = m_straightVelocityControlkDEntry.getDouble(m_straightVelocityControlkD);
 
         m_targettingTurnKP = m_targettingTurnKPEntry.getDouble(m_targettingTurnKP);
         m_targettingTurnKI = m_targettingTurnKIEntry.getDouble(m_targettingTurnKI);
@@ -280,8 +314,8 @@ public class HandlingBase { // extend this class to create a unique set of handl
         return 0.2;
     }
 
-    protected double getMaxVelocityInitialValue() {
-        return 20;
+    protected double getPowerCoefficentInitialValue() {
+        return .3;
     }
 
     protected double getRadialTurnCoefficentInitalValue() {
@@ -306,10 +340,6 @@ public class HandlingBase { // extend this class to create a unique set of handl
 
     protected double getTalonTankDriveKiInitialValue() {
         return 0;
-    }
-
-    protected boolean getUpdateTalonConfig() {
-        return m_updateTalonConfigEntry.getBoolean(false);
     }
 
     protected double getTalonTankDriveKdInitialValue() {
@@ -396,12 +426,12 @@ public class HandlingBase { // extend this class to create a unique set of handl
         return getTankFineHandlingMaxVelocityInitialValue();
     }
 
-    public double getMaxVelocity() {
-        if (m_maxVelocity != null) {
-            return m_maxVelocity;
+    public double getPowerCoefficent() {
+        if (m_powerCoefficent != null) {
+            return m_powerCoefficent;
         }
 
-        return getMaxVelocityInitialValue();
+        return getPowerCoefficentInitialValue();
     }
 
     public double getRadialTurnCoefficent() {

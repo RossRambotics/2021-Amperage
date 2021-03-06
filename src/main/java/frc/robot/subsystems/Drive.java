@@ -11,6 +11,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonFXSensorCollection;
+import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.PigeonIMU;
@@ -45,7 +46,6 @@ public class Drive extends SubsystemBase {
   // per rotation
   // steps / 100ms = mps * .1 seconds * steps per rotation / wheel cicumference /
   // gear ratio
-  private double m_velocityCoefficent = 50000.0; // (encoder steps / 100 ms)
   private double m_wheelCircumference = 0.478; // meters - 6 inch diameter
   private double m_gearCoeffiecent = .0933; // 10.71 to 1 falcon rotation to wheel rotation
   private double m_stepsPerRotation = 2048.0; // encoder steps
@@ -117,8 +117,6 @@ public class Drive extends SubsystemBase {
 
     m_degreesFrameRotationPerStep = getDegreesFrameRotationPerStep();
 
-    m_velocityCoefficent = getVelocityCoefficent();
-
     clearTalonEncoders();
     configureTalons();
     setProfileSlot();
@@ -181,10 +179,6 @@ public class Drive extends SubsystemBase {
   @Override
   public void periodic() {
     m_handlingValues.refreshNetworkTablesValues();
-    if (m_handlingValues.m_configureTalons) {
-      configureTalons();
-    }
-
   }
 
   @Override
@@ -192,18 +186,17 @@ public class Drive extends SubsystemBase {
     // This method will be called once per scheduler run during simulation
   }
 
-  public void tankDrive(double leftSpeed, double rightSpeed) {
-    // m_differentialDrive.tankDrive(leftSpeed, rightSpeed); <-Dumb
-
-    m_velocityCoefficent = getVelocityCoefficent();
-
-    m_rightDriveTalon.set(ControlMode.Velocity, rightSpeed * m_velocityCoefficent);
-    m_leftDriveTalon.set(ControlMode.Velocity, leftSpeed * m_velocityCoefficent);
-  }
-
   public void tankDriveRaw(double leftSpeed, double rightSpeed) { // tank drive but without velocity adjustment
+    System.out.println("LeftSpeed: " + leftSpeed + "RightSpeed: " + rightSpeed);
     m_rightDriveTalon.set(ControlMode.PercentOutput, rightSpeed);
     m_leftDriveTalon.set(ControlMode.PercentOutput, leftSpeed);
+  }
+
+  public void tankDrive(double leftSpeed, double rightSpeed) { // takes into account the velocity coefficent
+    System.out.println("LeftSpeed: " + leftSpeed + "RightSpeed: " + rightSpeed);
+
+    m_rightDriveTalon.set(ControlMode.PercentOutput, rightSpeed * m_handlingValues.getPowerCoefficent());
+    m_leftDriveTalon.set(ControlMode.PercentOutput, leftSpeed * m_handlingValues.getPowerCoefficent());
   }
 
   public boolean getSmallJoystickLeftShoulder() {
@@ -223,7 +216,11 @@ public class Drive extends SubsystemBase {
     if (Math.abs(x) < m_handlingValues.getArcadeLowTurnZone()) { // adjust to make a fine turning zone
       x = m_handlingValues.getArcadeLowTurnCoefficent() * x; // makes the robot turnable at low speeds
     } else {
-      x = m_handlingValues.getArcadeHighTurnCoefficent() * x + m_handlingValues.getArcadeLowMaxTurn(); // MAXPOWER
+      if (x > 0) {
+        x = m_handlingValues.getArcadeHighTurnCoefficent() * x + m_handlingValues.getArcadeLowMaxTurn(); // MAXPOWER
+      } else {
+        x = m_handlingValues.getArcadeHighTurnCoefficent() * x - m_handlingValues.getArcadeLowMaxTurn(); // MAXPOWER
+      }
     }
 
     double leftSpeed = y - x; // acrade drive algorithm
@@ -253,8 +250,6 @@ public class Drive extends SubsystemBase {
       }
     }
 
-    m_velocityCoefficent = getVelocityCoefficent();
-
     /*
      * System.out.println("Left Velocity:" + leftSpeed * m_velocityCoefficent *
      * getDistancePerStep() + " Right Velocity:" + rightSpeed * m_velocityCoefficent
@@ -283,8 +278,8 @@ public class Drive extends SubsystemBase {
       default:
     }
 
-    m_rightDriveTalon.set(ControlMode.Velocity, rightSpeed * m_velocityCoefficent); // sets speeds
-    m_leftDriveTalon.set(ControlMode.Velocity, leftSpeed * m_velocityCoefficent);
+    m_rightDriveTalon.set(ControlMode.PercentOutput, rightSpeed * m_handlingValues.getPowerCoefficent()); // sets speeds
+    m_leftDriveTalon.set(ControlMode.PercentOutput, leftSpeed * m_handlingValues.getPowerCoefficent());
   }
 
   private void clearTalonEncoders() // resets the talon encoder positions to 0
@@ -316,6 +311,9 @@ public class Drive extends SubsystemBase {
     m_rightDriveTalon.configAllSettings(m_rightTalonConfig);
     m_leftDriveTalonFollower.configAllSettings(m_leftTalonConfig);
     m_rightDriveTalonFollower.configAllSettings(m_rightTalonConfig);
+
+    m_leftDriveTalon.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_1Ms, 50);
+    m_rightDriveTalon.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_1Ms, 50);
   }
 
   private void setProfileSlot() {
@@ -361,7 +359,8 @@ public class Drive extends SubsystemBase {
 
   public double getVelocityCoefficent() // gets the scaling factor to translate the joystick input to the velcoity input
   {
-    return (m_handlingValues.getMaxVelocity() * 0.1 * m_stepsPerRotation / m_gearCoeffiecent / m_wheelCircumference);
+    return (m_handlingValues.getPowerCoefficent() * 0.1 * m_stepsPerRotation / m_gearCoeffiecent
+        / m_wheelCircumference);
     // mps = wheel circumference * gearcoefficent * (steps / 100 ms) * 1000ms /
     // steps per rotation
     // steps / 100ms = mps * .1 seconds * steps per rotation / wheel cicumference /

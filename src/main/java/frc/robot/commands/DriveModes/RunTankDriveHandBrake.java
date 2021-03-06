@@ -23,6 +23,9 @@ public class RunTankDriveHandBrake extends CommandBase {
   @Override
   public void initialize() {
     System.out.println("Switching to manual tank drive with handbrake!");
+
+    m_drive.setBrakeModeLeftDriveTalons(true);
+    m_drive.setBrakeModeRightDriveTalons(true);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -48,6 +51,9 @@ public class RunTankDriveHandBrake extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    m_drive.setBrakeModeLeftDriveTalons(false);
+    m_drive.setBrakeModeRightDriveTalons(false);
+
     if (interrupted) {
       System.out.println("Manual tank drive interupted!");
     } else {
