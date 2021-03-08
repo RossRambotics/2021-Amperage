@@ -101,14 +101,18 @@ public class RobotContainer {
     aButton.whenPressed(new frc.robot.commands.IntakeMotorOn(intake), true);
 
     JoystickButton startButton = new JoystickButton(m_smallJoystick, 8);
-    startButton.whenPressed(
-        new SequentialCommandGroup(new Track(drive), new AutonomousMovementBaseII(drive, -.5), new Track(drive),
-            new AutonomousMovementBaseII(drive, -.5), new Track(drive), new AutonomousMovementBaseII(drive, -.4),
-            new AutonomousMovementBaseII(drive, .5), new frc.robot.commands.ExtendHoodToTarget(hood),
-            new ParallelCommandGroup(new frc.robot.commands.StartShooterTargeting(shooter),
-                new frc.robot.commands.Target(drive)),
-            new frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(3),
-            new frc.robot.commands.Test.Shooter.StopShooter(shooter)));
+    startButton.whenPressed(new AutonomousMovementBaseII(drive, -65));
+    /*
+     * new SequentialCommandGroup(new Track(drive), new
+     * AutonomousMovementBaseII(drive, -.5), new Track(drive), new
+     * AutonomousMovementBaseII(drive, -.5), new Track(drive), new
+     * AutonomousMovementBaseII(drive, -.4), new AutonomousMovementBaseII(drive,
+     * .5), new frc.robot.commands.ExtendHoodToTarget(hood), new
+     * ParallelCommandGroup(new frc.robot.commands.StartShooterTargeting(shooter),
+     * new frc.robot.commands.Target(drive)), new
+     * frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(3), new
+     * frc.robot.commands.Test.Shooter.StopShooter(shooter)));
+     */
 
     JoystickButton selectButton = new JoystickButton(m_smallJoystick, 7);
 

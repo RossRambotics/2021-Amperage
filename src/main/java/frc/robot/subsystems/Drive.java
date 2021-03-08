@@ -4,28 +4,19 @@
 
 package frc.robot.subsystems;
 
-import java.time.Year;
 import java.util.Map;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.TalonFXSensorCollection;
-import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-import com.ctre.phoenix.sensors.PigeonIMU;
 
-import org.opencv.core.Mat;
-
-import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
-import edu.wpi.first.wpilibj.SpeedControllerGroup;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -144,11 +135,6 @@ public class Drive extends SubsystemBase {
     SmartDashboard.putData(driveModeSelectCommand);
     driveModeCommands.add(driveModeSelectCommand);
 
-    driveModeSelectCommand = new UpdateHandlingCharacteristics(this, new DerekTankDrive());
-    driveModeSelectCommand.setName("Derek Tank Drive");
-    SmartDashboard.putData(driveModeSelectCommand);
-    driveModeCommands.add(driveModeSelectCommand);
-
     driveModeSelectCommand = new UpdateHandlingCharacteristics(this, new ChesterTankDrive());
     driveModeSelectCommand.setName("Chester Tank Drive");
     SmartDashboard.putData(driveModeSelectCommand);
@@ -163,17 +149,6 @@ public class Drive extends SubsystemBase {
     driveModeSelectCommand.setName("Will Arcade Drive");
     SmartDashboard.putData(driveModeSelectCommand);
     driveModeCommands.add(driveModeSelectCommand);
-
-    driveModeSelectCommand = new UpdateHandlingCharacteristics(this, new WillTankDrive());
-    driveModeSelectCommand.setName("Will Tank Drive");
-    SmartDashboard.putData(driveModeSelectCommand);
-    driveModeCommands.add(driveModeSelectCommand);
-
-    driveModeSelectCommand = new UpdateHandlingCharacteristics(this, new RyanTankDrive());
-    driveModeSelectCommand.setName("Ryan Arcade Drive");
-    SmartDashboard.putData(driveModeSelectCommand);
-    driveModeCommands.add(driveModeSelectCommand);
-
   }
 
   @Override
@@ -187,14 +162,11 @@ public class Drive extends SubsystemBase {
   }
 
   public void tankDriveRaw(double leftSpeed, double rightSpeed) { // tank drive but without velocity adjustment
-    System.out.println("LeftSpeed: " + leftSpeed + "RightSpeed: " + rightSpeed);
     m_rightDriveTalon.set(ControlMode.PercentOutput, rightSpeed);
     m_leftDriveTalon.set(ControlMode.PercentOutput, leftSpeed);
   }
 
   public void tankDrive(double leftSpeed, double rightSpeed) { // takes into account the velocity coefficent
-    System.out.println("LeftSpeed: " + leftSpeed + "RightSpeed: " + rightSpeed);
-
     m_rightDriveTalon.set(ControlMode.PercentOutput, rightSpeed * m_handlingValues.getPowerCoefficent());
     m_leftDriveTalon.set(ControlMode.PercentOutput, leftSpeed * m_handlingValues.getPowerCoefficent());
   }
@@ -301,8 +273,6 @@ public class Drive extends SubsystemBase {
     m_leftTalonConfig.slot0.kI = m_handlingValues.getTalonTankDriveKi();
     m_leftTalonConfig.slot0.kD = m_handlingValues.getTalonTankDriveKd();
 
-    System.out.println(m_handlingValues.getTalonTankDriveKp());
-
     m_rightTalonConfig.slot0.kP = m_handlingValues.getTalonTankDriveKp();
     m_rightTalonConfig.slot0.kI = m_handlingValues.getTalonTankDriveKi();
     m_rightTalonConfig.slot0.kD = m_handlingValues.getTalonTankDriveKd();
@@ -312,8 +282,8 @@ public class Drive extends SubsystemBase {
     m_leftDriveTalonFollower.configAllSettings(m_leftTalonConfig);
     m_rightDriveTalonFollower.configAllSettings(m_rightTalonConfig);
 
-    m_leftDriveTalon.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_1Ms, 50);
-    m_rightDriveTalon.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_1Ms, 50);
+    m_leftDriveTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 1);
+    m_rightDriveTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 1);
   }
 
   private void setProfileSlot() {
@@ -333,20 +303,21 @@ public class Drive extends SubsystemBase {
   }
 
   public double getLeftTalonEncoderPosition() {
-    return m_leftTalonSensors.getIntegratedSensorPosition(); // average of master and follower?
+    return -m_leftDriveTalon.getSelectedSensorPosition();
   }
 
   public double getRightTalonEncoderPostion() {
-    return -m_rightTalonSensors.getIntegratedSensorPosition(); // average of master and follower?
+    return -m_rightDriveTalon.getSelectedSensorPosition();
   }
 
   public double getAverageRobotEncoderVelocity() {
-    return (-m_leftTalonSensors.getIntegratedSensorVelocity() + m_rightTalonSensors.getIntegratedSensorVelocity()) / 2;
+    return -(m_leftDriveTalon.getSelectedSensorPosition() + m_rightDriveTalon.getSelectedSensorPosition()) / 2;
   }
 
   public double getAverageAbsoluteRobotEncoderVelocity() {
-    return (Math.abs(m_leftTalonSensors.getIntegratedSensorVelocity())
-        + Math.abs(m_rightTalonSensors.getIntegratedSensorVelocity())) / 2;
+    return (Math.abs(m_leftDriveTalon.getSelectedSensorPosition())
+        + Math.abs(m_rightDriveTalon.getSelectedSensorPosition())) / 2;
+
   }
 
   public void setTargetLeftTalonTargetPosition(double targetSteps) {
@@ -481,7 +452,6 @@ public class Drive extends SubsystemBase {
   public double getLeftJoystickY() {
     double y = m_leftLargeJoystick.getY();
 
-    System.out.println(m_handlingValues.getTankFineHandlingMaxVelocity());
     if (Math.abs(y) > m_handlingValues.getTankDeadZone()) { // enforces joystick deadzone
       if (Math.abs(y) < m_handlingValues.getTankFineHandlingZone()) { // low velocity for superior handling
         return m_handlingValues.getTankFineHandlingCoefficent() * y;

@@ -36,6 +36,11 @@ public class ManualDriveStraightBoosted extends CommandBase {
     public void initialize() {
         m_timer.start();
         m_timer.reset(); // start the timer over again
+
+        m_Kp = m_drive.m_handlingValues.getAngleAdjustmentkP();
+        m_Ki = m_drive.m_handlingValues.getAngleAdjustmentkI();
+        m_Kd = m_drive.m_handlingValues.getAngleAdjustmentkD();
+
         m_initalYaw = m_drive.getGyroYaw();
         m_previousYaw = m_initalYaw; // so it has a reasonable value
     }
@@ -73,7 +78,7 @@ public class ManualDriveStraightBoosted extends CommandBase {
         }
 
         if (maxPower > 0) { // if the robot is moving backward
-            if (totalCorrection > 0) {
+            if (totalCorrection < 0) {
                 double leftValue = maxPower + totalCorrection;
                 leftValue = Math.min(1, leftValue); // ensure the values are in the range
                 leftValue = Math.max(-1, leftValue);

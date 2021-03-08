@@ -71,10 +71,7 @@ public class AutonomousMovementBaseII extends CommandBase {
         // if this value is negative speed up left motor or slow right
         // note both motors and joystcicks are inverted ;)
 
-        double maxPower = 0.05;
-        if (m_targetMeters > 0) {
-            maxPower = maxPower * -1;
-        }
+        double maxPower = getPowerFromDistanceRemaining(m_currentDistanceRemaining);
 
         if (maxPower > 0) { // if the robot is moving backward
             if (totalCorrection > 0) {
@@ -82,13 +79,13 @@ public class AutonomousMovementBaseII extends CommandBase {
                 leftValue = Math.min(1, leftValue); // ensure the values are in the range
                 leftValue = Math.max(-1, leftValue);
 
-                m_drive.tankDrive(leftValue, maxPower);// if total correction is positive slow left
+                m_drive.tankDriveRaw(leftValue, maxPower);// if total correction is positive slow left
             } else {
                 double rightValue = maxPower - totalCorrection;
                 rightValue = Math.min(1, rightValue); // ensure the values are in the range
                 rightValue = Math.max(-1, rightValue);
 
-                m_drive.tankDrive(maxPower, rightValue);// if total correction is positive slow right
+                m_drive.tankDriveRaw(maxPower, rightValue);// if total correction is positive slow right
             }
         } else { // if the robot is moving forward
             if (totalCorrection > 0) {
@@ -96,13 +93,13 @@ public class AutonomousMovementBaseII extends CommandBase {
                 leftValue = Math.min(1, leftValue); // ensure the values are in the range
                 leftValue = Math.max(-1, leftValue);
 
-                m_drive.tankDrive(leftValue, maxPower);// if total correction is positive slow left
+                m_drive.tankDriveRaw(leftValue, maxPower);// if total correction is positive slow left
             } else {
                 double rightValue = maxPower - totalCorrection;
                 rightValue = Math.min(1, rightValue); // ensure the values are in the range
                 rightValue = Math.max(-1, rightValue);
 
-                m_drive.tankDrive(maxPower, rightValue);// if total correction is positive slow right
+                m_drive.tankDriveRaw(maxPower, rightValue);// if total correction is positive slow right
             }
         }
 
@@ -121,9 +118,31 @@ public class AutonomousMovementBaseII extends CommandBase {
     public boolean isFinished() {
         System.out.println(m_currentDistanceRemaining);
 
-        if (Math.abs(m_currentDistanceRemaining) < 5000) {
+        if (Math.abs(m_currentDistanceRemaining) < 2000) {
             return true;
         }
         return false;
     }
+
+    private double getPowerFromDistanceRemaining(double stepsRemaining) {
+        double maxPower = .25;
+        double slowPower = .1;
+        double slowZone = 50000;
+
+        if (Math.abs(stepsRemaining) < slowZone) {
+            if (stepsRemaining < 0) {
+                slowPower = -slowPower;
+                maxPower = -maxPower;
+            }
+
+            return slowPower + -(maxPower - slowPower) * stepsRemaining / slowZone;
+        }
+
+        if (stepsRemaining < 0) {
+            maxPower = -maxPower;
+        }
+
+        return maxPower;
+    }
+
 }
