@@ -22,6 +22,9 @@ public class RunArcadeDrive extends CommandBase {
   @Override
   public void initialize() {
     System.out.println("Switching to manual arcade drive!");
+
+    m_drive.setBrakeModeLeftDriveTalons(true);
+    m_drive.setBrakeModeRightDriveTalons(true);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -45,6 +48,9 @@ public class RunArcadeDrive extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+
+    m_drive.setBrakeModeLeftDriveTalons(false);
+    m_drive.setBrakeModeRightDriveTalons(false);
     if (interrupted) {
       System.out.println("Manual arcade drive interupted!");
     } else {

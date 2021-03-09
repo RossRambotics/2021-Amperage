@@ -53,8 +53,6 @@ public class Drive extends SubsystemBase {
   private WPI_TalonFX m_leftDriveTalonFollower;
   private TalonFXConfiguration m_leftTalonConfig;
   private TalonFXConfiguration m_rightTalonConfig;
-  private TalonFXSensorCollection m_rightTalonSensors;
-  private TalonFXSensorCollection m_leftTalonSensors;
 
   // private PigeonIMU m_pigeon; // replaced by ADXRS450 gyro
   private ADXRS450_Gyro m_gyro; // the gyro in the SPI port
@@ -92,10 +90,6 @@ public class Drive extends SubsystemBase {
     // configures the inversion and peak output for the talons
     m_leftDriveTalon.setInverted(true);
     m_leftDriveTalonFollower.setInverted(true);
-
-    // gets the sensors
-    m_rightTalonSensors = m_rightDriveTalon.getSensorCollection();
-    m_leftTalonSensors = m_leftDriveTalon.getSensorCollection();
 
     // m_pigeon = new PigeonIMU(31);// new pigeon on 31; doesnt work with falcon 500
     // -- replaced
@@ -154,6 +148,7 @@ public class Drive extends SubsystemBase {
   @Override
   public void periodic() {
     m_handlingValues.refreshNetworkTablesValues();
+
   }
 
   @Override
@@ -339,13 +334,23 @@ public class Drive extends SubsystemBase {
   }
 
   public void setBrakeModeLeftDriveTalons(boolean brake) { // turns on/off brake mode on left side
-    m_leftDriveTalon.setNeutralMode(NeutralMode.Brake);
-    m_leftDriveTalonFollower.setNeutralMode(NeutralMode.Brake);
+    NeutralMode neutralMode = NeutralMode.Coast;
+    if (brake) {
+      neutralMode = NeutralMode.Brake;
+    }
+
+    m_leftDriveTalon.setNeutralMode(neutralMode);
+    m_leftDriveTalonFollower.setNeutralMode(neutralMode);
   }
 
   public void setBrakeModeRightDriveTalons(boolean brake) { // turns on/off brake mode on right side
-    m_rightDriveTalon.setNeutralMode(NeutralMode.Brake);
-    m_rightDriveTalonFollower.setNeutralMode(NeutralMode.Brake);
+    NeutralMode neutralMode = NeutralMode.Coast;
+    if (brake) {
+      neutralMode = NeutralMode.Brake;
+    }
+
+    m_rightDriveTalon.setNeutralMode(neutralMode);
+    m_rightDriveTalonFollower.setNeutralMode(neutralMode);
   }
 
   public double getStepsPerFrameRotation() { // get the number of encoder steps it take the robot to make one full

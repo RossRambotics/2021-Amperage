@@ -16,7 +16,7 @@ public class ChesterTankDrive extends HandlingBase {
 
     @Override
     public double getPowerCoefficentInitialValue() {
-        return 25;
+        return .5;
     }
 
     @Override
@@ -26,6 +26,17 @@ public class ChesterTankDrive extends HandlingBase {
 
     @Override
     protected double getRadialTurnCoefficentInitalValue() {
-        return 0.1;
+        return 0.36;
+    }
+
+    @Override
+    protected double getTankFineHandlingMaxVelocityInitialValue() {
+        // TODO Auto-generated method stub
+        return 0.2;
+    }
+
+    @Override
+    protected double getTankFineHandlingZoneInitialValue() {
+        return 0.99;
     }
 }
