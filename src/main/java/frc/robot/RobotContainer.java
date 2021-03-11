@@ -25,6 +25,7 @@ import frc.robot.commands.AutomatedMotion.AutonomousMovementBaseII;
 import frc.robot.commands.AutomatedMotion.ManualDriveStraight;
 import frc.robot.commands.AutomatedMotion.ManualDriveStraightBoosted;
 import frc.robot.commands.AutomatedMotion.Track;
+import frc.robot.commands.AutomatedMotion.TrackMotionGyro;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -115,6 +116,7 @@ public class RobotContainer {
      */
 
     JoystickButton selectButton = new JoystickButton(m_smallJoystick, 7);
+    selectButton.whenHeld(new TrackMotionGyro(drive));
 
     if (m_leftLargeJoystick != null) {
       JoystickButton leftTopForwardButton = new JoystickButton(m_leftLargeJoystick, 3);

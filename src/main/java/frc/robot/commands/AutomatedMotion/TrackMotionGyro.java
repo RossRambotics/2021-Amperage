@@ -16,7 +16,7 @@ public class TrackMotionGyro extends CommandBase {
     private double m_currentLeftSteps; // the left steps at the current time
     private double m_currentRightSteps; // the right steps at the current time
 
-    public TrackMotionGyro(Drive drive, double callingJoystick) { // calling joystick corrosponds to port number
+    public TrackMotionGyro(Drive drive) { // calling joystick corrosponds to port number
         m_drive = drive;
     }
 
@@ -45,7 +45,8 @@ public class TrackMotionGyro extends CommandBase {
             // calcuates the ABSOLUTE heading and relative Y and X position
 
             // updates the position
-            m_currentHeading = relativePosition[2];
+            m_currentHeading = newHeading;
+            System.out.println("X: " + m_currentXPosition + " Y: " + m_currentYPosition);
             m_currentXPosition = m_currentXPosition + relativePosition[1];
             m_currentYPosition = m_currentYPosition + relativePosition[0];
 

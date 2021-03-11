@@ -12,22 +12,32 @@ public class WillArcadeDrive extends HandlingBase {
     }
 
     @Override
+    protected double getPowerCoefficentInitialValue() {
+        return .5;
+    }
+
+    @Override
     public String getTabName() {
         return "WLA";
     }
 
     @Override
-    public double getPowerCoefficentInitialValue() {
-        return 7;
-    }
-
-    @Override
     public double getArcadeLowMaxTurnInitialValue() {
-        return 0.15;
+        return 0.7;
     }
 
     @Override
     public double getArcadeLowTurnZoneInitialValue() {
         return 0.9;
+    }
+
+    @Override
+    public double getArcadeHighMaxTurnCoefficentInitalValue() {
+        return 1;
+    }
+
+    @Override
+    public double getRadialTurnCoefficentInitialValue() {
+        return .4;
     }
 }

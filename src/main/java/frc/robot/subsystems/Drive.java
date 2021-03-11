@@ -409,28 +409,35 @@ public class Drive extends SubsystemBase {
   public double[] getXYTranslationFromEncoderGyroMovement(double rightMovement, double leftMovement,
       double initialHeading, double finalHeading) {
 
+    System.out.println("Right: " + rightMovement + " left: " + leftMovement);
+
     // becuase I thought this was smart at the time Y is the direction parellel to
     // the robot, X is perpendiular
     // returns translation in [Y, X]
 
-    double degreesOfRotation = finalHeading - initialHeading; // the amount of
-                                                              // degrees the
-                                                              // robot rotated
-    double turnRadius = 28.647 * (leftMovement + rightMovement) / degreesOfRotation;
-    // 360 / degreesOfRotation* (leftMovement + rightMovement) / 2 / 2 / 3.14; //
+    double degreesOfRotation = Math.abs(finalHeading - initialHeading); // the amount of
+    // degrees the
+    // robot rotated
+    System.out.println("Rotation: " + degreesOfRotation);
+    double turnRadius = 28.647 * Math.abs(leftMovement + rightMovement) / degreesOfRotation;
+    // (360 / degreesOfRotation) * (leftMovement + rightMovement) / 2 / 2 / 3.14; //
     // the radius of the turn made by the robot
-    double xRelativeMovement = turnRadius - Math.cos(degreesOfRotation) * turnRadius; // the x translation relative to
-                                                                                      // the initial heading of the
-                                                                                      // robot
+    double xRelativeMovement = turnRadius - Math.cos(Math.toRadians(degreesOfRotation)) * turnRadius; // the x
+                                                                                                      // translation
+                                                                                                      // relative to
+    // the initial heading of the
+    // robot
     // x is side to side
     // left is negative, right is positive
-    double yRelativeMovement = Math.sin(degreesOfRotation) * turnRadius;
+    double yRelativeMovement = Math.sin(Math.toRadians(degreesOfRotation)) * turnRadius;
     // y is forward and backward
 
     if (rightMovement > leftMovement) { // give the x value the proper sign
       // required because of the absolute value in the degrees of rotation calcualtion
       xRelativeMovement = -xRelativeMovement;
     }
+
+    System.out.println("xRelative: " + xRelativeMovement + " yRelative: " + yRelativeMovement);
     // Rules:
     // x is side to side
     // left is negative, right is positive
@@ -441,8 +448,10 @@ public class Drive extends SubsystemBase {
     // x direction equals initialHeading - 90
     // initial heading of zero is the robots initial direction of travel
     // the rotation of heading is 0 to 360 in a counterclockwise direction
-    double yAbsolute = Math.cos(initialHeading) * yRelativeMovement + Math.cos(initialHeading - 90) * xRelativeMovement;
-    double xAbsolute = Math.sin(initialHeading) * xRelativeMovement + Math.cos(initialHeading - 90) * yRelativeMovement;
+    double yAbsolute = Math.cos(Math.toRadians(initialHeading)) * yRelativeMovement
+        + Math.cos(Math.toRadians(initialHeading - 90)) * xRelativeMovement;
+    double xAbsolute = Math.sin(Math.toRadians(initialHeading)) * xRelativeMovement
+        + Math.cos(Math.toRadians(initialHeading - 90)) * yRelativeMovement;
     // I though about this backward -- x is sin and y is cos in this case
     // --FACESMACK
 

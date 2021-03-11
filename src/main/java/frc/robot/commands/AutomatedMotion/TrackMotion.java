@@ -15,7 +15,7 @@ public class TrackMotion extends CommandBase {
     private double m_currentLeftSteps; // the left steps at the current time
     private double m_currentRightSteps; // the right steps at the current time
 
-    public TrackMotion(Drive drive, double callingJoystick) { // calling joystick corrosponds to port number
+    public TrackMotion(Drive drive) { // calling joystick corrosponds to port number
         m_drive = drive;
     }
 
@@ -24,6 +24,10 @@ public class TrackMotion extends CommandBase {
     public void initialize() {
         m_currentLeftSteps = m_drive.getLeftTalonEncoderPosition();
         m_currentRightSteps = m_drive.getRightTalonEncoderPostion();
+
+        m_currentYPosition = 0;
+        m_currentXPosition = 0;
+        m_currentHeading = 0;
     }
 
     // Called every time the scheduler runs while the command is scheduled.

@@ -27,7 +27,7 @@ public class TyTankDrive extends HandlingBase {
     }
 
     @Override
-    protected double getRadialTurnCoefficentInitalValue() {
+    protected double getRadialTurnCoefficentInitialValue() {
         return 0.1;
     }
 }

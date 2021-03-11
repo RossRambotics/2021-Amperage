@@ -25,7 +25,7 @@ public class ChesterTankDrive extends HandlingBase {
     }
 
     @Override
-    protected double getRadialTurnCoefficentInitalValue() {
+    protected double getRadialTurnCoefficentInitialValue() {
         return 0.36;
     }
 

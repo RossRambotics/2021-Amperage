@@ -318,7 +318,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
         return .3;
     }
 
-    protected double getRadialTurnCoefficentInitalValue() {
+    protected double getRadialTurnCoefficentInitialValue() {
         return 0.05;
     }
 
@@ -439,7 +439,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
             return m_radialTurnCoefficent;
         }
 
-        return getRadialTurnCoefficentInitalValue();
+        return getRadialTurnCoefficentInitialValue();
     }
 
     public double getArcadeLowMaxTurn() {

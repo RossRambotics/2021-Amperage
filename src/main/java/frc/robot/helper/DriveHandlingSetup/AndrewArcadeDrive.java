@@ -16,7 +16,7 @@ public class AndrewArcadeDrive extends HandlingBase {
 
     @Override
     protected double getPowerCoefficentInitialValue() {
-        return 7;
+        return .5;
     }
 
     @Override
@@ -26,11 +26,21 @@ public class AndrewArcadeDrive extends HandlingBase {
 
     @Override
     public double getArcadeLowMaxTurnInitialValue() {
-        return .15;
+        return 0.7;
     }
 
     @Override
     public double getArcadeLowTurnZoneInitialValue() {
         return 0.9;
+    }
+
+    @Override
+    public double getArcadeHighMaxTurnCoefficentInitalValue() {
+        return 1;
+    }
+
+    @Override
+    public double getRadialTurnCoefficentInitialValue() {
+        return .36;
     }
 }
