@@ -16,6 +16,8 @@ public class TrackMotionGyro extends CommandBase {
     private double m_currentLeftSteps; // the left steps at the current time
     private double m_currentRightSteps; // the right steps at the current time
 
+    private double m_reportLoops = 100; // how many loops between reports //change in two places
+
     public TrackMotionGyro(Drive drive) { // calling joystick corrosponds to port number
         m_drive = drive;
     }
@@ -46,14 +48,22 @@ public class TrackMotionGyro extends CommandBase {
 
             // updates the position
             m_currentHeading = newHeading;
-            System.out.println("X: " + m_currentXPosition + " Y: " + m_currentYPosition);
-            m_currentXPosition = m_currentXPosition + relativePosition[1];
-            m_currentYPosition = m_currentYPosition + relativePosition[0];
+            m_currentXPosition = m_currentXPosition - relativePosition[1] * m_drive.getDistancePerStep();
+            m_currentYPosition = m_currentYPosition + relativePosition[0] * m_drive.getDistancePerStep();
 
             // updates the current encoder counts
             m_currentRightSteps = newRightSteps;
             m_currentLeftSteps = newLeftSteps;
             m_currentHeading = newHeading;
+
+            m_drive.updateAbsolutePosition(m_currentXPosition, m_currentYPosition, m_currentHeading);
+        }
+
+        m_reportLoops = m_reportLoops - 1;
+        if (m_reportLoops <= 0) {
+            System.out.println("Heading: " + (m_currentHeading - m_initialHeading));
+            System.out.println("Y: " + m_currentYPosition + " X: " + m_currentXPosition);
+            m_reportLoops = 100;
         }
 
     }

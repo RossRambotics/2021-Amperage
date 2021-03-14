@@ -37,7 +37,7 @@ public class Drive extends SubsystemBase {
   // per rotation
   // steps / 100ms = mps * .1 seconds * steps per rotation / wheel cicumference /
   // gear ratio
-  private double m_wheelCircumference = 0.478; // meters - 6 inch diameter
+  private double m_wheelCircumference = 0.525; // meters - 6 inch diameter // now empirically determined
   private double m_gearCoeffiecent = .0933; // 10.71 to 1 falcon rotation to wheel rotation
   private double m_stepsPerRotation = 2048.0; // encoder steps
   private double m_trackwidth = 0.556; // the robot trackwidth7
@@ -46,6 +46,10 @@ public class Drive extends SubsystemBase {
   private Joystick m_rightLargeJoystick;
   private Joystick m_leftLargeJoystick;
   private Joystick m_smallJoystick;
+
+  private double m_absoluteX = 0;
+  private double m_absoluteY = 0;
+  private double m_absoluteH = 0;
 
   private WPI_TalonFX m_rightDriveTalon;
   private WPI_TalonFX m_leftDriveTalon;
@@ -162,6 +166,8 @@ public class Drive extends SubsystemBase {
   }
 
   public void tankDrive(double leftSpeed, double rightSpeed) { // takes into account the velocity coefficent
+
+    System.out.println("Left: " + leftSpeed + " Right: " + rightSpeed);
     m_rightDriveTalon.set(ControlMode.PercentOutput, rightSpeed * m_handlingValues.getPowerCoefficent());
     m_leftDriveTalon.set(ControlMode.PercentOutput, leftSpeed * m_handlingValues.getPowerCoefficent());
   }
@@ -175,7 +181,17 @@ public class Drive extends SubsystemBase {
   }
 
   public double getGyroYaw() {
-    return m_gyro.getAngle();
+    return m_gyro.getAngle() % 360;
+  }
+
+  public void updateAbsolutePosition(double x, double y, double heading) {
+    m_absoluteX = x;
+    m_absoluteY = y;
+    m_absoluteH = heading;
+  }
+
+  public double[] getAbsolutePosition() {// [x, y, heading]
+    return new double[] { m_absoluteX, m_absoluteY, m_absoluteH };
   }
 
   public void arcadeDrive(double x, double y, String brakeSide) {
@@ -409,8 +425,6 @@ public class Drive extends SubsystemBase {
   public double[] getXYTranslationFromEncoderGyroMovement(double rightMovement, double leftMovement,
       double initialHeading, double finalHeading) {
 
-    System.out.println("Right: " + rightMovement + " left: " + leftMovement);
-
     // becuase I thought this was smart at the time Y is the direction parellel to
     // the robot, X is perpendiular
     // returns translation in [Y, X]
@@ -418,7 +432,6 @@ public class Drive extends SubsystemBase {
     double degreesOfRotation = Math.abs(finalHeading - initialHeading); // the amount of
     // degrees the
     // robot rotated
-    System.out.println("Rotation: " + degreesOfRotation);
     double turnRadius = 28.647 * Math.abs(leftMovement + rightMovement) / degreesOfRotation;
     // (360 / degreesOfRotation) * (leftMovement + rightMovement) / 2 / 2 / 3.14; //
     // the radius of the turn made by the robot
@@ -432,12 +445,15 @@ public class Drive extends SubsystemBase {
     double yRelativeMovement = Math.sin(Math.toRadians(degreesOfRotation)) * turnRadius;
     // y is forward and backward
 
+    if ((rightMovement + leftMovement) < 0) {
+      yRelativeMovement = -yRelativeMovement;
+    }
+
     if (rightMovement > leftMovement) { // give the x value the proper sign
       // required because of the absolute value in the degrees of rotation calcualtion
       xRelativeMovement = -xRelativeMovement;
     }
 
-    System.out.println("xRelative: " + xRelativeMovement + " yRelative: " + yRelativeMovement);
     // Rules:
     // x is side to side
     // left is negative, right is positive

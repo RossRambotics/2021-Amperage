@@ -22,10 +22,13 @@ import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.*;
 import frc.robot.commands.AutomatedMotion.AutonomousMovementBase;
 import frc.robot.commands.AutomatedMotion.AutonomousMovementBaseII;
+import frc.robot.commands.AutomatedMotion.GoToPoint;
 import frc.robot.commands.AutomatedMotion.ManualDriveStraight;
 import frc.robot.commands.AutomatedMotion.ManualDriveStraightBoosted;
 import frc.robot.commands.AutomatedMotion.Track;
 import frc.robot.commands.AutomatedMotion.TrackMotionGyro;
+import frc.robot.helper.TestCourseManager;
+import frc.robot.helper.WayPoint;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -102,7 +105,7 @@ public class RobotContainer {
     aButton.whenPressed(new frc.robot.commands.IntakeMotorOn(intake), true);
 
     JoystickButton startButton = new JoystickButton(m_smallJoystick, 8);
-    startButton.whenPressed(new AutonomousMovementBaseII(drive, -65));
+    startButton.whenPressed(new AutonomousMovementBaseII(drive, -6));
     /*
      * new SequentialCommandGroup(new Track(drive), new
      * AutonomousMovementBaseII(drive, -.5), new Track(drive), new
@@ -115,8 +118,9 @@ public class RobotContainer {
      * frc.robot.commands.Test.Shooter.StopShooter(shooter)));
      */
 
+    TestCourseManager testCourse = new TestCourseManager(drive);
     JoystickButton selectButton = new JoystickButton(m_smallJoystick, 7);
-    selectButton.whenHeld(new TrackMotionGyro(drive));
+    selectButton.whenPressed(testCourse.getCourseCommand());
 
     if (m_leftLargeJoystick != null) {
       JoystickButton leftTopForwardButton = new JoystickButton(m_leftLargeJoystick, 3);

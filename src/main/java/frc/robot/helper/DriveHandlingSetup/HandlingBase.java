@@ -311,7 +311,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
     }
 
     protected double getTankFineHandlingMaxVelocityInitialValue() {
-        return 0.2;
+        return 0.5;
     }
 
     protected double getPowerCoefficentInitialValue() {
