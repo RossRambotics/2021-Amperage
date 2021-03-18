@@ -17,8 +17,6 @@ baseImage = Image.open('BaseImage.jpg')
 baseImageBitmap = np.array(baseImage) #3d image array [height, width, RGBA]
 outputImageBitmap = baseImageBitmap # save for later use
 
-
-
 baseHeight = baseImageBitmap.shape[0]
 baseWidth = baseImageBitmap.shape[1]
 
@@ -319,8 +317,9 @@ print("Converting path to code")
 codePathArray = []
 if(k_convertPathToCode):
     for waypoint in scaledPathArray: 
-        codePathArray.append("wayPoints.add(new double[] { " + str(waypoint[1]) + " , " + str(waypoint[0]) + " });\n")
-        #Course manager understands points to be [x,y]
+        codePathArray.append("wayPoints.add(new double[] { " + str(-waypoint[0]) + " , " + str(waypoint[1]) + " });\n")
+        #Course manager understands points to be [x,y] but the robot starts facing sideways so [y,x]
+        # the course on amperage is alos mirrored so x is -x
 
 print("Generating output text file")
 
