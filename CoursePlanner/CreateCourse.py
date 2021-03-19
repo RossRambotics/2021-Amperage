@@ -10,7 +10,7 @@ k_markerColor = [255, 40, 5] #Ferrari Red
 k_orginColor = [0, 255, 0] # green
 k_waypointStringingRadius = 23 # the maximum distance to look for a waypoint when creating a path
 k_pixelScalingFactor = .009208 # how many meters are represented by the length 1 pixel
-k_maxPathSmoothingDistance = 40 # how far between points the smoothing algorithim can go
+k_maxPathSmoothingDistance = 80 # how far between points the smoothing algorithim can go
 k_convertPathToCode = True # wether or not to save the path as lines of code
 
 baseImage = Image.open('BaseImage.jpg')
@@ -179,7 +179,7 @@ while(pathFound):
             if(unlineraity < lowestUnlinearity or lowestUnlinearity == -1):
                 lowestUnlinearity = unlineraity
         
-        unlineraityMax = lowestUnlinearity + math.pi / 6 # waypoints that are valid must be in this range + or -
+        unlineraityMax = lowestUnlinearity + math.pi / 12 # waypoints that are valid must be in this range + or -
         validWaypoints = [] # all of the points that are within the unlinearity max
         for waypoint in waypointsInZoneArray:
             currentAngle = math.pi / 2
@@ -211,20 +211,19 @@ while(pathFound):
         pathArray.append(startPoint) # adds the new point to the path
         waypointMaskArray[startPoint[0]][startPoint[1]] = 0 # remove the waypoint from the array of valid points to go to
 
-'''
-print("Smoothing Path")
+print("Smoothing: Method 1")
+
 waypointCounter = 0
-while(waypointCounter < pathArray.__len__()):
+while(waypointCounter + 3 < pathArray.__len__()):
     smoothPoint = True
     while(smoothPoint == True):
         point = pathArray[waypointCounter] # the base point
-
         # invalid points have a third entry which is -1
         nextPointCounter = 1
         pointFound = False # has a new point been found
-        while(not pointFound): # while a valid next point has not been found
-            if(pathArray[waypointCounter + nextPointCounter].__len__() != 2): # if the point is a vaild point
-                invalidPoint = pathArray[waypointCounter + nextPointCounter]
+        while((not pointFound) and pathArray.__len__() > waypointCounter + nextPointCounter + 2): # while a valid next point has not been found
+            if(pathArray[waypointCounter + nextPointCounter + 1].__len__() != 2): # if the point is a vaild point
+                invalidPoint = pathArray[waypointCounter + nextPointCounter + 1]
                 
                 distance = math.sqrt(math.pow(point[0] - invalidPoint[0], 2) + math.pow(point[1] - invalidPoint[1], 2))
                 if(distance < k_maxPathSmoothingDistance): # if the point is within the smoothing distance continue
@@ -233,13 +232,137 @@ while(waypointCounter < pathArray.__len__()):
                     pointFound = True # marks the point as found but do not smooth becuase the point is invalid
                     smoothPoint = False
             else: 
-                pointFound = True
+                validPoint = pathArray[waypointCounter + nextPointCounter + 1]
 
-        if(smoothPoint): # if the point is to be attempted to be smooth
+                distance = math.sqrt(math.pow(point[0] - validPoint[0], 2) + math.pow(point[1] - validPoint[1], 2))
+                if(distance < k_maxPathSmoothingDistance): # if the point is within the smoothing distance continue
+                    pointFound = True
+                else:
+                    pointFound = True # marks the point as found but do not smooth becuase the point is too far
+                    smoothPoint = False
+        
+        if(not pointFound): # makes sure the loop can end when the point cannot be found
+            smoothPoint = False
+
+        if(smoothPoint and pointFound): # if the point is to be attempted to be smooth
             nextPoint = pathArray[waypointCounter + nextPointCounter]
             nextNextPoint = pathArray[waypointCounter + nextPointCounter + 1]
             nextNextNextPoint = pathArray[waypointCounter + nextPointCounter + 2]
-'''
+
+            #account for a lot of divide by zero execptions
+            relativeAngle = math.pi / 2
+            if(nextPoint[0] < point[0]):
+                relativeAngle = -relativeAngle
+            if(nextPoint[1] != point[1]):
+                relativeAngle = math.atan(nextPoint[0] - point[0]) / (nextPoint[1] - point[1]) #slope of the first path between the first two points
+
+
+            nextRelativeAngle = math.pi / 2
+            if(nextNextPoint[0] < nextPoint[0]):
+                nextRelativeAngle = -nextRelativeAngle
+            if(nextNextPoint[1] != nextPoint[1]):
+                nextRelativeAngle = math.atan(nextNextPoint[0] - nextPoint[0]) / (nextNextPoint[1] - nextPoint[1]) #slope of the first path between the first two points
+
+ 
+            nextNextRelativeAngle = math.pi / 2
+            if(nextNextNextPoint[0] < nextNextPoint[0]):
+                nextNextRelativeAngle = -nextNextRelativeAngle
+            if(nextNextNextPoint[1] != nextNextPoint[1]):
+                nextNextRelativeAngle = math.atan(nextNextNextPoint[0] - nextNextPoint[0]) / (nextNextNextPoint[1] - nextNextPoint[1]) #slope of the first path between the first two points
+
+            nextDistance = math.sqrt(math.pow(nextNextPoint[0] - nextPoint[0], 2) + math.pow(nextNextPoint[1] - nextPoint[1], 2)) # the distance between points 2 and three
+            nextNextDistance = math.sqrt(math.pow(nextNextNextPoint[0] - nextNextPoint[0], 2) + math.pow(nextNextNextPoint[1] - nextNextPoint[1], 2)) # the distance between points 2 and four
+
+            unlinearityChange = (nextRelativeAngle - relativeAngle) / nextDistance
+            nextUnlinearityChange = (nextNextRelativeAngle - relativeAngle) / nextNextDistance
+
+            if(abs(unlinearityChange - nextUnlinearityChange) == abs(unlinearityChange) + abs(nextUnlinearityChange)): # if they aren't the same sign then smooth
+                pathArray[waypointCounter + nextPointCounter + 1] = [nextNextPoint[0], nextNextPoint[1], -1]
+            else:
+                smoothPoint = False
+    
+    ironCounter = 0
+    newPathArray = []
+
+    while(ironCounter < pathArray.__len__()): #irons out all of the invalid points from the path array
+        if(pathArray[ironCounter].__len__() == 2):
+            newPathArray.append(pathArray[ironCounter])
+        ironCounter = ironCounter + 1
+
+    pathArray = newPathArray
+
+    waypointCounter = waypointCounter + 1
+
+print("Smoothing: Method 2")
+
+waypointCounter = 0
+while(waypointCounter + 2 < pathArray.__len__()):
+    smoothPoint = True
+    while(smoothPoint == True):
+        point = pathArray[waypointCounter] # the base point
+        # invalid points have a third entry which is -1
+        nextPointCounter = 1
+        pointFound = False # has a new point been found
+        while((not pointFound) and pathArray.__len__() > waypointCounter + nextPointCounter + 1): # while a valid next point has not been found
+            if(pathArray[waypointCounter + nextPointCounter + 1].__len__() != 2): # if the point is a vaild point
+                invalidPoint = pathArray[waypointCounter + nextPointCounter + 1]
+                
+                distance = math.sqrt(math.pow(point[0] - invalidPoint[0], 2) + math.pow(point[1] - invalidPoint[1], 2))
+                if(distance < k_maxPathSmoothingDistance): # if the point is within the smoothing distance continue
+                    nextPointCounter = nextPointCounter + 1
+                else:
+                    pointFound = True # marks the point as found but do not smooth becuase the point is invalid
+                    smoothPoint = False
+            else: 
+                validPoint = pathArray[waypointCounter + nextPointCounter + 1]
+
+                distance = math.sqrt(math.pow(point[0] - validPoint[0], 2) + math.pow(point[1] - validPoint[1], 2))
+                if(distance < k_maxPathSmoothingDistance): # if the point is within the smoothing distance continue
+                    pointFound = True
+                else:
+                    pointFound = True # marks the point as found but do not smooth becuase the point is too far
+                    smoothPoint = False
+        
+        if(not pointFound): # makes sure the loop can end when the point cannot be found
+            smoothPoint = False
+
+        if(smoothPoint and pointFound): # if the point is to be attempted to be smooth
+            nextPoint = pathArray[waypointCounter + nextPointCounter]
+            nextNextPoint = pathArray[waypointCounter + nextPointCounter + 1]
+
+            #account for a lot of divide by zero execptions
+            relativeAngle = math.pi / 2
+            if(nextPoint[0] < point[0]):
+                relativeAngle = -relativeAngle
+            if(nextPoint[1] != point[1]):
+                relativeAngle = math.atan(nextPoint[0] - point[0]) / (nextPoint[1] - point[1]) #slope of the first path between the first two points
+
+
+            nextRelativeAngle = math.pi / 2
+            if(nextNextPoint[0] < point[0]):
+                nextRelativeAngle = -nextRelativeAngle
+            if(nextNextPoint[1] != point[1]):
+                nextRelativeAngle = math.atan(nextNextPoint[0] - point[0]) / (nextNextPoint[1] - point[1]) #slope of the first path between the first two points
+
+            unlinearity = (nextRelativeAngle - relativeAngle)
+
+            if(unlinearity < (math.pi / 12)): # smooth if the line is almost linear
+                pathArray[waypointCounter + nextPointCounter + 1] = [nextNextPoint[0], nextNextPoint[1], -1]
+            else:
+                smoothPoint = False
+    
+    ironCounter = 0
+    newPathArray = []
+
+    while(ironCounter < pathArray.__len__()): #irons out all of the invalid points from the path array
+        if(pathArray[ironCounter].__len__() == 2):
+            newPathArray.append(pathArray[ironCounter])
+        ironCounter = ironCounter + 1
+
+    pathArray = newPathArray
+
+    waypointCounter = waypointCounter + 1
+
 
 
 
@@ -254,7 +377,7 @@ for waypoint in pathArray: # gos through and draws lines between waypoints
             slope = (waypoint[0] - previousPoint[0]) / (waypoint[1] - previousPoint[1])
             #pathEquation: yValue = slope*(xValue - previousPoint[1]) + previousPoint[0]
             
-            pathCountIncrement = 0.2
+            pathCountIncrement = 0.05
             if(waypoint[1] > previousPoint[1]): # set up to account for backwards motion 
                 xValue = previousPoint[1] + pathCountIncrement / 2
 
