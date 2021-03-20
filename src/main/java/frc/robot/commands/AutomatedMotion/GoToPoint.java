@@ -17,8 +17,8 @@ public class GoToPoint extends CommandBase {
     private Timer m_timer; // allows for the calculation of the derivative
     private double m_previousFrameCount; // the most recent acknowledged frame
 
-    private double m_basePower = -0.8; // the base value for moving to power cells
-    private double m_Kp = 0.05;
+    private double m_basePower = -0.4; // the base value for moving to power cells
+    private double m_Kp = 0.08;
     private double m_Ki = 0.02;
     private double m_Kd = 0.0013;
 
@@ -98,13 +98,13 @@ public class GoToPoint extends CommandBase {
                 leftValue = Math.min(1, leftValue); // ensure the values are in the range
                 leftValue = Math.max(-1, leftValue);
 
-                m_drive.tankDrive(leftValue, basePower);// if total correction is positive slow left
+                m_drive.tankDriveRaw(leftValue, basePower);// if total correction is positive slow left
             } else {
                 double rightValue = basePower - totalCorrection;
                 rightValue = Math.min(1, rightValue); // ensure the values are in the range
                 rightValue = Math.max(-1, rightValue);
 
-                m_drive.tankDrive(basePower, rightValue);// if total correction is positive slow right
+                m_drive.tankDriveRaw(basePower, rightValue);// if total correction is positive slow right
             }
         } else { // if the robot is moving forward
             if (totalCorrection > 0) {
@@ -112,13 +112,13 @@ public class GoToPoint extends CommandBase {
                 leftValue = Math.min(1, leftValue); // ensure the values are in the range
                 leftValue = Math.max(-1, leftValue);
 
-                m_drive.tankDrive(leftValue, basePower);// if total correction is positive slow left
+                m_drive.tankDriveRaw(leftValue, basePower);// if total correction is positive slow left
             } else {
                 double rightValue = basePower - totalCorrection;
                 rightValue = Math.min(1, rightValue); // ensure the values are in the range
                 rightValue = Math.max(-1, rightValue);
 
-                m_drive.tankDrive(basePower, rightValue);// if total correction is positive slow right
+                m_drive.tankDriveRaw(basePower, rightValue);// if total correction is positive slow right
             }
         }
 

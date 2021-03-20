@@ -10,7 +10,7 @@ k_markerColor = [255, 40, 5] #Ferrari Red
 k_orginColor = [0, 255, 0] # green
 k_waypointStringingRadius = 23 # the maximum distance to look for a waypoint when creating a path
 k_pixelScalingFactor = .009208 # how many meters are represented by the length 1 pixel
-k_maxPathSmoothingDistance = 80 # how far between points the smoothing algorithim can go
+k_maxPathSmoothingDistance = 100 # how far between points the smoothing algorithim can go
 k_convertPathToCode = True # wether or not to save the path as lines of code
 
 baseImage = Image.open('BaseImage.jpg')
@@ -20,7 +20,7 @@ outputImageBitmap = baseImageBitmap # save for later use
 baseHeight = baseImageBitmap.shape[0]
 baseWidth = baseImageBitmap.shape[1]
 
-newImage = Image.open('NewImage5.jpg')
+newImage = Image.open('NewImage6.jpg')
 newImageBitmap = np.array(newImage)
 
 newHeight = newImageBitmap.shape[0]
@@ -179,8 +179,8 @@ while(pathFound):
             if(unlineraity < lowestUnlinearity or lowestUnlinearity == -1):
                 lowestUnlinearity = unlineraity
         
-        unlineraityMax = lowestUnlinearity + math.pi / 12 # waypoints that are valid must be in this range + or -
-        validWaypoints = [] # all of the points that are within the unlinearity max
+        unlineraityMax = lowestUnlinearity + math.pi / 16 # waypoints that are valid must be in this range + or -
+        validWaypoints = [] # all of the points that are w ithin the unlinearity max
         for waypoint in waypointsInZoneArray:
             currentAngle = math.pi / 2
             if(waypoint[1] != startPoint[1]): # stops a division by zero
@@ -294,6 +294,7 @@ while(waypointCounter + 3 < pathArray.__len__()):
     waypointCounter = waypointCounter + 1
 
 print("Smoothing: Method 2")
+print(pathArray.__len__())
 
 waypointCounter = 0
 while(waypointCounter + 2 < pathArray.__len__()):
@@ -314,7 +315,7 @@ while(waypointCounter + 2 < pathArray.__len__()):
                     pointFound = True # marks the point as found but do not smooth becuase the point is invalid
                     smoothPoint = False
             else: 
-                validPoint = pathArray[waypointCounter + nextPointCounter + 1]
+                validPoint = pathArray[waypointCounter + nextPointCounter]
 
                 distance = math.sqrt(math.pow(point[0] - validPoint[0], 2) + math.pow(point[1] - validPoint[1], 2))
                 if(distance < k_maxPathSmoothingDistance): # if the point is within the smoothing distance continue
@@ -336,35 +337,40 @@ while(waypointCounter + 2 < pathArray.__len__()):
                 relativeAngle = -relativeAngle
             if(nextPoint[1] != point[1]):
                 relativeAngle = math.atan(nextPoint[0] - point[0]) / (nextPoint[1] - point[1]) #slope of the first path between the first two points
-
+                if(nextPoint[1] < point[1]):
+                    relativeAngle = relativeAngle + math.pi
 
             nextRelativeAngle = math.pi / 2
-            if(nextNextPoint[0] < point[0]):
+            if(nextNextPoint[0] < nextPoint[0]):
                 nextRelativeAngle = -nextRelativeAngle
-            if(nextNextPoint[1] != point[1]):
-                nextRelativeAngle = math.atan(nextNextPoint[0] - point[0]) / (nextNextPoint[1] - point[1]) #slope of the first path between the first two points
+            if(nextNextPoint[1] != nextPoint[1]):
+                nextRelativeAngle = math.atan(nextNextPoint[0] - nextPoint[0]) / (nextNextPoint[1] - nextPoint[1]) #slope of the first path between the first two points
+                if(nextNextPoint[1] < nextPoint[1]):
+                    nextRelativeAngle = nextRelativeAngle + math.pi
 
-            unlinearity = (nextRelativeAngle - relativeAngle)
+            unlinearity = abs(nextRelativeAngle - relativeAngle)
+            if(unlinearity > math.pi):
+                unlinearity = math.pi * 2 - unlinearity
 
-            if(unlinearity < (math.pi / 12)): # smooth if the line is almost linear
-                pathArray[waypointCounter + nextPointCounter + 1] = [nextNextPoint[0], nextNextPoint[1], -1]
+            if(unlinearity < (math.pi / 50)): # smooth if the line is almost linear
+                pathArray[waypointCounter + nextPointCounter] = [nextNextPoint[0], nextNextPoint[1], -1]
             else:
                 smoothPoint = False
     
-    ironCounter = 0
-    newPathArray = []
+        ironCounter = 0
+        newPathArray = []
 
-    while(ironCounter < pathArray.__len__()): #irons out all of the invalid points from the path array
-        if(pathArray[ironCounter].__len__() == 2):
-            newPathArray.append(pathArray[ironCounter])
-        ironCounter = ironCounter + 1
+        while(ironCounter < pathArray.__len__()): #irons out all of the invalid points from the path array
+            if(pathArray[ironCounter].__len__() == 2):
+                newPathArray.append(pathArray[ironCounter])
 
-    pathArray = newPathArray
+            ironCounter = ironCounter + 1
+
+        pathArray = newPathArray
 
     waypointCounter = waypointCounter + 1
 
-
-
+print(pathArray.__len__())
 
 print("Creating ouput image")
 

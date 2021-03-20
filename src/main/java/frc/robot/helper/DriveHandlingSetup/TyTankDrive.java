@@ -7,6 +7,11 @@ public class TyTankDrive extends HandlingBase {
     }
 
     @Override
+    public double getPowerCoefficentInitialValue() {
+        return .5;
+    }
+
+    @Override
     public String getDefaultDriveCommandNameInitialValue() {
         return "TankDriveHandBrake";
     }
@@ -19,11 +24,6 @@ public class TyTankDrive extends HandlingBase {
     @Override
     public String getTabName() {
         return "TAT";
-    }
-
-    @Override
-    public double getPowerCoefficentInitialValue() {
-        return 13;
     }
 
     @Override
