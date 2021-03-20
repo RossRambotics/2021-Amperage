@@ -5,7 +5,7 @@ public class WayPoint {
     // positioning in meters
     private double m_absoluteX;
     private double m_absoluteY;
-    private double m_targetRadius = .2;
+    private double m_targetRadius = .1;
 
     public boolean cleared = false; // wether the radian has been cleared
 
@@ -27,7 +27,11 @@ public class WayPoint {
     public double getHeadingTo(double x, double y) {
 
         // acot because y is straight ahead and x is side to side -- x and y are flipped
-        double radians = -Math.atan((m_absoluteX - x) / (m_absoluteY - y));
+        double radians = Math.PI / 2;
+
+        if (Math.abs(m_absoluteY - y) > .00001) { // prevents NAN errorz
+            radians = -Math.atan((m_absoluteX - x) / (m_absoluteY - y));
+        }
 
         if ((m_absoluteY - y) < 0) { // accounts for the return of arc only covering half the range
             radians = radians + Math.PI;
@@ -38,5 +42,6 @@ public class WayPoint {
         }
 
         return 57.32 * radians; // degrees
+
     }
 }

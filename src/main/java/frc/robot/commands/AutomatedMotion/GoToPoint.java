@@ -17,8 +17,8 @@ public class GoToPoint extends CommandBase {
     private Timer m_timer; // allows for the calculation of the derivative
     private double m_previousFrameCount; // the most recent acknowledged frame
 
-    private double m_basePower = -0.4; // the base value for moving to power cells
-    private double m_Kp = 0.08;
+    private double m_basePower = -0.3; // the base value for moving to power cells
+    private double m_Kp = 0.1;
     private double m_Ki = 0.02;
     private double m_Kd = 0.0013;
 

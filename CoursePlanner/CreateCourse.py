@@ -3,15 +3,19 @@ import numpy as np
 from numpy.lib.function_base import _diff_dispatcher
 import math
 
+
+
 k_searchInterval = 2 # the spacing between evaluated pixels
 k_lineThickness = 10 # the line thickness drawn on the image
 k_markerRadius = 2 # the radius for the marker on the output image
 k_markerColor = [255, 40, 5] #Ferrari Red
 k_orginColor = [0, 255, 0] # green
-k_waypointStringingRadius = 23 # the maximum distance to look for a waypoint when creating a path
+k_waypointStringingRadius = 43 # the maximum distance to look for a waypoint when creating a path
 k_pixelScalingFactor = .009208 # how many meters are represented by the length 1 pixel
 k_maxPathSmoothingDistance = 100 # how far between points the smoothing algorithim can go
 k_convertPathToCode = True # wether or not to save the path as lines of code
+k_initalXOffset = 0  # the inital x
+k_initialYOffset = 0  # the initial y
 
 baseImage = Image.open('BaseImage.jpg')
 baseImageBitmap = np.array(baseImage) #3d image array [height, width, RGBA]
@@ -20,7 +24,7 @@ outputImageBitmap = baseImageBitmap # save for later use
 baseHeight = baseImageBitmap.shape[0]
 baseWidth = baseImageBitmap.shape[1]
 
-newImage = Image.open('NewImage6.jpg')
+newImage = Image.open('Salolom2.jpg')
 newImageBitmap = np.array(newImage)
 
 newHeight = newImageBitmap.shape[0]
@@ -179,7 +183,7 @@ while(pathFound):
             if(unlineraity < lowestUnlinearity or lowestUnlinearity == -1):
                 lowestUnlinearity = unlineraity
         
-        unlineraityMax = lowestUnlinearity + math.pi / 16 # waypoints that are valid must be in this range + or -
+        unlineraityMax = lowestUnlinearity + math.pi / 6 # waypoints that are valid must be in this range + or -
         validWaypoints = [] # all of the points that are w ithin the unlinearity max
         for waypoint in waypointsInZoneArray:
             currentAngle = math.pi / 2
@@ -440,7 +444,7 @@ print("Scaling path")
 
 scaledPathArray = [] # the transposed path array but scale to meters
 for waypoint in pathArray: # creates a copy of the path array but relative to the orgin
-    scaledPathArray.append([(waypoint[0] - orgin[0]) * k_pixelScalingFactor, (waypoint[1] - orgin[1]) * k_pixelScalingFactor])
+    scaledPathArray.append([(waypoint[0] - orgin[0]) * k_pixelScalingFactor + k_initialYOffset, (waypoint[1] - orgin[1] ) * k_pixelScalingFactor] + k_initalXOffset)
 
 print("Converting path to code")
 codePathArray = []
@@ -456,7 +460,7 @@ printArray = scaledPathArray
 if(k_convertPathToCode):
     printArray = codePathArray
 
-file = open("outputPath.txt", "w") # open file and truncate
+file = open("outputPath2.txt", "w") # open file and truncate
 
 for line in printArray:
     file.write(line)

@@ -99,6 +99,7 @@ public class Drive extends SubsystemBase {
     // -- replaced
     m_gyro = new ADXRS450_Gyro();
     m_gyro.reset();
+    m_gyro.calibrate();
 
     m_PDP = new PowerDistributionPanel(30);
 
@@ -181,7 +182,13 @@ public class Drive extends SubsystemBase {
   }
 
   public double getGyroYaw() {
-    return m_gyro.getAngle() % 360;
+    double angle = m_gyro.getAngle() % 360;
+
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+
+    return angle;
   }
 
   public void updateAbsolutePosition(double x, double y, double heading) {
@@ -432,18 +439,24 @@ public class Drive extends SubsystemBase {
     double degreesOfRotation = Math.abs(finalHeading - initialHeading); // the amount of
     // degrees the
     // robot rotated
-    double turnRadius = 28.647 * Math.abs(leftMovement + rightMovement) / degreesOfRotation;
-    // (360 / degreesOfRotation) * (leftMovement + rightMovement) / 2 / 2 / 3.14; //
-    // the radius of the turn made by the robot
-    double xRelativeMovement = turnRadius - Math.cos(Math.toRadians(degreesOfRotation)) * turnRadius; // the x
-                                                                                                      // translation
-                                                                                                      // relative to
-    // the initial heading of the
-    // robot
-    // x is side to side
-    // left is negative, right is positive
-    double yRelativeMovement = Math.sin(Math.toRadians(degreesOfRotation)) * turnRadius;
-    // y is forward and backward
+    double xRelativeMovement = 0;
+    double yRelativeMovement = 0;
+    if (degreesOfRotation != 0) { // protects against a divide by zero error
+      double turnRadius = 28.647 * Math.abs(leftMovement + rightMovement) / degreesOfRotation;
+      // (360 / degreesOfRotation) * (leftMovement + rightMovement) / 2 / 2 / 3.14; //
+      // the radius of the turn made by the robot
+      xRelativeMovement = turnRadius - Math.cos(Math.toRadians(degreesOfRotation)) * turnRadius; // the x
+                                                                                                 // translation
+                                                                                                 // relative to
+      // the initial heading of the
+      // robot
+      // x is side to side
+      // left is negative, right is positive
+      yRelativeMovement = Math.sin(Math.toRadians(degreesOfRotation)) * turnRadius;
+      // y is forward and backward
+    } else {
+      yRelativeMovement = Math.abs(leftMovement + rightMovement) / 2;
+    }
 
     if ((rightMovement + leftMovement) < 0) {
       yRelativeMovement = -yRelativeMovement;
@@ -470,6 +483,8 @@ public class Drive extends SubsystemBase {
         + Math.cos(Math.toRadians(initialHeading - 90)) * yRelativeMovement;
     // I though about this backward -- x is sin and y is cos in this case
     // --FACESMACK
+
+    System.out.println(yAbsolute + " " + xAbsolute);
 
     return new double[] { yAbsolute, xAbsolute };
   }
