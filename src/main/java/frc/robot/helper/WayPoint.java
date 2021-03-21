@@ -14,6 +14,14 @@ public class WayPoint {
         m_absoluteY = yPosition;
     }
 
+    public double getAbsoluteX() {
+        return m_absoluteX;
+    }
+
+    public double getAbsoluteY() {
+        return m_absoluteY;
+    }
+
     public double getDistanceFrom(double x, double y) {
         double distance = Math.sqrt(Math.pow(m_absoluteX - x, 2) + Math.pow(m_absoluteY - y, 2)); // pathagorean therom
 

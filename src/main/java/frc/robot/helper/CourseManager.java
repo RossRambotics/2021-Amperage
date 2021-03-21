@@ -11,8 +11,9 @@ import frc.robot.subsystems.Drive;
 
 public class CourseManager {
 
-    private Stack<WayPoint> wayPoints;
+    private Stack<List<WayPoint>> wayPoints;
     private Drive m_drive;
+    private double m_lookAheadValue = 5;
 
     public CourseManager(Drive drive) {
         wayPoints = new Stack();
@@ -25,9 +26,13 @@ public class CourseManager {
         List<double[]> points = getWayPointPoints();
 
         for (int i = points.size() - 1; i >= 0; i = i - 1) { // for loop flips order of points
-            double[] array = points.get(i);
-            double number = array[1];
-            wayPoints.push(new WayPoint(points.get(i)[0], points.get(i)[1]));
+            List<WayPoint> lookAheadList = new ArrayList<>();
+            for (int f = i; f < i + m_lookAheadValue && f < points.size(); f = f + 1) {
+                lookAheadList.add(new WayPoint(points.get(i)[0], points.get(i)[1]));
+            }
+
+            System.out.println(lookAheadList);
+            wayPoints.push(lookAheadList);
         }
     }
 
@@ -45,7 +50,7 @@ public class CourseManager {
         SequentialCommandGroup command = new SequentialCommandGroup();
 
         while (wayPoints.size() > 0) {
-            WayPoint point = wayPoints.peek();
+            List<WayPoint> point = wayPoints.peek();
             command.addCommands(new GoToPoint(m_drive, point));
             wayPoints.pop();
         }

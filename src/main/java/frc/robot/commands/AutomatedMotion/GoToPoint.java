@@ -1,5 +1,7 @@
 package frc.robot.commands.AutomatedMotion;
 
+import java.util.List;
+
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -17,18 +19,18 @@ public class GoToPoint extends CommandBase {
     private Timer m_timer; // allows for the calculation of the derivative
     private double m_previousFrameCount; // the most recent acknowledged frame
 
-    private double m_basePower = -0.3; // the base value for moving to power cells
-    private double m_Kp = 0.1;
+    private double m_basePower = -0.4; // the base value for moving to power cells
+    private double m_Kp = 0.05;
     private double m_Ki = 0.02;
     private double m_Kd = 0.0013;
 
     private int m_reportCounter = 10;
 
-    private WayPoint m_WayPoint;
+    private List<WayPoint> m_WayPoints;
 
-    public GoToPoint(Drive drive, WayPoint wayPoint) { // calling joystick corrosponds to port number
+    public GoToPoint(Drive drive, List<WayPoint> wayPoints) { // calling joystick corrosponds to port number
         m_drive = drive;
-        m_WayPoint = wayPoint;
+        m_WayPoints = wayPoints;
         addRequirements(drive);
 
         m_Kp = m_Kp * Math.abs(m_basePower);
@@ -50,7 +52,8 @@ public class GoToPoint extends CommandBase {
         double yPosition = absolutePosition[1];
         double currentYaw = absolutePosition[2];
 
-        double targetYaw = m_WayPoint.getHeadingTo(xPosition, yPosition);
+        double targetYaw = getTargetYaw(xPosition, yPosition);
+
         double relativeTurn = -targetYaw + currentYaw;
         if (relativeTurn < -180) {
             relativeTurn = relativeTurn + 360;
@@ -69,7 +72,9 @@ public class GoToPoint extends CommandBase {
             }
         }
 
-        m_WayPoint.getDistanceFrom(xPosition, yPosition);
+        for (WayPoint waypoint : m_WayPoints) {
+            waypoint.getDistanceFrom(xPosition, yPosition);
+        }
 
         double secondsSinceLastLoop = m_timer.get(); // gets the loop time
         m_timer.reset();
@@ -134,11 +139,66 @@ public class GoToPoint extends CommandBase {
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
-        if (m_WayPoint.cleared) { // if the waypoint has been reached
-            System.out.println("Way Point Cleared");
-            return true;
+        int counter = 0; // counts the loop
+        for (WayPoint waypoint : m_WayPoints) {
+            if (waypoint.cleared) {
+                System.out.println("Way Point Cleared");
+
+                if (counter > 0) { // clear the previous waypoints
+                    while (counter >= 0) {
+                        counter = counter - 1;
+                        m_WayPoints.get(counter).cleared = true;
+                    }
+                }
+
+                return true;
+            }
+            counter = counter + 1;
         }
 
         return false;
+    }
+
+    private double getTargetYaw(double xPosition, double yPosition) {
+        double cumulativeX = 0;
+        double cumulativeY = 0;
+        double cumulativeCounter = 0;
+        double counter = 1;
+        double counterIncrement = 1;
+
+        for (WayPoint waypoint : m_WayPoints) {
+            cumulativeX = cumulativeX + (waypoint.getAbsoluteX() - xPosition) * counter;
+            cumulativeY = cumulativeY + (waypoint.getAbsoluteY() - yPosition) * counter;
+            cumulativeCounter = cumulativeCounter + counter;
+
+            counter = counter + counterIncrement;
+        }
+
+        double averageX = cumulativeX / cumulativeCounter;
+        double averageY = cumulativeY / cumulativeCounter;
+
+        return getHeadingTo(averageX, averageY);
+
+    }
+
+    private double getHeadingTo(double xTarget, double yTagret) {
+
+        // acot because y is straight ahead and x is side to side -- x and y are flipped
+        double radians = Math.PI / 2;
+
+        if (Math.abs(yTagret) > .00001) { // prevents NAN errorz
+            radians = -Math.atan((xTarget) / (yTagret));
+        }
+
+        if ((yTagret) < 0) { // accounts for the return of arc only covering half the range
+            radians = radians + Math.PI;
+        }
+
+        if (radians < 0) { // normalizes to 0 to 2pi scale
+            radians = radians + 2 * Math.PI;
+        }
+
+        return 57.32 * radians; // degrees
+
     }
 }
