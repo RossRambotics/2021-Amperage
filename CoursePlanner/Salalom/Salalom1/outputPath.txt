@@ -1,0 +1,17 @@
+wayPoints.add(new double[] { -0.0 , 0.0 });
+wayPoints.add(new double[] { 0.11049599999999998 , 0.9944639999999999 });
+wayPoints.add(new double[] { 0.55248 , 1.5469439999999999 });
+wayPoints.add(new double[] { 0.7734719999999999 , 1.6574399999999998 });
+wayPoints.add(new double[] { 1.10496 , 1.8784319999999999 });
+wayPoints.add(new double[] { 1.3259519999999998 , 1.9889279999999998 });
+wayPoints.add(new double[] { 1.8784319999999999 , 2.7624 });
+wayPoints.add(new double[] { 1.8784319999999999 , 3.7568639999999998 });
+wayPoints.add(new double[] { 1.7679359999999997 , 4.8618239999999995 });
+wayPoints.add(new double[] { 1.5469439999999999 , 5.745792 });
+wayPoints.add(new double[] { 1.2154559999999999 , 6.077279999999999 });
+wayPoints.add(new double[] { 1.10496 , 6.077279999999999 });
+wayPoints.add(new double[] { 0.33148799999999995 , 6.408767999999999 });
+wayPoints.add(new double[] { -0.11049599999999998 , 6.629759999999999 });
+wayPoints.add(new double[] { -0.0 , 6.629759999999999 });
+wayPoints.add(new double[] { -0.11049599999999998 , 6.740256 });
+wayPoints.add(new double[] { -0.11049599999999998 , 6.961247999999999 });

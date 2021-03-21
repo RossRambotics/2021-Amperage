@@ -11,9 +11,10 @@ argumentParser.add_argument("--Folder_Path",
     help= "The path to the folder with the painted image and json files. This is also where the output will go.",
     default= "")
 arguments = argumentParser.parse_args()
+print(arguments.Folder_Path)
 
 # gets the json file
-jsonFile = open(str(arguments.Folder_Path + "/data.txt"),"r")
+jsonFile = open("data.txt","r")
 data = json.load(jsonFile)
 jsonConstants = data["Constants"][0]
 jsonFileNames = data["FileNaming"][0]
@@ -27,14 +28,14 @@ k_waypointStringingRadius = int(jsonConstants["k_waypointStringingRadius"]) # th
 k_pixelScalingFactor = float(jsonConstants["k_pixelScalingFactor"]) # how many meters are represented by the length 1 pixel
 k_maxPathSmoothingDistance = int(jsonConstants["k_maxPathSmoothingDistance"]) # how far between points the smoothing algorithim can go
 k_convertPathToCode = bool(jsonConstants["k_convertPathToCode"]) # wether or not to save the path as lines of code
-k_initalXOffset = float(jsonConstants["k_initalXOffset"])  # the inital x
-k_initialYOffset = float(jsonConstants["k_initialYOffset"])  # the initial y
+k_initalXOffset = int(jsonConstants["k_initalXOffset"])  # the inital x
+k_initialYOffset = int(jsonConstants["k_initialYOffset"])  # the initial y
 
 #handle the course names
-f_baseImageName =  str("BackgroundFiles/" + str(jsonFileNames["f_baseImageName"]))
-f_textOutputName = str(arguments.Folder_Path) + "/" + str(jsonFileNames["f_textOutputName"])
-f_imageOutputName = str(arguments.Folder_Path) + "/" + str(jsonFileNames["f_imageOutputName"])
-f_imageInputName = str(arguments.Folder_Path) + "/" + str(jsonFileNames["f_imageInputName"])
+f_baseImageName = str(jsonFileNames["f_baseImageName"])
+f_textOutputName = str(jsonFileNames["f_textOutputName"])
+f_imageOutputName = str(jsonFileNames["f_imageOutputName"])
+f_imageInputName = str(jsonFileNames["f_imageInputName"])
 
 baseImage = Image.open(f_baseImageName)
 baseImageBitmap = np.array(baseImage) #3d image array [height, width, RGBA]
@@ -375,7 +376,7 @@ while(waypointCounter + 2 < pathArray.__len__()):
             if(unlinearity > math.pi):
                 unlinearity = math.pi * 2 - unlinearity
 
-            if(unlinearity < (math.pi / 50000)): # smooth if the line is almost linear
+            if(unlinearity < (math.pi / 50)): # smooth if the line is almost linear
                 pathArray[waypointCounter + nextPointCounter] = [nextNextPoint[0], nextNextPoint[1], -1]
             else:
                 smoothPoint = False
@@ -479,7 +480,7 @@ printArray = scaledPathArray
 if(k_convertPathToCode):
     printArray = codePathArray
 
-file = open(f_textOutputName, "w") # open file and truncate
+file = open(f_textOuputName, "w") # open file and truncate
 
 for line in printArray:
     file.write(line)

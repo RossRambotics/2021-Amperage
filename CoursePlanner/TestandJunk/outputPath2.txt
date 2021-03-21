@@ -1,0 +1,11 @@
+wayPoints.add(new double[] { -0.0 , 0.0 });
+wayPoints.add(new double[] { -0.0 , 110496.0 });
+wayPoints.add(new double[] { 331488.0 , 441984.0 });
+wayPoints.add(new double[] { 662976.0 , 552480.0 });
+wayPoints.add(new double[] { 773472.0 , 552480.0 });
+wayPoints.add(new double[] { 1657440.0 , 883968.0 });
+wayPoints.add(new double[] { 1546944.0 , 2430912.0 });
+wayPoints.add(new double[] { 1436448.0 , 2430912.0 });
+wayPoints.add(new double[] { 1215456.0 , 2541408.0 });
+wayPoints.add(new double[] { 1104960.0 , 2541408.0 });
+wayPoints.add(new double[] { -110496.0 , 1657440.0 });

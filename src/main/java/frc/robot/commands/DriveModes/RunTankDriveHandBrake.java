@@ -39,9 +39,9 @@ public class RunTankDriveHandBrake extends CommandBase {
       m_drive.tankDrive(m_drive.getLeftJoystickY(), 0.0);
     } else if (m_drive.getLeftJoystickRadialTurnButton()) { // radial turn left
       m_drive.tankDrive(m_drive.getLeftJoystickY() * m_drive.m_handlingValues.getRadialTurnCoefficent(),
-          m_drive.getRightJoystickY());
+          m_drive.getLeftJoystickY());
     } else if (m_drive.getRightJoystickRadialTurnButton()) { // radial turn right
-      m_drive.tankDrive(m_drive.getLeftJoystickY(),
+      m_drive.tankDrive(m_drive.getRightJoystickY(),
           m_drive.getRightJoystickY() * m_drive.m_handlingValues.getRadialTurnCoefficent());
     } else {
       m_drive.tankDrive(m_drive.getLeftJoystickY(), m_drive.getRightJoystickY()); // normal

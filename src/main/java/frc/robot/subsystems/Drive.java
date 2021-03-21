@@ -484,8 +484,6 @@ public class Drive extends SubsystemBase {
     // I though about this backward -- x is sin and y is cos in this case
     // --FACESMACK
 
-    System.out.println(yAbsolute + " " + xAbsolute);
-
     return new double[] { yAbsolute, xAbsolute };
   }
 
