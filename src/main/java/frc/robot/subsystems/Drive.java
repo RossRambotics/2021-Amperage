@@ -37,7 +37,7 @@ public class Drive extends SubsystemBase {
   // per rotation
   // steps / 100ms = mps * .1 seconds * steps per rotation / wheel cicumference /
   // gear ratio
-  private double m_wheelCircumference = 0.525; // meters - 6 inch diameter // now empirically determined
+  private double m_wheelCircumference = 0.483; // meters - 6 inch diameter // now empirically determined
   private double m_gearCoeffiecent = .0933; // 10.71 to 1 falcon rotation to wheel rotation
   private double m_stepsPerRotation = 2048.0; // encoder steps
   private double m_trackwidth = 0.556; // the robot trackwidth7
@@ -47,9 +47,9 @@ public class Drive extends SubsystemBase {
   private Joystick m_leftLargeJoystick;
   private Joystick m_smallJoystick;
 
-  private double m_absoluteX = 0;
-  private double m_absoluteY = 0;
-  private double m_absoluteH = 0;
+  static private double m_absoluteX = 0;
+  static private double m_absoluteY = 0;
+  static private double m_absoluteH = 0;
 
   private WPI_TalonFX m_rightDriveTalon;
   private WPI_TalonFX m_leftDriveTalon;
@@ -189,6 +189,20 @@ public class Drive extends SubsystemBase {
     }
 
     return angle;
+  }
+
+  public void resetGyroYaw() { // reset the gyro to zero
+    System.out.println("Gyro Reset");
+    m_gyro.reset();
+  }
+
+  public void resetAbsolultePositioning() {
+    m_absoluteX = 0; // reset stored values
+    m_absoluteY = 0;
+    m_absoluteH = 0;
+
+    m_leftDriveTalon.setSelectedSensorPosition(0);
+    m_rightDriveTalon.setSelectedSensorPosition(0);
   }
 
   public void updateAbsolutePosition(double x, double y, double heading) {

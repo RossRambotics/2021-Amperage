@@ -14,7 +14,8 @@ jsonData["Constants"].append({
     "k_maxPathSmoothingDistance": "100",
     "k_convertPathToCode": "True",
     "k_initalXOffset": "0",
-    "k_initialYOffset": "0"
+    "k_initialYOffset": "0",
+    "k_reductionFactor": "1"
 })
 
 jsonData["FileNaming"] = []

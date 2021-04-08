@@ -22,16 +22,22 @@ public class CourseManager {
         fillWayPointStack();
     }
 
+    public void resetCourse() { // reset with the new cleared points
+        wayPoints = new Stack();
+        fillWayPointStack();
+    }
+
     private void fillWayPointStack() {
         List<double[]> points = getWayPointPoints();
 
         for (int i = points.size() - 1; i >= 0; i = i - 1) { // for loop flips order of points
             List<WayPoint> lookAheadList = new ArrayList<>();
+
+            m_lookAheadValue = points.get(i)[2];
             for (int f = i; f < i + m_lookAheadValue && f < points.size(); f = f + 1) {
-                lookAheadList.add(new WayPoint(points.get(i)[0], points.get(i)[1]));
+                lookAheadList.add(new WayPoint(-points.get(f)[0], points.get(f)[1]));
             }
 
-            System.out.println(lookAheadList);
             wayPoints.push(lookAheadList);
         }
     }

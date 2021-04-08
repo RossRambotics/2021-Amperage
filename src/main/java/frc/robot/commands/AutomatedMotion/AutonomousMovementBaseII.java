@@ -20,7 +20,7 @@ public class AutonomousMovementBaseII extends CommandBase {
     private double m_targetMeters; // the target distance in meters
     private double m_currentDistanceRemaining; // the current distance remaining
 
-    private double m_Kp = 0.006;
+    private double m_Kp = 0.008;
     private double m_Ki = 0.02;
     private double m_Kd = 0.0013;
 
@@ -125,8 +125,8 @@ public class AutonomousMovementBaseII extends CommandBase {
     }
 
     private double getPowerFromDistanceRemaining(double stepsRemaining) {
-        double maxPower = .25;
-        double slowPower = .1;
+        double maxPower = .8;
+        double slowPower = .6;
         double slowZone = 50000;
 
         if (Math.abs(stepsRemaining) < slowZone) {

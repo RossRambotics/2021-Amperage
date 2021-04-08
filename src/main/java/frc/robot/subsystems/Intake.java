@@ -180,8 +180,8 @@ public class Intake extends SubsystemBase {
   public void IntakeMotorReverse() {
     if (m_bExtended == true) {
       TheRobot.log("IntakeMotorReverse setting intake motor");
-      m_rollerMotor.set(-.5);
-      m_feederMotor.set(-.5);
+      m_rollerMotor.set(-.8);
+      m_feederMotor.set(-.9);
     } else {
       m_rollerMotor.set(0);
       m_feederMotor.set(0);

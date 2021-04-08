@@ -37,6 +37,7 @@ public class ShooterLookUp // changes distance to speed and hood angle
     }
 
     private void fillTableVaules() { // adds the key value pairs to the lookup table <KEY, HoodAngle, ShooterRPM>
+        addTableValue(1.0, 1.0, 2700.0);
         addTableValue(2.0, 12.0, 2700.0);
         addTableValue(3.0, 25.0, 4100.0);
         addTableValue(4.0, 25.7, 4250.0);

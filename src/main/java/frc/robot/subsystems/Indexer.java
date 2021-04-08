@@ -127,13 +127,13 @@ public class Indexer extends SubsystemBase {
   }
 
   public void shoot() {
-    m_topMotor.set(0.30);
-    m_btmMotor.set(0.30);
+    m_topMotor.set(0.50);
+    m_btmMotor.set(0.50);
   }
 
   public void advance() {
-    m_topMotor.set(0.17);
-    m_btmMotor.set(0.17);
+    m_topMotor.set(0.27);
+    m_btmMotor.set(0.27);
   }
 
   public void stop() {

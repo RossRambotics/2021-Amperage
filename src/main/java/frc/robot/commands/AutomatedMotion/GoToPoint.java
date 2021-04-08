@@ -20,9 +20,9 @@ public class GoToPoint extends CommandBase {
     private double m_previousFrameCount; // the most recent acknowledged frame
 
     private double m_basePower = -0.4; // the base value for moving to power cells
-    private double m_Kp = 0.05;
+    private double m_Kp = 0.03;
     private double m_Ki = 0.02;
-    private double m_Kd = 0.0013;
+    private double m_Kd = 0.0;
 
     private int m_reportCounter = 10;
 
@@ -88,7 +88,11 @@ public class GoToPoint extends CommandBase {
         // if this value is positive speed up right motor or slow left
         // if this value is negative speed up left motor or slow right
         // note both motors and joystcicks are inverted ;)
-
+        /*
+         * if (Math.abs(totalCorrection) > 0.5) { basePower = Math.min(0.1,
+         * Math.max(-0.1, basePower)); totalCorrection = Math.min(0.3, Math.max(-0.3,
+         * totalCorrection)); }
+         */
         if (m_reportCounter >= 10) {
             System.out.println("RelaitveTurn: " + relativeTurn);
             System.out.println("pValue: " + pCorrection + " dValue: " + dCorrection);// + " errorSum: " + iCorrection);
@@ -145,7 +149,7 @@ public class GoToPoint extends CommandBase {
                 System.out.println("Way Point Cleared");
 
                 if (counter > 0) { // clear the previous waypoints
-                    while (counter >= 0) {
+                    while (counter > 0) {
                         counter = counter - 1;
                         m_WayPoints.get(counter).cleared = true;
                     }
@@ -163,8 +167,9 @@ public class GoToPoint extends CommandBase {
         double cumulativeX = 0;
         double cumulativeY = 0;
         double cumulativeCounter = 0;
-        double counter = 1;
+        double counter = 0.000001;
         double counterIncrement = 1;
+        double counterIncrementIncrement = 0;
 
         for (WayPoint waypoint : m_WayPoints) {
             cumulativeX = cumulativeX + (waypoint.getAbsoluteX() - xPosition) * counter;
@@ -172,6 +177,12 @@ public class GoToPoint extends CommandBase {
             cumulativeCounter = cumulativeCounter + counter;
 
             counter = counter + counterIncrement;
+            counterIncrement = counterIncrement + counterIncrementIncrement;
+
+            /*
+             * System.out.println("WX: " + waypoint.getAbsoluteX() + " CX: " + cumulativeX +
+             * " CY: " + cumulativeY + " CC:" + cumulativeCounter);
+             */
         }
 
         double averageX = cumulativeX / cumulativeCounter;

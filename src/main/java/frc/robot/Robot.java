@@ -23,17 +23,19 @@ import frc.robot.subsystems.*;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
-  private RobotContainer m_robotContainer;
+  public RobotContainer m_robotContainer;
   public Drive m_drive = null;
   public Indexer m_indexer = null;
   public Intake m_intake = null;
   public Shooter m_shooter = null;
   public Hood m_hood = null;
   private HandlingBase m_handlingBase;
+  static public TrackMotionGyro m_trackMotionCommand;
 
   public Robot() {
     super();
     TheRobot.SetInstance(this);
+
   }
 
   /**
@@ -64,6 +66,8 @@ public class Robot extends TimedRobot {
 
     m_robotContainer = new RobotContainer();
     m_intake.createShuffleBoardTab();
+
+    m_trackMotionCommand = new TrackMotionGyro(m_drive);
 
   }
 
@@ -113,7 +117,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    CommandScheduler.getInstance().schedule(new TrackMotionGyro(m_drive));
+    System.out.println(m_trackMotionCommand);
+    CommandScheduler.getInstance().schedule(m_trackMotionCommand);
 
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to

@@ -82,4 +82,12 @@ public class TrackMotionGyro extends CommandBase {
     public boolean isFinished() {
         return false;
     }
+
+    public boolean resetPosition() {
+        m_currentXPosition = 0;
+        m_currentYPosition = 0;
+        m_currentHeading = 0;
+
+        return true;
+    }
 }

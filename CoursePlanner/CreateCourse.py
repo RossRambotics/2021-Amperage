@@ -5,11 +5,16 @@ import math
 import json
 import argparse
 
+# make sure to cd to directory in terminal before use
+
 # gets the path for the modified files
 argumentParser = argparse.ArgumentParser(description= "Create a path from a Microsoft Paint image...")
 argumentParser.add_argument("--Folder_Path", 
     help= "The path to the folder with the painted image and json files. This is also where the output will go.",
     default= "")
+argumentParser.add_argument("--NewBaseImage", 
+    help= "Create a new base image with the starting point and direction marked",
+    action= "store_true")
 arguments = argumentParser.parse_args()
 
 # gets the json file
@@ -29,16 +34,19 @@ k_maxPathSmoothingDistance = int(jsonConstants["k_maxPathSmoothingDistance"]) # 
 k_convertPathToCode = bool(jsonConstants["k_convertPathToCode"]) # wether or not to save the path as lines of code
 k_initalXOffset = float(jsonConstants["k_initalXOffset"])  # the inital x
 k_initialYOffset = float(jsonConstants["k_initialYOffset"])  # the initial y
+k_reductionFactor = int(jsonConstants["k_reductionFactor"]) # the factor to reduce the amount of points by
 
 #handle the course names
 f_baseImageName =  str("BackgroundFiles/" + str(jsonFileNames["f_baseImageName"]))
 f_textOutputName = str(arguments.Folder_Path) + "/" + str(jsonFileNames["f_textOutputName"])
 f_imageOutputName = str(arguments.Folder_Path) + "/" + str(jsonFileNames["f_imageOutputName"])
+f_newBaseImageName = str(arguments.Folder_Path) + "/NewBaseImage.jpg"
 f_imageInputName = str(arguments.Folder_Path) + "/" + str(jsonFileNames["f_imageInputName"])
 
 baseImage = Image.open(f_baseImageName)
 baseImageBitmap = np.array(baseImage) #3d image array [height, width, RGBA]
-outputImageBitmap = baseImageBitmap # save for later use
+newBaseImageBitmap = np.copy(baseImageBitmap) # save for later use
+outputImageBitmap = np.copy(baseImageBitmap) # save for later use
 
 baseHeight = baseImageBitmap.shape[0]
 baseWidth = baseImageBitmap.shape[1]
@@ -122,9 +130,10 @@ for waypoint in waypointArray: # finds the orgin marker in green
     greenError = 0.0 # the error from the drakest green color
     orginErrorCounter = 0
     while(orginErrorCounter < 3):
-        greenError = greenError + abs(waypointRGB[orginErrorCounter] - k_orginColor[orginErrorCounter])
+        greenError = 1 * greenError + abs(waypointRGB[orginErrorCounter] - k_orginColor[orginErrorCounter])
+
         orginErrorCounter = orginErrorCounter + 1
-        
+     
     if(greenError < minGreenError): # if the waypoint is closer to true green than the current
         orgin = waypoint
         minGreenError = greenError
@@ -139,6 +148,7 @@ waypointMaskArray[orgin[0]][orgin[1]] = 0 # remove orgin as valid point
 pathFound = True # changes to false if no valid link is found between two waypoints
 previousPoint = [-1] # starts at -1 which is an invalid point -- 
 startPoint = orgin # the point to start the path from
+startPoint.append(0) # 0 for unlinearity because why not
 pathArray = [orgin] # the waypoints in order of the path 
 while(pathFound):
     pathSearchZone = [[max(startPoint[0] - k_waypointStringingRadius, 0), max(startPoint[1] - k_waypointStringingRadius, 0)], [min(startPoint[0] + k_waypointStringingRadius, newHeight), min(startPoint[1] + k_waypointStringingRadius, newWidth)]] 
@@ -159,6 +169,27 @@ while(pathFound):
         print("Path Terminated No Point Found")
         pathFound = False
     elif(waypointsInZoneArray.__len__() == 1): # if one go there
+        previousAngle = math.pi / 2 # used in unlinearity calc
+        if(startPoint[1] != previousPoint[1]): # stops a division by zero
+            previousAngle = math.atan((startPoint[0] - previousPoint[0]) / (startPoint[1] - previousPoint[1]))
+        
+        if(startPoint[1] - previousPoint[1] < 0):
+            previousAngle = previousAngle + math.pi
+
+        # determine unlinearity anyway for later use
+        currentAngle = math.pi / 2
+        if(waypointsInZoneArray[0][1] != startPoint[1]): # stops a division by zero
+            currentAngle = math.atan((waypointsInZoneArray[0][0] - startPoint[0]) / (waypointsInZoneArray[0][1] - startPoint[1]))
+        
+        if(waypointsInZoneArray[0][1] - startPoint[1] < 0):
+            currentAngle = currentAngle + math.pi
+
+        unlineraity = abs(currentAngle - previousAngle)
+        if(unlineraity > math.pi):
+           unlineraity = 6.14 - unlineraity
+
+        waypointsInZoneArray[0].append(unlineraity) # save with point for later
+
         previousPoint = startPoint
         startPoint = waypointsInZoneArray[0]
         pathArray.append(startPoint) # adds the new point to the path
@@ -174,8 +205,11 @@ while(pathFound):
                 closestPoint[0] = waypoint[0]
                 closestPoint[1] = waypoint[1]
 
+        # unlinearity is 0 here because why not
+        nextPoint = [closestPoint[0], closestPoint[1], 0]
+
         previousPoint = startPoint # remove the waypoint from the array of valid points to go to
-        startPoint = [closestPoint[0], closestPoint[1]] # if the first connection - go to the closest
+        startPoint = nextPoint # if the first connection - go to the closest
         pathArray.append(startPoint) # adds the new point to the path
         waypointMaskArray[startPoint[0]][startPoint[1]] = 0 # the closest point to the orgin - [Y, X, Distance]
     else: # if multiple points - use unlinearity and distance to calculate the next point
@@ -199,6 +233,8 @@ while(pathFound):
             if(unlineraity > math.pi):
                 unlineraity = 6.14 - unlineraity
 
+            waypoint.append(unlineraity)
+
             if(unlineraity < lowestUnlinearity or lowestUnlinearity == -1):
                 lowestUnlinearity = unlineraity
         
@@ -219,21 +255,25 @@ while(pathFound):
             if(unlineraity < unlineraityMax):
                 validWaypoints.append(waypoint)
 
-        closestPoint = [0, 0, 100000] # the closest point to the orgin - [Y, X, Distance]
+
+        closestPoint = [0, 0, 0, 100000] # the closest point to the orgin - [Y, X, Unlinarity, Distance]
         
         for waypoint in validWaypoints:
             distance = math.sqrt((math.pow(startPoint[0] - waypoint[0], 2) + math.pow(startPoint[1] - waypoint[1], 2))) # distance from the previous point
             
-            if(closestPoint[2] > distance):# if the waypoint is closest -- update the closest point
-                closestPoint[2] = distance
+            if(closestPoint[3] > distance):# if the waypoint is closest -- update the closest point
+                closestPoint[3] = distance
                 closestPoint[0] = waypoint[0]
                 closestPoint[1] = waypoint[1]
+                closestPoint[2] = waypoint[2]
 
         previousPoint = startPoint # makes the start point into the next previous point
-        startPoint = [closestPoint[0], closestPoint[1]] # new start point
+        startPoint = [closestPoint[0], closestPoint[1], closestPoint[2]] # new start point
         pathArray.append(startPoint) # adds the new point to the path
         waypointMaskArray[startPoint[0]][startPoint[1]] = 0 # remove the waypoint from the array of valid points to go to
 
+#make sure when smoothing is fixed the old mehtoed for filtering out invalid point is replaced -- the code will not do what you want
+'''
 print("Smoothing: Method 1")
 
 waypointCounter = 0
@@ -394,6 +434,10 @@ while(waypointCounter + 2 < pathArray.__len__()):
     waypointCounter = waypointCounter + 1
 
 print(pathArray.__len__())
+'''
+
+
+
 
 print("Creating ouput image")
 
@@ -438,8 +482,6 @@ for waypoint in pathArray: # gos through and draws lines between waypoints
 
         previousPoint = waypoint
 
-
-
 for waypoint in pathArray: # goes through and marks waypoints
     markerZone = [[max(waypoint[0] - k_markerRadius, 0), max(waypoint[1] - k_markerRadius, 0)], [min(waypoint[0] + k_markerRadius, newHeight), min(waypoint[1] + k_markerRadius, newWidth)]] 
     markerZoneYCounter = markerZone[0][0]
@@ -459,19 +501,38 @@ for waypoint in pathArray: # goes through and marks waypoints
 outputImage = Image.fromarray(outputImageBitmap)
 outputImage.save(f_imageOutputName)
 
-print("Scaling path")
+print("Scaling path and converting unlinearity to turn ahead value")
 
 scaledPathArray = [] # the transposed path array but scale to meters
+turnAheadCounter = 0
 for waypoint in pathArray: # creates a copy of the path array but relative to the orgin
-    scaledPathArray.append([(waypoint[0] - orgin[0]) * k_pixelScalingFactor + k_initialYOffset, (waypoint[1] - orgin[1] ) * k_pixelScalingFactor + k_initalXOffset] )
+    turnAheadValue = 5
+
+    nextPointsCounter = 0
+    sharpTurnDetected = 0
+    while (nextPointsCounter < 5 and nextPointsCounter + turnAheadCounter < pathArray.__len__() and sharpTurnDetected < 2):
+        if(pathArray[nextPointsCounter + turnAheadCounter][2] > math.pi / 6):
+            sharpTurnDetected = sharpTurnDetected + 1
+        
+        nextPointsCounter = nextPointsCounter + 1
+    
+    turnAheadValue = nextPointsCounter
+
+    if(turnAheadValue < 2):
+       turnAheadValue = 2
+
+    scaledPathArray.append([(waypoint[0] - orgin[0]) * k_pixelScalingFactor + k_initialYOffset, (waypoint[1] - orgin[1] ) * k_pixelScalingFactor + k_initalXOffset, turnAheadValue])
+
+    turnAheadCounter = turnAheadCounter + 1
 
 print("Converting path to code")
 codePathArray = []
 if(k_convertPathToCode):
     for waypoint in scaledPathArray: 
-        codePathArray.append("wayPoints.add(new double[] { " + str(-waypoint[0]) + " , " + str(waypoint[1]) + " });\n")
+        codePathArray.append("wayPoints.add(new double[] { " + str(waypoint[0]) + " , " + str(waypoint[1]) + " , " + str(waypoint[2]) + " });\n")
         #Course manager understands points to be [x,y] but the robot starts facing sideways so [y,x]
         # the course on amperage is alos mirrored so x is -x
+
 
 print("Generating output text file")
 
@@ -485,12 +546,29 @@ for line in printArray:
     file.write(line)
 file.close()
 
+if(arguments.NewBaseImage): # creates a new base image with the last point of the previous path marked
+    print("Creating a new base image")
+
+    lastPoint = pathArray[(pathArray.__len__() - 1)]
+    lastPointColor = newImageBitmap[lastPoint[0]][lastPoint[1]] # the color used to draw on the edited image 
+
+    startPointZone = [[lastPoint[0] - math.floor(k_lineThickness / 2), lastPoint[0] + math.floor(k_lineThickness / 2)], [lastPoint[1] - math.floor(k_lineThickness / 2), lastPoint[1] + math.floor(k_lineThickness / 2)]]
+
+    startPointYCounter = startPointZone[0][0]
+    while(startPointYCounter <= startPointZone[0][1]):
+
+        startPointXCounter = startPointZone[1][0]
+        while(startPointXCounter <= startPointZone[1][1]):
+            newBaseImageBitmap[startPointYCounter][startPointXCounter] = lastPointColor
+
+            startPointXCounter = startPointXCounter + 1
+        
+        startPointYCounter = startPointYCounter + 1
+
+    newBaseImage = Image.fromarray(newBaseImageBitmap)
+    newBaseImage.save(f_newBaseImageName)
 
 
 
 
-    
-            
-
-    
 

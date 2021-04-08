@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
@@ -18,6 +21,7 @@ import frc.robot.commands.IntakeReverse;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.AutomatedMotion.*;
 
 import frc.robot.commands.*;
 import frc.robot.commands.AutomatedMotion.AutonomousMovementBase;
@@ -27,6 +31,7 @@ import frc.robot.commands.AutomatedMotion.ManualDriveStraight;
 import frc.robot.commands.AutomatedMotion.ManualDriveStraightBoosted;
 import frc.robot.commands.AutomatedMotion.Track;
 import frc.robot.commands.AutomatedMotion.TrackMotionGyro;
+import frc.robot.helper.CourseManager;
 import frc.robot.helper.TestCourseManager;
 import frc.robot.helper.WayPoint;
 import frc.robot.subsystems.ExampleSubsystem;
@@ -48,6 +53,9 @@ public class RobotContainer {
   public Joystick m_smallJoystick;
   private Joystick m_leftLargeJoystick = null;
   private Joystick m_rightLargeJoystick = null;
+  private JoystickButton m_leftStickButton = null;
+  private JoystickButton m_selectButton = null;
+  static public CourseManager m_testCourse = null;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -75,6 +83,11 @@ public class RobotContainer {
     Shooter shooter = TheRobot.getInstance().m_shooter;
     Hood hood = TheRobot.getInstance().m_hood;
 
+    m_testCourse = new TestCourseManager(drive);
+
+    m_leftStickButton = new JoystickButton(m_smallJoystick, 9);
+    m_selectButton = new JoystickButton(m_smallJoystick, 7);
+
     JoystickButton bButton = new JoystickButton(m_smallJoystick, 2);
     bButton.whenHeld(new frc.robot.commands.Indexer.UnloadIndexer(indexer, intake), true);
 
@@ -88,14 +101,16 @@ public class RobotContainer {
         new frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(3),
         new frc.robot.commands.Test.Shooter.StopShooter(shooter));
 
-    /*
-     * CommandBase cmd = new SequentialCommandGroup(new
-     * frc.robot.commands.Test.Hood.ExtendHood(hood), new
-     * frc.robot.commands.Test.Shooter.StartShooter(shooter), new WaitCommand(3),
-     * new frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(3), new
-     * frc.robot.commands.Test.Shooter.StopShooter(shooter)); //
-     * rightShoulderButton.whenPressed(cmd, true);
-     */
+    JoystickButton m_shootButton = new JoystickButton(m_leftLargeJoystick, 5);
+    CommandBase shootCommand = new SequentialCommandGroup(new frc.robot.commands.ExtendHoodToTarget(hood),
+        new ParallelCommandGroup(new frc.robot.commands.StartShooterTargeting(shooter),
+            new frc.robot.commands.Target(drive)),
+        new frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(3),
+        new frc.robot.commands.Test.Shooter.StopShooter(shooter));
+    m_shootButton.whenPressed(shootCommand, true);
+
+    JoystickButton m_indexButton = new JoystickButton(m_rightLargeJoystick, 4);
+    m_indexButton.whenPressed(new frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(3), true);
 
     JoystickButton xButton = new JoystickButton(m_smallJoystick, 3);
     xButton.whenPressed(cmd);
@@ -105,22 +120,42 @@ public class RobotContainer {
     aButton.whenPressed(new frc.robot.commands.IntakeMotorOn(intake), true);
 
     JoystickButton startButton = new JoystickButton(m_smallJoystick, 8);
-    startButton.whenPressed(new AutonomousMovementBaseII(drive, -6));
     /*
-     * new SequentialCommandGroup(new Track(drive), new
+     * CommandBase track = new SequentialCommandGroup(new Track(drive), new
      * AutonomousMovementBaseII(drive, -.5), new Track(drive), new
      * AutonomousMovementBaseII(drive, -.5), new Track(drive), new
      * AutonomousMovementBaseII(drive, -.4), new AutonomousMovementBaseII(drive,
-     * .5), new frc.robot.commands.ExtendHoodToTarget(hood), new
-     * ParallelCommandGroup(new frc.robot.commands.StartShooterTargeting(shooter),
-     * new frc.robot.commands.Target(drive)), new
-     * frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(3), new
-     * frc.robot.commands.Test.Shooter.StopShooter(shooter)));
+     * -.4));
      */
+    List<WayPoint> firstPoint = new ArrayList();
+    List<WayPoint> secondPoint = new ArrayList();
+    List<WayPoint> second2Point = new ArrayList();
+    List<WayPoint> second3Point = new ArrayList();
+    List<WayPoint> thirdPoint = new ArrayList();
+    List<WayPoint> fourthPoint = new ArrayList();
+    List<WayPoint> fifthPoint = new ArrayList();
+    List<WayPoint> sixthPoint = new ArrayList();
+    List<WayPoint> endZone = new ArrayList();
 
-    TestCourseManager testCourse = new TestCourseManager(drive);
-    JoystickButton selectButton = new JoystickButton(m_smallJoystick, 7);
-    selectButton.whenPressed(testCourse.getCourseCommand());
+    firstPoint.add(new WayPoint(-.55, -1.824));
+    secondPoint.add(new WayPoint(-.55, -2.1));
+    second2Point.add(new WayPoint(0, -2.4));
+    second3Point.add(new WayPoint(.762, -3.3));
+    thirdPoint.add(new WayPoint(.762, -3.7));
+    fourthPoint.add(new WayPoint(-.2, -4.1));
+    fifthPoint.add(new WayPoint(-.762, -4.8));
+    sixthPoint.add(new WayPoint(.01, -5.4));
+    endZone.add(new WayPoint(.05, -9.92));
+
+    CommandBase track = new SequentialCommandGroup(new GoToPoint(drive, firstPoint), new GoToPoint(drive, secondPoint),
+        new GoToPoint(drive, second2Point), new GoToPoint(drive, second3Point), new GoToPoint(drive, thirdPoint),
+        new GoToPoint(drive, fourthPoint), new GoToPoint(drive, fifthPoint), new GoToPoint(drive, sixthPoint),
+        new GoToPoint(drive, endZone));
+    startButton.whenPressed(track);
+
+    m_selectButton.whenPressed(m_testCourse.getCourseCommand());
+
+    m_leftStickButton.whenPressed(new frc.robot.commands.AutomatedMotion.ResetAutomation(drive));
 
     if (m_leftLargeJoystick != null) {
       JoystickButton leftTopForwardButton = new JoystickButton(m_leftLargeJoystick, 3);
@@ -140,4 +175,13 @@ public class RobotContainer {
 
   }
 
+  public boolean resetCourseManager() {
+    if (m_testCourse != null) {
+      m_testCourse.resetCourse();
+      m_selectButton.whenPressed(m_testCourse.getCourseCommand());
+      return true;
+    }
+
+    return false;
+  }
 }
