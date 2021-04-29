@@ -28,6 +28,7 @@ public class Robot extends TimedRobot {
   public Indexer m_indexer = null;
   public Intake m_intake = null;
   public Shooter m_shooter = null;
+  public Climb m_climb = null;
   public Hood m_hood = null;
   private HandlingBase m_handlingBase;
   static public TrackMotionGyro m_trackMotionCommand;
@@ -61,6 +62,7 @@ public class Robot extends TimedRobot {
     m_indexer = new Indexer();
     m_shooter = new Shooter();
     m_hood = new Hood();
+    m_climb = new Climb();
     // m_PCTargeter = new PowerCellTargeter();
     // m_LEDs = new LEDController();
 
