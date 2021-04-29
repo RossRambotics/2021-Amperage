@@ -16,10 +16,10 @@ public class Climb extends SubsystemBase {
   private CANSparkMax m_rightSlide = null;
   private CANSparkMax m_leftSlide = null;
 
-  private double m_leftWinchRetractSpeed = .2;
-  private double m_rightWinchRetractSpeed = .2;
+  private double m_leftWinchRetractSpeed = -.2;
+  private double m_rightWinchRetractSpeed = -.2;
   private double m_leftSlidePowerCoefficent = 1;
-  private double m_rightSlidePowerCoefficent = 1;
+  private double m_rightSlidePowerCoefficent = -1;
 
   public Joystick m_smallOperatorJoystick = null;
 
@@ -30,7 +30,7 @@ public class Climb extends SubsystemBase {
     m_leftSlide = new CANSparkMax(9, MotorType.kBrushless);
     m_rightSlide = new CANSparkMax(10, MotorType.kBrushless);
 
-    m_smallOperatorJoystick = new Joystick(4);
+    m_smallOperatorJoystick = new Joystick(3);
 
     this.setDefaultCommand(new frc.robot.commands.Climb.RunSlides(this));
   }
@@ -75,7 +75,7 @@ public class Climb extends SubsystemBase {
       m_leftSlide.set(0);
     }
 
-    m_leftSlide.set(m_rightSlidePowerCoefficent * power);
+    m_leftSlide.set(m_leftSlidePowerCoefficent * power);
   }
 
 }
