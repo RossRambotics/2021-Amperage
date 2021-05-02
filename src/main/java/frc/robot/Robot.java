@@ -8,6 +8,8 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.AutomatedMotion.TrackMotionGyro;
+import frc.robot.helper.Autonomous.CourseManager;
+import frc.robot.helper.Autonomous.TestCourseManager;
 import frc.robot.helper.DriveHandlingSetup.DefaultHardSurfaceArcadeDrive;
 import frc.robot.helper.DriveHandlingSetup.DefaultHardSurfaceHandling;
 import frc.robot.helper.DriveHandlingSetup.HandlingBase;
@@ -109,7 +111,10 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
+    CourseManager courseManager = new TestCourseManager(m_drive, m_shooter, m_indexer, m_hood); // change to be
+                                                                                                // autocourse
 
+    CommandScheduler.getInstance().schedule(courseManager.getCourseCommand());
   }
 
   /** This function is called periodically during autonomous. */

@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import frc.robot.subsystems.Drive;
+import frc.robot.subsystems.Hood;
+import frc.robot.subsystems.Indexer;
+import frc.robot.subsystems.Shooter;
 
 public class TestCourseManager extends CourseManager {
-    public TestCourseManager(Drive m_drive) {
-        super(m_drive);
+    public TestCourseManager(Drive m_drive, Shooter shooter, Indexer indexer, Hood hood) {
+        super(m_drive, shooter, indexer, hood);
     }
 
     @Override

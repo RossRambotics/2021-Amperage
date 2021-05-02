@@ -8,16 +8,25 @@ import java.util.Stack;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.commands.AutomatedMotion.GoToPoint;
 import frc.robot.subsystems.Drive;
+import frc.robot.subsystems.Hood;
+import frc.robot.subsystems.Indexer;
+import frc.robot.subsystems.Shooter;
 
 public class CourseManager {
 
     private Stack<List<WayPoint>> wayPoints;
     private Drive m_drive;
+    private Shooter m_shooter;
+    private Indexer m_indexer;
+    private Hood m_hood;
     private double m_lookAheadValue = 5;
 
-    public CourseManager(Drive drive) {
+    public CourseManager(Drive drive, Shooter shooter, Indexer indexer, Hood hood) {
         wayPoints = new Stack();
         m_drive = drive;
+        m_shooter = shooter;
+        m_indexer = indexer;
+        m_hood = hood;
 
         fillWayPointStack();
     }
@@ -59,14 +68,19 @@ public class CourseManager {
         while (wayPoints.size() > 0) {
             List<WayPoint> point = wayPoints.peek();
             command.addCommands(new GoToPoint(m_drive, point));
-            
-            if(point.get(0).getTrackAfter() != 0){
+
+            if (point.get(0).getTrackAfter() != 0) {
                 double trackCount = point.get(0).getTrackAfter();
 
-                while(trackCount > 0){
-                    command.addCommands()
+                while (trackCount > 0) {
+                    command.addCommands(new frc.robot.commands.AutomatedMotion.TrackSequence(m_drive));
                     trackCount = trackCount - 1;
                 }
+            }
+
+            if (point.get(0).getShootAfter()) {
+                command.addCommands(
+                        new frc.robot.commands.Shoot.StandingShootSequence(m_drive, m_shooter, m_hood, m_indexer));
             }
 
             wayPoints.pop();

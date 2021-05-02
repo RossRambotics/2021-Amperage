@@ -36,7 +36,6 @@ public class RobotContainer {
   private Joystick m_smallOperatorJoystick = null;
   private JoystickButton m_leftStickButton = null;
   private JoystickButton m_selectButton = null;
-  static public CourseManager m_testCourse = null;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -68,8 +67,6 @@ public class RobotContainer {
 
     configureOperatorButtons(m_smallOperatorJoystick, drive, indexer, intake, climb);
 
-    m_testCourse = new TestCourseManager(drive);
-
     m_leftStickButton = new JoystickButton(m_smallDriverJoystick, 9);
     m_selectButton = new JoystickButton(m_smallDriverJoystick, 7);
 
@@ -83,19 +80,19 @@ public class RobotContainer {
     CommandBase cmd = new SequentialCommandGroup(new frc.robot.commands.Shoot.ExtendHoodToTarget(hood),
         new ParallelCommandGroup(new frc.robot.commands.Shoot.StartShooterTargeting(shooter),
             new frc.robot.commands.Shoot.Target(drive)),
-        new frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(3),
-        new frc.robot.commands.Test.Shooter.StopShooter(shooter));
+        new frc.robot.commands.Indexer.RunIndexer(indexer).withTimeout(3),
+        new frc.robot.commands.Shoot.StopShooter(shooter));
 
     JoystickButton m_shootButton = new JoystickButton(m_leftLargeJoystick, 5);
     CommandBase shootCommand = new SequentialCommandGroup(new frc.robot.commands.Shoot.ExtendHoodToTarget(hood),
         new ParallelCommandGroup(new frc.robot.commands.Shoot.StartShooterTargeting(shooter),
             new frc.robot.commands.Shoot.Target(drive)),
-        new frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(3),
-        new frc.robot.commands.Test.Shooter.StopShooter(shooter));
+        new frc.robot.commands.Indexer.RunIndexer(indexer).withTimeout(3),
+        new frc.robot.commands.Shoot.StopShooter(shooter));
     m_shootButton.whenPressed(shootCommand, true);
 
     JoystickButton m_indexButton = new JoystickButton(m_rightLargeJoystick, 4);
-    m_indexButton.whenPressed(new frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(3), true);
+    m_indexButton.whenPressed(new frc.robot.commands.Indexer.RunIndexer(indexer).withTimeout(3), true);
 
     JoystickButton aButton = new JoystickButton(m_smallDriverJoystick, 1);
     aButton.whenPressed(new frc.robot.commands.IntakeExtend(intake), true);
@@ -119,16 +116,6 @@ public class RobotContainer {
       rightTopBottomButton.whileHeld(new ManualDriveStraightBoosted(drive, 0));
     }
 
-  }
-
-  public boolean resetCourseManager() {
-    if (m_testCourse != null) {
-      m_testCourse.resetCourse();
-      m_selectButton.whenPressed(m_testCourse.getCourseCommand());
-      return true;
-    }
-
-    return false;
   }
 
   private void configureOperatorButtons(Joystick joystick, Drive drive, Indexer indexer, Intake intake, Climb climb) {

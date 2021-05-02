@@ -57,18 +57,18 @@ public class Indexer extends SubsystemBase {
     ShuffleboardLayout shooterCommands = tab.getLayout("Commands", BuiltInLayouts.kList).withSize(2, 2)
         .withProperties(Map.of("Label position", "HIDDEN")); // hide labels for commands
 
-    CommandBase c = new frc.robot.commands.Test.Indexer.StartIndexer(this);
+    CommandBase c = new frc.robot.commands.Indexer.StartIndexer(this);
     c.setName("Start Indexer");
     SmartDashboard.putData(c);
     shooterCommands.add(c);
 
-    c = new frc.robot.commands.Test.Indexer.StopIndexer(this);
+    c = new frc.robot.commands.Indexer.StopIndexer(this);
     c.setName("Stop Indexer");
     SmartDashboard.putData(c);
     shooterCommands.add(c);
 
     // TODO make the timeout value a variable on the tab
-    c = new frc.robot.commands.Test.Indexer.RunIndexer(this).withTimeout(0.5);
+    c = new frc.robot.commands.Indexer.RunIndexer(this).withTimeout(0.5);
     c.setName("Run Indexer");
     SmartDashboard.putData(c);
     shooterCommands.add(c);

@@ -118,12 +118,12 @@ public class Shooter extends SubsystemBase {
     ShuffleboardLayout shooterCommands = tab.getLayout("Commands", BuiltInLayouts.kList).withSize(2, 2)
         .withProperties(Map.of("Label position", "HIDDEN")); // hide labels for commands
 
-    CommandBase c = new frc.robot.commands.Test.Shooter.StartShooter(this);
+    CommandBase c = new frc.robot.commands.Shoot.StartShooter(this);
     c.setName("Start Shooter");
     SmartDashboard.putData(c);
     shooterCommands.add(c);
 
-    c = new frc.robot.commands.Test.Shooter.StopShooter(this);
+    c = new frc.robot.commands.Shoot.StopShooter(this);
     c.setName("Stop Shooter");
     SmartDashboard.putData(c);
     shooterCommands.add(c);
