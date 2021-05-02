@@ -47,6 +47,9 @@ public class Drive extends SubsystemBase {
   private Joystick m_leftLargeJoystick;
   private Joystick m_smallJoystick;
 
+  private double m_singularNudgePower = 0.1;
+  private double m_dualNudgePower = 0.1;
+
   static private double m_absoluteX = 0;
   static private double m_absoluteY = 0;
   static private double m_absoluteH = 0;
@@ -594,6 +597,22 @@ public class Drive extends SubsystemBase {
     // updates the drive handling characteristics and refreshes talon configs
     m_handlingValues = base;
     configureTalons();
+  }
+
+  public void nudgeClockwise() {
+    tankDrive(m_singularNudgePower, -m_singularNudgePower);
+  }
+
+  public void nudgeCounterClockwise() {
+    tankDrive(-m_singularNudgePower, m_singularNudgePower);
+  }
+
+  public void nudgeForward() {
+    tankDrive(m_dualNudgePower, m_dualNudgePower);
+  }
+
+  public void nudgeBackward() {
+    tankDrive(-m_dualNudgePower, -m_dualNudgePower);
   }
 
 }

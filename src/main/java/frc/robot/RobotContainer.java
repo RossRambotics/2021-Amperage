@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.commands.IntakeReverse;
 import frc.robot.subsystems.Intake;
 import frc.robot.commands.AutomatedMotion.*;
@@ -83,7 +84,7 @@ public class RobotContainer {
     Hood hood = TheRobot.getInstance().m_hood;
     Climb climb = TheRobot.getInstance().m_climb;
 
-    configureOperatorButtons(m_smallOperatorJoystick, indexer, intake, climb);
+    configureOperatorButtons(m_smallOperatorJoystick, drive, indexer, intake, climb);
 
     m_testCourse = new TestCourseManager(drive);
 
@@ -148,7 +149,7 @@ public class RobotContainer {
     return false;
   }
 
-  private void configureOperatorButtons(Joystick joystick, Indexer indexer, Intake intake, Climb climb) {
+  private void configureOperatorButtons(Joystick joystick, Drive drive, Indexer indexer, Intake intake, Climb climb) {
     // configure reverse function
     JoystickButton bButton = new JoystickButton(joystick, 2);
     bButton.whileHeld(new frc.robot.commands.Indexer.UnloadIndexer(indexer, intake));
@@ -159,6 +160,17 @@ public class RobotContainer {
     JoystickButton rightShoulder = new JoystickButton(joystick, 6);
     rightShoulder.whileHeld(new frc.robot.commands.Climb.RetractRightWinch(climb));
 
+    POVButton leftPOV = new POVButton(joystick, 270);
+    leftPOV.whileHeld(new frc.robot.commands.Nudges.NudgeCounterClockwise(drive));
+
+    POVButton rightPOV = new POVButton(joystick, 90);
+    rightPOV.whileHeld(new frc.robot.commands.Nudges.NudgeClockwise(drive));
+
+    POVButton backwardPOV = new POVButton(joystick, 180);
+    backwardPOV.whileHeld(new frc.robot.commands.Nudges.NudgeBackward(drive));
+
+    POVButton forwardPOV = new POVButton(joystick, 0);
+    forwardPOV.whileHeld(new frc.robot.commands.Nudges.NudgeForward(drive));
   }
 
   private void configureDriverButtons(Joystick joystick, Indexer indexer, Intake intake) {
