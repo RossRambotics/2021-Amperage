@@ -74,8 +74,8 @@ public class RobotContainer {
     bButton.whenHeld(new frc.robot.commands.Indexer.UnloadIndexer(indexer, intake), true);
 
     JoystickButton yButton = new JoystickButton(m_smallDriverJoystick, 4);
-    yButton.whenPressed(new frc.robot.commands.IntakeRetract(intake), true);
-    yButton.whenPressed(new frc.robot.commands.IntakeMotorOff(intake), true);
+    yButton.whenPressed(new frc.robot.commands.Intake.IntakeRetract(intake), true);
+    yButton.whenPressed(new frc.robot.commands.Intake.IntakeMotorOff(intake), true);
 
     CommandBase cmd = new SequentialCommandGroup(new frc.robot.commands.Shoot.ExtendHoodToTarget(hood),
         new ParallelCommandGroup(new frc.robot.commands.Shoot.StartShooterTargeting(shooter),
@@ -95,10 +95,8 @@ public class RobotContainer {
     m_indexButton.whenPressed(new frc.robot.commands.Indexer.RunIndexer(indexer).withTimeout(3), true);
 
     JoystickButton aButton = new JoystickButton(m_smallDriverJoystick, 1);
-    aButton.whenPressed(new frc.robot.commands.IntakeExtend(intake), true);
-    aButton.whenPressed(new frc.robot.commands.IntakeMotorOn(intake), true);
-
-    m_leftStickButton.whenPressed(new frc.robot.commands.AutomatedMotion.ResetAutomation(drive));
+    aButton.whenPressed(new frc.robot.commands.Intake.IntakeExtend(intake), true);
+    aButton.whenPressed(new frc.robot.commands.Intake.IntakeMotorOn(intake), true);
 
     if (m_leftLargeJoystick != null) {
       JoystickButton leftTopForwardButton = new JoystickButton(m_leftLargeJoystick, 3);
@@ -119,9 +117,25 @@ public class RobotContainer {
   }
 
   private void configureOperatorButtons(Joystick joystick, Drive drive, Indexer indexer, Intake intake, Climb climb) {
-    // configure reverse function
+    JoystickButton aButton = new JoystickButton(joystick, 1);
+    aButton.whenPressed(new ParallelCommandGroup(new frc.robot.commands.Intake.IntakeExtend(intake),
+        new frc.robot.commands.Intake.IntakeMotorOn(intake)));
+
     JoystickButton bButton = new JoystickButton(joystick, 2);
-    bButton.whileHeld(new frc.robot.commands.Indexer.UnloadIndexer(indexer, intake));
+    bButton.whenPressed(new frc.robot.commands.Intake.IntakeReverse(intake));
+
+    JoystickButton yButton = new JoystickButton(joystick, 3);
+    yButton.whenPressed(new ParallelCommandGroup(new frc.robot.commands.Intake.IntakeRetract(intake),
+        new frc.robot.commands.Intake.IntakeMotorOff(intake)));
+
+    JoystickButton xButton = new JoystickButton(joystick, 4);
+    xButton.whenPressed(new frc.robot.commands.Intake.IntakeMotorOff(intake));
+
+    JoystickButton backButton = new JoystickButton(joystick, 8);
+    backButton.whileHeld(new frc.robot.commands.Indexer.UnloadIndexer(indexer, intake));
+
+    JoystickButton selectButton = new JoystickButton(joystick, 7);
+    selectButton.whileHeld(new frc.robot.commands.Indexer.RunIndexer(indexer));
 
     JoystickButton leftShoulder = new JoystickButton(joystick, 5);
     leftShoulder.whileHeld(new frc.robot.commands.Climb.RetractLeftWinch(climb));
@@ -142,16 +156,16 @@ public class RobotContainer {
     forwardPOV.whileHeld(new frc.robot.commands.Nudges.NudgeForward(drive));
   }
 
-  private void configureDriverButtons(Joystick joystick, Indexer indexer, Intake intake) {
+  private void configureArcadeDriverButtons(Joystick joystick, Indexer indexer, Intake intake) {
     // configure intake extend and start
     JoystickButton aButton = new JoystickButton(joystick, 1);
-    aButton.whenPressed(new frc.robot.commands.IntakeExtend(intake), true);
-    aButton.whenPressed(new frc.robot.commands.IntakeMotorOn(intake), true);
+    aButton.whenPressed(new frc.robot.commands.Intake.IntakeExtend(intake), true);
+    aButton.whenPressed(new frc.robot.commands.Intake.IntakeMotorOn(intake), true);
 
     // configure intake stop and retract
     JoystickButton bButton = new JoystickButton(joystick, 2);
-    bButton.whenPressed(new frc.robot.commands.IntakeRetract(intake), true);
-    bButton.whenPressed(new frc.robot.commands.IntakeMotorOff(intake), true);
+    bButton.whenPressed(new frc.robot.commands.Intake.IntakeRetract(intake), true);
+    bButton.whenPressed(new frc.robot.commands.Intake.IntakeMotorOff(intake), true);
 
     // configure reverse function
     JoystickButton leftStickButton = new JoystickButton(joystick, 9);
