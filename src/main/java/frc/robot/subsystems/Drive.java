@@ -47,8 +47,8 @@ public class Drive extends SubsystemBase {
   private Joystick m_leftLargeJoystick;
   private Joystick m_smallJoystick;
 
-  private double m_singularNudgePower = 0.1;
-  private double m_dualNudgePower = 0.1;
+  private double m_singularNudgePower = -0.15; // neagtive because robot is backards
+  private double m_dualNudgePower = -0.1; // negative because robot is backwards
 
   static private double m_absoluteX = 0;
   static private double m_absoluteY = 0;
@@ -170,8 +170,6 @@ public class Drive extends SubsystemBase {
   }
 
   public void tankDrive(double leftSpeed, double rightSpeed) { // takes into account the velocity coefficent
-
-    System.out.println("Left: " + leftSpeed + " Right: " + rightSpeed);
     m_rightDriveTalon.set(ControlMode.PercentOutput, rightSpeed * m_handlingValues.getPowerCoefficent());
     m_leftDriveTalon.set(ControlMode.PercentOutput, leftSpeed * m_handlingValues.getPowerCoefficent());
   }
@@ -600,19 +598,19 @@ public class Drive extends SubsystemBase {
   }
 
   public void nudgeClockwise() {
-    tankDrive(m_singularNudgePower, -m_singularNudgePower);
+    tankDriveRaw(m_singularNudgePower, 0);
   }
 
   public void nudgeCounterClockwise() {
-    tankDrive(-m_singularNudgePower, m_singularNudgePower);
+    tankDriveRaw(0, m_singularNudgePower);
   }
 
   public void nudgeForward() {
-    tankDrive(m_dualNudgePower, m_dualNudgePower);
+    tankDriveRaw(m_dualNudgePower, m_dualNudgePower);
   }
 
   public void nudgeBackward() {
-    tankDrive(-m_dualNudgePower, -m_dualNudgePower);
+    tankDriveRaw(-m_dualNudgePower, -m_dualNudgePower);
   }
 
 }

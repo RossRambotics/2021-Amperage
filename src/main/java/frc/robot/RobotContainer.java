@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.subsystems.Intake;
@@ -74,7 +75,7 @@ public class RobotContainer {
     // leftstick 1, rightstick 0
 
     // shoot sequence
-    JoystickButton m_topCenterButton = new JoystickButton(joystick, 4);
+    JoystickButton m_topCenterButton = new JoystickButton(joystick, 3);
     m_topCenterButton.whenPressed(new frc.robot.commands.Shoot.StandingShootSequence(drive, shooter, hood, indexer));
 
     // drive straight fast
@@ -93,12 +94,12 @@ public class RobotContainer {
     bButton.whenPressed(new frc.robot.commands.Intake.IntakeReverse(intake));
 
     // inhale and stop intake
-    JoystickButton yButton = new JoystickButton(joystick, 3);
+    JoystickButton yButton = new JoystickButton(joystick, 4);
     yButton.whenPressed(new ParallelCommandGroup(new frc.robot.commands.Intake.IntakeRetract(intake),
-        new frc.robot.commands.Intake.IntakeMotorOff(intake)));
+        new SequentialCommandGroup(new WaitCommand(0.1), new frc.robot.commands.Intake.IntakeMotorOff(intake))));
 
     // stop intake
-    JoystickButton xButton = new JoystickButton(joystick, 4);
+    JoystickButton xButton = new JoystickButton(joystick, 3);
     xButton.whenPressed(new frc.robot.commands.Intake.IntakeMotorOff(intake));
 
     // reverse indexer and intake
@@ -119,19 +120,19 @@ public class RobotContainer {
 
     // nudge left
     POVButton leftPOV = new POVButton(joystick, 270);
-    leftPOV.whileHeld(new frc.robot.commands.Nudges.NudgeCounterClockwise(drive));
+    leftPOV.whenPressed(new frc.robot.commands.Nudges.NudgeCounterClockwise(drive).withTimeout(0.3));
 
     // nudge right
     POVButton rightPOV = new POVButton(joystick, 90);
-    rightPOV.whileHeld(new frc.robot.commands.Nudges.NudgeClockwise(drive));
+    rightPOV.whenPressed(new frc.robot.commands.Nudges.NudgeClockwise(drive).withTimeout(0.3));
 
     // nudge backward
     POVButton backwardPOV = new POVButton(joystick, 180);
-    backwardPOV.whileHeld(new frc.robot.commands.Nudges.NudgeBackward(drive));
+    backwardPOV.whenPressed(new frc.robot.commands.Nudges.NudgeBackward(drive).withTimeout(0.3));
 
     // nudge forward
     POVButton forwardPOV = new POVButton(joystick, 0);
-    forwardPOV.whileHeld(new frc.robot.commands.Nudges.NudgeForward(drive));
+    forwardPOV.whenPressed(new frc.robot.commands.Nudges.NudgeForward(drive).withTimeout(0.3));
   }
 
   private void configureArcadeDriverButtons(Joystick joystick, Indexer indexer, Intake intake) {
