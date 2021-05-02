@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.AutomatedMotion.TrackMotionGyro;
 import frc.robot.helper.Autonomous.CourseManager;
 import frc.robot.helper.Autonomous.TestCourseManager;
+import frc.robot.helper.DriveHandlingSetup.ChesterTankDrive;
 import frc.robot.helper.DriveHandlingSetup.DefaultHardSurfaceArcadeDrive;
 import frc.robot.helper.DriveHandlingSetup.DefaultHardSurfaceHandling;
 import frc.robot.helper.DriveHandlingSetup.HandlingBase;
@@ -52,7 +53,7 @@ public class Robot extends TimedRobot {
     // autonomous chooser on the dashboard.
     TheRobot.log("robotInit.");
 
-    m_handlingBase = new DefaultHardSurfaceArcadeDrive(); // change out handling base to set default handling
+    m_handlingBase = new ChesterTankDrive(); // change out handling base to set default handling
     // other handling modes avialble in shuffleboard in drive tab
 
     // m_climber = new Climber();
@@ -72,6 +73,9 @@ public class Robot extends TimedRobot {
     m_intake.createShuffleBoardTab();
 
     m_trackMotionCommand = new TrackMotionGyro(m_drive);
+
+    System.out.println(m_trackMotionCommand);
+    CommandScheduler.getInstance().schedule(m_trackMotionCommand);
 
   }
 
@@ -124,8 +128,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    System.out.println(m_trackMotionCommand);
-    CommandScheduler.getInstance().schedule(m_trackMotionCommand);
 
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
