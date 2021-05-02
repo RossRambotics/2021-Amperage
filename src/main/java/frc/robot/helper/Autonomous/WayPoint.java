@@ -5,13 +5,34 @@ public class WayPoint {
     // positioning in meters
     private double m_absoluteX;
     private double m_absoluteY;
+    private boolean m_shootAfter = false; // if true target and shoot power cells if target is available after going to
+                                          // the waypoint
+    private double m_trackAfter = 0; // if non-zero track the specified number of powercells and collect
     private double m_targetRadius = .1;
 
     public boolean cleared = false; // wether the radian has been cleared
 
+    public WayPoint(double xPosition, double yPosition, double trackAfter, double shootAfter) {
+        m_absoluteX = xPosition;
+        m_absoluteY = yPosition;
+        m_trackAfter = trackAfter;
+
+        if (shootAfter != 0) {
+            m_shootAfter = true;
+        }
+    }
+
     public WayPoint(double xPosition, double yPosition) {
         m_absoluteX = xPosition;
         m_absoluteY = yPosition;
+    }
+
+    public boolean getShootAfter() {
+        return m_shootAfter;
+    }
+
+    public double getTrackAfter() {
+        return m_trackAfter;
     }
 
     public double getAbsoluteX() {

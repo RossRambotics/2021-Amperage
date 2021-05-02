@@ -2,16 +2,16 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.commands.Test.Indexer;
+package frc.robot.commands.Indexer;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Indexer;
 
-public class StartIndexer extends CommandBase {
+public class StopIndexer extends CommandBase {
   private Indexer m_indexer = null;
 
-  /** Creates a new StartIndexer. */
-  public StartIndexer(Indexer indexer) {
+  /** Creates a new StopIndexer. */
+  public StopIndexer(Indexer indexer) {
     m_indexer = indexer;
 
     // Use addRequirements() here to declare subsystem dependencies.
@@ -26,7 +26,7 @@ public class StartIndexer extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_indexer.advance();
+    m_indexer.stop();
   }
 
   // Called once the command ends or is interrupted.

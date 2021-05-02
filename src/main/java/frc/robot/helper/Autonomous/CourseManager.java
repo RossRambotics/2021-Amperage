@@ -33,9 +33,10 @@ public class CourseManager {
         for (int i = points.size() - 1; i >= 0; i = i - 1) { // for loop flips order of points
             List<WayPoint> lookAheadList = new ArrayList<>();
 
-            m_lookAheadValue = points.get(i)[2];
+            m_lookAheadValue = points.get(i)[4];
             for (int f = i; f < i + m_lookAheadValue && f < points.size(); f = f + 1) {
-                lookAheadList.add(new WayPoint(-points.get(f)[0], points.get(f)[1]));
+                lookAheadList
+                        .add(new WayPoint(-points.get(f)[0], points.get(f)[1], points.get(f)[2], points.get(f)[3]));
             }
 
             wayPoints.push(lookAheadList);
@@ -45,8 +46,8 @@ public class CourseManager {
     protected List<double[]> getWayPointPoints() {
         List<double[]> points = new ArrayList<>();
 
-        points.add(new double[] { 0, 0 }); // override and add points like this
-        // its [x, y]
+        points.add(new double[] { 0, 0, 0, 0, 1 }); // override and add points like this
+        // its [x, y, trackAfter, shootAfter, lookAhead]
         // add them in order that they should run in
 
         return points;
@@ -58,6 +59,16 @@ public class CourseManager {
         while (wayPoints.size() > 0) {
             List<WayPoint> point = wayPoints.peek();
             command.addCommands(new GoToPoint(m_drive, point));
+            
+            if(point.get(0).getTrackAfter() != 0){
+                double trackCount = point.get(0).getTrackAfter();
+
+                while(trackCount > 0){
+                    command.addCommands()
+                    trackCount = trackCount - 1;
+                }
+            }
+
             wayPoints.pop();
         }
 
