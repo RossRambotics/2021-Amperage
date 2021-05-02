@@ -1,4 +1,4 @@
-package frc.robot.helper;
+package frc.robot.helper.Autonomous;
 
 import java.util.ArrayList;
 import java.util.Deque;
@@ -45,7 +45,7 @@ public class CourseManager {
     protected List<double[]> getWayPointPoints() {
         List<double[]> points = new ArrayList<>();
 
-        points.add(new double[] { 1, 1 }); // override and add points like this
+        points.add(new double[] { 0, 0 }); // override and add points like this
         // its [x, y]
         // add them in order that they should run in
 

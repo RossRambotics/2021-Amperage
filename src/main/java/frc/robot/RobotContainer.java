@@ -4,40 +4,22 @@
 
 package frc.robot;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
-import frc.robot.commands.IntakeReverse;
 import frc.robot.subsystems.Intake;
-import frc.robot.commands.AutomatedMotion.*;
 
-import frc.robot.commands.*;
-import frc.robot.commands.AutomatedMotion.AutonomousMovementBase;
-import frc.robot.commands.AutomatedMotion.AutonomousMovementBaseII;
-import frc.robot.commands.AutomatedMotion.GoToPoint;
 import frc.robot.commands.AutomatedMotion.ManualDriveStraight;
 import frc.robot.commands.AutomatedMotion.ManualDriveStraightBoosted;
-import frc.robot.commands.AutomatedMotion.Track;
-import frc.robot.commands.AutomatedMotion.TrackMotionGyro;
-import frc.robot.helper.CourseManager;
-import frc.robot.helper.TestCourseManager;
-import frc.robot.helper.WayPoint;
+import frc.robot.helper.Autonomous.CourseManager;
+import frc.robot.helper.Autonomous.TestCourseManager;
 import frc.robot.subsystems.*;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-
-import frc.robot.Robot;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -98,16 +80,16 @@ public class RobotContainer {
     yButton.whenPressed(new frc.robot.commands.IntakeRetract(intake), true);
     yButton.whenPressed(new frc.robot.commands.IntakeMotorOff(intake), true);
 
-    CommandBase cmd = new SequentialCommandGroup(new frc.robot.commands.ExtendHoodToTarget(hood),
-        new ParallelCommandGroup(new frc.robot.commands.StartShooterTargeting(shooter),
-            new frc.robot.commands.Target(drive)),
+    CommandBase cmd = new SequentialCommandGroup(new frc.robot.commands.Shoot.ExtendHoodToTarget(hood),
+        new ParallelCommandGroup(new frc.robot.commands.Shoot.StartShooterTargeting(shooter),
+            new frc.robot.commands.Shoot.Target(drive)),
         new frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(3),
         new frc.robot.commands.Test.Shooter.StopShooter(shooter));
 
     JoystickButton m_shootButton = new JoystickButton(m_leftLargeJoystick, 5);
-    CommandBase shootCommand = new SequentialCommandGroup(new frc.robot.commands.ExtendHoodToTarget(hood),
-        new ParallelCommandGroup(new frc.robot.commands.StartShooterTargeting(shooter),
-            new frc.robot.commands.Target(drive)),
+    CommandBase shootCommand = new SequentialCommandGroup(new frc.robot.commands.Shoot.ExtendHoodToTarget(hood),
+        new ParallelCommandGroup(new frc.robot.commands.Shoot.StartShooterTargeting(shooter),
+            new frc.robot.commands.Shoot.Target(drive)),
         new frc.robot.commands.Test.Indexer.RunIndexer(indexer).withTimeout(3),
         new frc.robot.commands.Test.Shooter.StopShooter(shooter));
     m_shootButton.whenPressed(shootCommand, true);

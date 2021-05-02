@@ -5,7 +5,7 @@ import java.util.List;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.helper.WayPoint;
+import frc.robot.helper.Autonomous.WayPoint;
 import frc.robot.helper.Tracking.PowerCellTracker;
 import frc.robot.subsystems.Drive;
 
