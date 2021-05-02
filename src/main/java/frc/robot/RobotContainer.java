@@ -34,8 +34,6 @@ public class RobotContainer {
   private Joystick m_leftLargeJoystick = null;
   private Joystick m_rightLargeJoystick = null;
   private Joystick m_smallOperatorJoystick = null;
-  private JoystickButton m_leftStickButton = null;
-  private JoystickButton m_selectButton = null;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -66,92 +64,72 @@ public class RobotContainer {
     Climb climb = TheRobot.getInstance().m_climb;
 
     configureOperatorButtons(m_smallOperatorJoystick, drive, indexer, intake, climb);
-
-    m_leftStickButton = new JoystickButton(m_smallDriverJoystick, 9);
-    m_selectButton = new JoystickButton(m_smallDriverJoystick, 7);
-
-    JoystickButton bButton = new JoystickButton(m_smallDriverJoystick, 2);
-    bButton.whenHeld(new frc.robot.commands.Indexer.UnloadIndexer(indexer, intake), true);
-
-    JoystickButton yButton = new JoystickButton(m_smallDriverJoystick, 4);
-    yButton.whenPressed(new frc.robot.commands.Intake.IntakeRetract(intake), true);
-    yButton.whenPressed(new frc.robot.commands.Intake.IntakeMotorOff(intake), true);
-
-    CommandBase cmd = new SequentialCommandGroup(new frc.robot.commands.Shoot.ExtendHoodToTarget(hood),
-        new ParallelCommandGroup(new frc.robot.commands.Shoot.StartShooterTargeting(shooter),
-            new frc.robot.commands.Shoot.Target(drive)),
-        new frc.robot.commands.Indexer.RunIndexer(indexer).withTimeout(3),
-        new frc.robot.commands.Shoot.StopShooter(shooter));
-
-    JoystickButton m_shootButton = new JoystickButton(m_leftLargeJoystick, 5);
-    CommandBase shootCommand = new SequentialCommandGroup(new frc.robot.commands.Shoot.ExtendHoodToTarget(hood),
-        new ParallelCommandGroup(new frc.robot.commands.Shoot.StartShooterTargeting(shooter),
-            new frc.robot.commands.Shoot.Target(drive)),
-        new frc.robot.commands.Indexer.RunIndexer(indexer).withTimeout(3),
-        new frc.robot.commands.Shoot.StopShooter(shooter));
-    m_shootButton.whenPressed(shootCommand, true);
-
-    JoystickButton m_indexButton = new JoystickButton(m_rightLargeJoystick, 4);
-    m_indexButton.whenPressed(new frc.robot.commands.Indexer.RunIndexer(indexer).withTimeout(3), true);
-
-    JoystickButton aButton = new JoystickButton(m_smallDriverJoystick, 1);
-    aButton.whenPressed(new frc.robot.commands.Intake.IntakeExtend(intake), true);
-    aButton.whenPressed(new frc.robot.commands.Intake.IntakeMotorOn(intake), true);
-
-    if (m_leftLargeJoystick != null) {
-      JoystickButton leftTopForwardButton = new JoystickButton(m_leftLargeJoystick, 3);
-      leftTopForwardButton.whileHeld(new ManualDriveStraight(drive, 1));
-
-      JoystickButton leftTopBottomButton = new JoystickButton(m_leftLargeJoystick, 2);
-      leftTopBottomButton.whileHeld(new ManualDriveStraightBoosted(drive, 1));
-    }
-
-    if (m_rightLargeJoystick != null) {
-      JoystickButton rightTopForwardButton = new JoystickButton(m_rightLargeJoystick, 3);
-      rightTopForwardButton.whileHeld(new ManualDriveStraight(drive, 0));
-
-      JoystickButton rightTopBottomButton = new JoystickButton(m_rightLargeJoystick, 2);
-      rightTopBottomButton.whileHeld(new ManualDriveStraightBoosted(drive, 0));
-    }
+    configureTankDriverButtons(m_leftLargeJoystick, 1, drive, shooter, indexer, hood);
+    configureTankDriverButtons(m_rightLargeJoystick, 0, drive, shooter, indexer, hood);
 
   }
 
+  private void configureTankDriverButtons(Joystick joystick, int stickNumber, Drive drive, Shooter shooter,
+      Indexer indexer, Hood hood) {
+    // leftstick 1, rightstick 0
+
+    // shoot sequence
+    JoystickButton m_topCenterButton = new JoystickButton(joystick, 4);
+    m_topCenterButton.whenPressed(new frc.robot.commands.Shoot.StandingShootSequence(drive, shooter, hood, indexer));
+
+    // drive straight fast
+    JoystickButton m_bottomCenterButton = new JoystickButton(joystick, 2);
+    m_bottomCenterButton.whileHeld(new ManualDriveStraightBoosted(drive, stickNumber));
+  }
+
   private void configureOperatorButtons(Joystick joystick, Drive drive, Indexer indexer, Intake intake, Climb climb) {
+    // Deploy and start intake
     JoystickButton aButton = new JoystickButton(joystick, 1);
     aButton.whenPressed(new ParallelCommandGroup(new frc.robot.commands.Intake.IntakeExtend(intake),
         new frc.robot.commands.Intake.IntakeMotorOn(intake)));
 
+    // Reverse intake
     JoystickButton bButton = new JoystickButton(joystick, 2);
     bButton.whenPressed(new frc.robot.commands.Intake.IntakeReverse(intake));
 
+    // inhale and stop intake
     JoystickButton yButton = new JoystickButton(joystick, 3);
     yButton.whenPressed(new ParallelCommandGroup(new frc.robot.commands.Intake.IntakeRetract(intake),
         new frc.robot.commands.Intake.IntakeMotorOff(intake)));
 
+    // stop intake
     JoystickButton xButton = new JoystickButton(joystick, 4);
     xButton.whenPressed(new frc.robot.commands.Intake.IntakeMotorOff(intake));
 
+    // reverse indexer and intake
     JoystickButton backButton = new JoystickButton(joystick, 8);
     backButton.whileHeld(new frc.robot.commands.Indexer.UnloadIndexer(indexer, intake));
 
+    // move the indexer forward
     JoystickButton selectButton = new JoystickButton(joystick, 7);
     selectButton.whileHeld(new frc.robot.commands.Indexer.RunIndexer(indexer));
 
+    // retract left winch
     JoystickButton leftShoulder = new JoystickButton(joystick, 5);
     leftShoulder.whileHeld(new frc.robot.commands.Climb.RetractLeftWinch(climb));
 
+    // retract right winch
     JoystickButton rightShoulder = new JoystickButton(joystick, 6);
     rightShoulder.whileHeld(new frc.robot.commands.Climb.RetractRightWinch(climb));
 
+    // nudge left
     POVButton leftPOV = new POVButton(joystick, 270);
     leftPOV.whileHeld(new frc.robot.commands.Nudges.NudgeCounterClockwise(drive));
 
+    // nudge right
     POVButton rightPOV = new POVButton(joystick, 90);
     rightPOV.whileHeld(new frc.robot.commands.Nudges.NudgeClockwise(drive));
 
+    // nudge backward
     POVButton backwardPOV = new POVButton(joystick, 180);
     backwardPOV.whileHeld(new frc.robot.commands.Nudges.NudgeBackward(drive));
 
+    // nudge forward
     POVButton forwardPOV = new POVButton(joystick, 0);
     forwardPOV.whileHeld(new frc.robot.commands.Nudges.NudgeForward(drive));
   }
