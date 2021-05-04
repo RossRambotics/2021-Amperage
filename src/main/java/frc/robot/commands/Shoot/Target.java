@@ -6,6 +6,8 @@ import java.util.List;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.TheRobot;
+import frc.robot.helper.Targetting.LEDColor;
 import frc.robot.subsystems.Drive;
 
 public class Target extends CommandBase {
@@ -131,6 +133,8 @@ public class Target extends CommandBase {
     public void end(boolean interrupted) {
         m_drive.setBrakeModeLeftDriveTalons(false);
         m_drive.setBrakeModeRightDriveTalons(false);
+        TheRobot.getInstance().m_LEDController.setColor(LEDColor.kOnTarget);
+
     }
 
     // Returns true when the command should end.

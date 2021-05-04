@@ -206,6 +206,10 @@ public class Shooter extends SubsystemBase {
 
     updateShooterReadiness();
 
+    if (m_lookUpTable.isTargetFound()) {
+
+    }
+
     // Output to dashboard
     SmartDashboard.putNumber("Shooter/Current RPM", m_RPM_shooter);
     SmartDashboard.putNumber("Shooter/Target RPM", m_RPM_target);

@@ -8,6 +8,7 @@ import java.util.Map;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import frc.robot.TheRobot;
 
 public class ShooterLookUp // changes distance to speed and hood angle
 {
@@ -46,7 +47,13 @@ public class ShooterLookUp // changes distance to speed and hood angle
     }
 
     public boolean isTargetFound() {
-        return m_targetFoundEntry.getBoolean(false);
+        if (m_targetFoundEntry.getBoolean(false)) {
+            TheRobot.getInstance().m_LEDController.setColor(LEDColor.kTargetFound);
+            return true;
+        } else {
+            TheRobot.getInstance().m_LEDController.setColor(LEDColor.kTargetNotFound);
+        }
+        return false;
     }
 
     public NetworkTableEntry getTargetFoundEntry() {
