@@ -27,11 +27,11 @@ public class CheckPowercell extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (m_indexer.checkIndexerSensor() && !m_indexer.checkFrontTopLight()) {
+    if (m_indexer.getIndexerRearSensor() && !m_indexer.getShooterIndexerSensor()) {
       // CommandBase c = new RunFeeder(m_indexer);
       CommandBase c = new SequentialCommandGroup(new InsertPowercell(m_indexer));
       CommandScheduler.getInstance().schedule(c);
-    } else if (m_indexer.checkFrontTopLight()) {
+    } else if (m_indexer.getShooterIndexerSensor()) {
       System.out.println("TopBackLight");
 
       m_indexer.reverse();

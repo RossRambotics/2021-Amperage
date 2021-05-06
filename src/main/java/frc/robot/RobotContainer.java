@@ -67,19 +67,19 @@ public class RobotContainer {
     LEDController LEDcontroller = TheRobot.getInstance().m_LEDController;
 
     configureOperatorButtons(m_smallOperatorJoystick, drive, indexer, intake, climb);
-    configureTankDriverButtons(m_leftLargeJoystick, 1, drive, shooter, indexer, hood, LEDcontroller);
-    configureTankDriverButtons(m_rightLargeJoystick, 0, drive, shooter, indexer, hood, LEDcontroller);
+    configureTankDriverButtons(m_leftLargeJoystick, 1, drive, shooter, indexer, intake, hood, LEDcontroller);
+    configureTankDriverButtons(m_rightLargeJoystick, 0, drive, shooter, indexer, intake, hood, LEDcontroller);
 
   }
 
   private void configureTankDriverButtons(Joystick joystick, int stickNumber, Drive drive, Shooter shooter,
-      Indexer indexer, Hood hood, LEDController LEDcontroller) {
+      Indexer indexer, Intake intake, Hood hood, LEDController LEDcontroller) {
     // leftstick 1, rightstick 0
 
     // shoot sequence
     JoystickButton topCenterButton = new JoystickButton(joystick, 3);
-    topCenterButton
-        .whenPressed(new frc.robot.commands.Shoot.StandingShootSequence(drive, shooter, hood, indexer, LEDcontroller));
+    topCenterButton.whenPressed(
+        new frc.robot.commands.Shoot.StandingShootSequence(drive, shooter, hood, indexer, intake, LEDcontroller));
 
     // drive straight fast
     JoystickButton bottomCenterButton = new JoystickButton(joystick, 2);

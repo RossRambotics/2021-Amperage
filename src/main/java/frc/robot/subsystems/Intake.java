@@ -42,8 +42,10 @@ public class Intake extends SubsystemBase {
   private double pid_kMAX;
   private double pid_kMIN;
 
-  private double captureSpeed = 0.5; // the capture speed for the intake in RPM
+  private double m_captureSpeed = 0.5; // the capture speed for the intake in RPM
+  private double m_feedSpeed = 0.5;
   private boolean m_bExtended;
+  private boolean m_feederWheelsEnabled = true; //
 
   public Intake() {
     m_rollerMotor = new CANSparkMax(11, MotorType.kBrushless);
@@ -53,7 +55,7 @@ public class Intake extends SubsystemBase {
 
     m_intakeSolenoid.set(Value.kForward); // retract the intake
 
-    SmartDashboard.putNumber("Intake/CaptureSpeed", captureSpeed);
+    SmartDashboard.putNumber("Intake/CaptureSpeed", m_captureSpeed);
     SmartDashboard.putBoolean("Intake/Extended?", m_bExtended);
     /*
      * intakePIDController = m_rollerMotor.getPIDController();
@@ -122,13 +124,13 @@ public class Intake extends SubsystemBase {
     SmartDashboard.putNumber("Intake/rollerMotor_Power", m_rollerMotor.get());
     SmartDashboard.putNumber("Intake/rollerMotor Current", m_rollerMotor.getOutputCurrent());
     SmartDashboard.putBoolean("Intake/Extended?", m_bExtended);
-    captureSpeed = SmartDashboard.getNumber("Intake/CaptureSpeed", 0);
+    m_captureSpeed = SmartDashboard.getNumber("Intake/CaptureSpeed", 0);
 
     if (true)
       return;
     // updates SmartDashbaord linked variables as needed
-    if (captureSpeed != SmartDashboard.getNumber("Intake/CaptureSpeed", captureSpeed)) {
-      captureSpeed = SmartDashboard.getNumber("Intake/CaptureSpeed", captureSpeed);
+    if (m_captureSpeed != SmartDashboard.getNumber("Intake/CaptureSpeed", m_captureSpeed)) {
+      m_captureSpeed = SmartDashboard.getNumber("Intake/CaptureSpeed", m_captureSpeed);
     }
     if (pid_kP != SmartDashboard.getNumber("Intake/pid_kP", pid_kP)) {
       pid_kP = SmartDashboard.getNumber("Intake/pid_kP", pid_kP);
@@ -172,6 +174,7 @@ public class Intake extends SubsystemBase {
   public void extend() {
     m_intakeSolenoid.set(Value.kReverse);
     m_bExtended = true;
+    m_feederWheelsEnabled = true; // provides operator override for a disable
     TheRobot.log("Intake Extended!");
   }
 
@@ -193,8 +196,11 @@ public class Intake extends SubsystemBase {
   public void capture() {
     // intakePIDController.setReference(captureSpeed, ControlType.kVelocity);
     TheRobot.log("Starting Intake Motor");
-    m_rollerMotor.set(captureSpeed);
-    m_feederMotor.set(.5);
+    m_rollerMotor.set(m_captureSpeed);
+
+    if (m_feederWheelsEnabled) { // prevents the feeder wheels from attempting to index when the indexer is full
+      m_feederMotor.set(m_feedSpeed);
+    }
   }
 
   // turns off intake motors
@@ -233,6 +239,14 @@ public class Intake extends SubsystemBase {
   // stops roller wheels
   public void stopIntakeRoller() {
     m_rollerMotor.set(0.0);
+  }
+
+  public void disableFeederWheels() { // allows the indexer to prevent overcrowding and maybe index another ball
+    m_feederWheelsEnabled = false;
+  }
+
+  public void enableFeederWheels() {
+    m_feederWheelsEnabled = true;
   }
 
 }

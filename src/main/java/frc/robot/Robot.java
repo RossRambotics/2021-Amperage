@@ -117,9 +117,10 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-    CourseManager courseManager = new TestCourseManager(m_drive, m_shooter, m_indexer, m_hood, m_LEDController); // change
-                                                                                                                 // to
-                                                                                                                 // be
+    CourseManager courseManager = new TestCourseManager(m_drive, m_shooter, m_indexer, m_hood, m_intake,
+        m_LEDController); // change
+                          // to
+                          // be
     // autocourse
 
     CommandScheduler.getInstance().schedule(courseManager.getCourseCommand());
