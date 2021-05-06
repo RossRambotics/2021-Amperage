@@ -27,7 +27,7 @@ public class Indexer extends SubsystemBase {
 
   private AnalogInput m_indexerlight = new AnalogInput(1);
   private AnalogInput m_backtoplight = new AnalogInput(0);
-  private AnalogInput m_fronttoplight = new AnalogInput(4);
+  private AnalogInput m_fronttoplight = new AnalogInput(3);
 
   // public CANSparkMax m_intake = new CANSparkMax(11, MotorType.kBrushless);
   public CANSparkMax m_topMotor = new CANSparkMax(4, MotorType.kBrushless);
@@ -127,13 +127,13 @@ public class Indexer extends SubsystemBase {
   }
 
   public void shoot() {
-    m_topMotor.set(0.50);
-    m_btmMotor.set(0.50);
+    m_topMotor.set(0.2);
+    m_btmMotor.set(0.2);
   }
 
   public void advance() {
-    m_topMotor.set(0.27);
-    m_btmMotor.set(0.27);
+    m_topMotor.set(0.2);
+    m_btmMotor.set(0.2);
   }
 
   public void stop() {

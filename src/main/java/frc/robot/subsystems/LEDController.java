@@ -8,6 +8,10 @@ import frc.robot.helper.Targetting.LEDColor;
 public class LEDController extends SubsystemBase {
   private double m_Color = 0.0;
   private Spark m_ledController = new Spark(0);
+  private int m_flashLength = 10; // in loops
+  private int m_flashCounter = 10;
+  private boolean m_flashToggle = true;
+  private boolean m_runFlash = false;
 
   /**
    * Creates a new ledController.
@@ -21,7 +25,39 @@ public class LEDController extends SubsystemBase {
   @Override
   public void periodic() {
     // m_Color = SmartDashboard.getNumber("LEDController/color", m_Color);
-    m_ledController.set(m_Color);
+    if (m_runFlash) {
+      runFlash();
+    } else {
+      m_ledController.set(m_Color);
+    }
+  }
+
+  private void runFlash() {
+    if (m_flashCounter < 0) {
+      m_flashCounter = m_flashLength;
+
+      if (m_flashToggle) {
+        m_flashToggle = false;
+      } else {
+        m_flashToggle = true;
+      }
+    }
+
+    m_flashCounter = m_flashCounter - 1;
+
+    if (m_flashToggle) {
+      m_ledController.set(m_Color);
+    } else {
+      m_ledController.set(0);
+    }
+  }
+
+  public void disableFlash() {
+    m_runFlash = false;
+  }
+
+  public void enableFlash() {
+    m_runFlash = true;
   }
 
   public void setColor(LEDColor color) {

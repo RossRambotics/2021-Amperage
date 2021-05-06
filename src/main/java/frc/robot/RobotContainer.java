@@ -18,6 +18,7 @@ import frc.robot.subsystems.Intake;
 
 import frc.robot.commands.AutomatedMotion.ManualDriveStraight;
 import frc.robot.commands.AutomatedMotion.ManualDriveStraightBoosted;
+import frc.robot.commands.Shoot.StopShooter;
 import frc.robot.helper.Autonomous.CourseManager;
 import frc.robot.helper.Autonomous.TestCourseManager;
 import frc.robot.subsystems.*;
@@ -63,24 +64,31 @@ public class RobotContainer {
     Shooter shooter = TheRobot.getInstance().m_shooter;
     Hood hood = TheRobot.getInstance().m_hood;
     Climb climb = TheRobot.getInstance().m_climb;
+    LEDController LEDcontroller = TheRobot.getInstance().m_LEDController;
 
     configureOperatorButtons(m_smallOperatorJoystick, drive, indexer, intake, climb);
-    configureTankDriverButtons(m_leftLargeJoystick, 1, drive, shooter, indexer, hood);
-    configureTankDriverButtons(m_rightLargeJoystick, 0, drive, shooter, indexer, hood);
+    configureTankDriverButtons(m_leftLargeJoystick, 1, drive, shooter, indexer, hood, LEDcontroller);
+    configureTankDriverButtons(m_rightLargeJoystick, 0, drive, shooter, indexer, hood, LEDcontroller);
 
   }
 
   private void configureTankDriverButtons(Joystick joystick, int stickNumber, Drive drive, Shooter shooter,
-      Indexer indexer, Hood hood) {
+      Indexer indexer, Hood hood, LEDController LEDcontroller) {
     // leftstick 1, rightstick 0
 
     // shoot sequence
-    JoystickButton m_topCenterButton = new JoystickButton(joystick, 3);
-    m_topCenterButton.whenPressed(new frc.robot.commands.Shoot.StandingShootSequence(drive, shooter, hood, indexer));
+    JoystickButton topCenterButton = new JoystickButton(joystick, 3);
+    topCenterButton
+        .whenPressed(new frc.robot.commands.Shoot.StandingShootSequence(drive, shooter, hood, indexer, LEDcontroller));
 
     // drive straight fast
-    JoystickButton m_bottomCenterButton = new JoystickButton(joystick, 2);
-    m_bottomCenterButton.whileHeld(new ManualDriveStraightBoosted(drive, stickNumber));
+    JoystickButton bottomCenterButton = new JoystickButton(joystick, 2);
+    bottomCenterButton.whileHeld(new ManualDriveStraightBoosted(drive, stickNumber));
+
+    if (stickNumber == 1) {
+      JoystickButton upperInsideButton = new JoystickButton(joystick, 5);
+      upperInsideButton.whenPressed(new StopShooter(shooter));
+    }
   }
 
   private void configureOperatorButtons(Joystick joystick, Drive drive, Indexer indexer, Intake intake, Climb climb) {

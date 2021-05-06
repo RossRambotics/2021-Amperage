@@ -49,6 +49,11 @@ public class ShooterLookUp // changes distance to speed and hood angle
     public boolean isTargetFound() {
         if (m_targetFoundEntry.getBoolean(false)) {
             TheRobot.getInstance().m_LEDController.setColor(LEDColor.kTargetFound);
+
+            if (Math.abs(getTargetAngle()) < 1) {
+                TheRobot.getInstance().m_LEDController.setColor(LEDColor.kOnTarget);
+            }
+
             return true;
         } else {
             TheRobot.getInstance().m_LEDController.setColor(LEDColor.kTargetNotFound);

@@ -10,6 +10,7 @@ import frc.robot.commands.AutomatedMotion.GoToPoint;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.Indexer;
+import frc.robot.subsystems.LEDController;
 import frc.robot.subsystems.Shooter;
 
 public class CourseManager {
@@ -20,13 +21,15 @@ public class CourseManager {
     private Indexer m_indexer;
     private Hood m_hood;
     private double m_lookAheadValue = 5;
+    private LEDController m_LEDController;
 
-    public CourseManager(Drive drive, Shooter shooter, Indexer indexer, Hood hood) {
+    public CourseManager(Drive drive, Shooter shooter, Indexer indexer, Hood hood, LEDController LEDcontroller) {
         wayPoints = new Stack();
         m_drive = drive;
         m_shooter = shooter;
         m_indexer = indexer;
         m_hood = hood;
+        m_LEDController = LEDcontroller;
 
         fillWayPointStack();
     }
@@ -79,8 +82,8 @@ public class CourseManager {
             }
 
             if (point.get(0).getShootAfter()) {
-                command.addCommands(
-                        new frc.robot.commands.Shoot.StandingShootSequence(m_drive, m_shooter, m_hood, m_indexer));
+                command.addCommands(new frc.robot.commands.Shoot.StandingShootSequence(m_drive, m_shooter, m_hood,
+                        m_indexer, m_LEDController));
             }
 
             wayPoints.pop();

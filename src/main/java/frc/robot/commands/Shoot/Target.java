@@ -133,7 +133,6 @@ public class Target extends CommandBase {
     public void end(boolean interrupted) {
         m_drive.setBrakeModeLeftDriveTalons(false);
         m_drive.setBrakeModeRightDriveTalons(false);
-        TheRobot.getInstance().m_LEDController.setColor(LEDColor.kOnTarget);
 
     }
 

@@ -1,16 +1,25 @@
 package frc.robot.helper.DriveHandlingSetup;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.commands.DriveModes.*;
+import frc.robot.helper.Autonomous.CourseManager;
 import frc.robot.subsystems.Drive;
+import frc.robot.subsystems.Hood;
+import frc.robot.subsystems.Indexer;
+import frc.robot.subsystems.Shooter;
+import frc.robot.helper.Autonomous.*;
 
 // Override getter functions for base values to change handling characteristics of the robot
 // Do not override getter functions for Calculated Values!!!
@@ -87,7 +96,12 @@ public class HandlingBase { // extend this class to create a unique set of handl
     private NetworkTableEntry m_targettingTurnKIEntry; // Network Table Entry for Shuffleboard
     private NetworkTableEntry m_targettingTurnKDEntry; // Network Table Entry for Shuffleboard
 
+    private String m_autonomousModeCommandName; // the name of the autonomous command to run
+
+    private SendableChooser<String> m_autonomousModeCommandEntry; // Network table entry for shuffleboard
+
     public HandlingBase() {
+
         setBaseMemberVariables();
         setCalculatedMemberVariables();
         createShuffleBoardTab();
@@ -136,6 +150,11 @@ public class HandlingBase { // extend this class to create a unique set of handl
                     .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(4, 2).getEntry();
         }
 
+        m_autonomousModeCommandEntry = new SendableChooser<String>();
+        m_autonomousModeCommandEntry.addOption("PowerPort", "PowerPort");
+        m_autonomousModeCommandEntry.addOption("Center", "Center");
+        m_autonomousModeCommandEntry.addOption("HumanPlayer", "HumanPlayer");
+
         if (automationTab.getComponents().size() == 0) { // makes sure the tab is not currently populated
             m_angleAdjustmentKpEntry = automationTab.add("Angle Adjustment Kp", m_angleAdjustmentkP)
                     .withWidget(BuiltInWidgets.kTextView).withSize(1, 1).withPosition(5, 0).getEntry();
@@ -157,6 +176,9 @@ public class HandlingBase { // extend this class to create a unique set of handl
                     .withSize(1, 1).getEntry();
             m_targettingTurnKPEntry = automationTab.add("Targetting Turn KP", m_targettingTurnKP).withPosition(7, 0)
                     .withSize(1, 1).getEntry();
+
+            automationTab.add("AutonomousModeCommands", m_autonomousModeCommandEntry).withSize(2, 2).withPosition(0, 0);
+
         } else {
             NetworkTable automationTable = NetworkTableInstance.getDefault().getTable("Shuffleboard")
                     .getSubTable(m_automationTabName);
@@ -268,6 +290,20 @@ public class HandlingBase { // extend this class to create a unique set of handl
         m_targettingTurnKD = m_targettingTurnKDEntry.getDouble(m_targettingTurnKD);
 
         setCalculatedMemberVariables(); // must redo the math :(
+    }
+
+    public void getAutonomousModeCommand() {
+        switch (m_autonomousModeCommandName) {
+            case "PowerPort":
+                break;
+            case "Center":
+                break;
+            case "HumanPlayer":
+                break;
+            case "Simple":
+                break;
+            default:
+        }
     }
 
     public Command getDefaultDriveCommand(Drive drive) {
