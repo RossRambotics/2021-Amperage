@@ -35,6 +35,6 @@ public class ChesterTankDrive extends HandlingBase {
 
     @Override
     protected double getTankFineHandlingZoneInitialValue() {
-        return 0.99;
+        return 0.5;
     }
 }

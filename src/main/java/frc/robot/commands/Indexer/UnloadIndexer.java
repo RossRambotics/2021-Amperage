@@ -26,7 +26,8 @@ public class UnloadIndexer extends CommandBase {
   public void initialize() {
     m_indexer.reverse();
     m_intake.enableFeederWheels(); // ensures the feeder wheels are ready to index
-    m_intake.IntakeMotorReverse();
+    m_intake.intakeMotorReverse();
+    m_indexer.setIndexerAdvanceEnable(true);
   }
 
   // Called every time the scheduler runs while the command is scheduled.

@@ -18,6 +18,7 @@ public class StandingShootSequence extends SequentialCommandGroup {
                 this.addCommands(
                                 new ParallelCommandGroup(
                                                 new frc.robot.commands.LEDController.EnableFlash(LEDcontroller),
+                                                new frc.robot.commands.Indexer.EnableIndexerAdvance(indexer),
                                                 new frc.robot.commands.Intake.EnableFeederWheels(intake),
                                                 new frc.robot.commands.Shoot.StartShooterTargeting(shooter),
                                                 new frc.robot.commands.Shoot.Target(drive).withTimeout(5),

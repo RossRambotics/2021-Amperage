@@ -50,6 +50,7 @@ public class Intake extends SubsystemBase {
   public Intake() {
     m_rollerMotor = new CANSparkMax(11, MotorType.kBrushless);
     m_feederMotor = new CANSparkMax(12, MotorType.kBrushless);
+    m_feederMotor.setSecondaryCurrentLimit(0.5);
 
     m_rollerMotor.restoreFactoryDefaults();
 
@@ -180,7 +181,7 @@ public class Intake extends SubsystemBase {
 
   // spins wheels backwards to unjam a ball after checking to see if the intake is
   // extended
-  public void IntakeMotorReverse() {
+  public void intakeMotorReverse() {
     if (m_bExtended == true) {
       TheRobot.log("IntakeMotorReverse setting intake motor");
       m_rollerMotor.set(-.7);
@@ -200,6 +201,8 @@ public class Intake extends SubsystemBase {
 
     if (m_feederWheelsEnabled) { // prevents the feeder wheels from attempting to index when the indexer is full
       m_feederMotor.set(m_feedSpeed);
+    } else {
+      m_feederMotor.set(0);
     }
   }
 
@@ -223,7 +226,11 @@ public class Intake extends SubsystemBase {
 
   // starts the feeder wheels
   public void startFeederWheels() {
-    m_feederMotor.set(0.5);
+    if (m_feederWheelsEnabled) { // prevents the feeder wheels from attempting to index when the indexer is full
+      m_feederMotor.set(m_feedSpeed);
+    } else {
+      m_feederMotor.set(0);
+    }
   }
 
   // stops the feeder wheels

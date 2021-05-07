@@ -34,12 +34,14 @@ public class IndexerDefaultCommand extends CommandBase {
             if (m_indexer.getIndexerFrontSensor()) {
                 // disable the feeder wheels to prevent overcrowding
                 m_intake.disableFeederWheels();
+                m_intake.stopFeederWheels();
+                m_indexer.setIndexerAdvanceEnable(false);
             }
-        } else if (m_indexer.getIntakeIndexerSensor()) {
+        } else if (m_indexer.getIntakeIndexerSensor() && m_indexer.getIndexerAdvanceEnabled()) {
             // index the power cell and enable the compact sequence
             m_indexer.advance();
             m_indexer.enableCompact(); // resets timer for compact
-        } else if (m_indexer.getIndexerRearSensor()) {
+        } else if (m_indexer.getIndexerRearSensor() && m_indexer.getIndexerAdvanceEnabled()) {
             m_indexer.advance();
         } else if (m_indexer.getIndexerFrontSensor()) {
             m_indexer.stop();
@@ -59,4 +61,5 @@ public class IndexerDefaultCommand extends CommandBase {
     public boolean isFinished() {
         return false;
     }
+
 }

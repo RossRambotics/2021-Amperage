@@ -37,9 +37,10 @@ public class Indexer extends SubsystemBase {
   public CANSparkMax m_btmMotor = new CANSparkMax(3, MotorType.kBrushless);
 
   private Timer m_currentTimer = new Timer();
-  private Boolean m_compactAvaliable = true; // if the indexer is allowed to compact
+  private boolean m_compactAvaliable = true; // if the indexer is allowed to compact
+  private boolean m_enableIndexerAdvance = true;
   private double m_compactEndTime = 0; // the time the compact sequence can no longer run
-  private double m_compactDuration = 5; // the time the compactor is allowed to run for in seconds
+  private double m_compactDuration = 1; // the time the compactor is allowed to run for in seconds
 
   /** Creates a new Indexer. */
   public Indexer() {
@@ -145,14 +146,19 @@ public class Indexer extends SubsystemBase {
     m_btmMotor.set(-0.2);
   }
 
+  public void reverseSlow() {
+    m_topMotor.set(-0.1);
+    m_btmMotor.set(-0.1);
+  }
+
   public void shoot() {
     m_topMotor.set(0.2);
     m_btmMotor.set(0.2);
   }
 
   public void advance() {
-    m_topMotor.set(0.2);
-    m_btmMotor.set(0.2);
+    m_topMotor.set(0.18);
+    m_btmMotor.set(0.18);
   }
 
   public void stop() {
@@ -168,7 +174,7 @@ public class Indexer extends SubsystemBase {
     }
 
     if (m_currentTimer.get() < m_compactEndTime) { // if the compactor should run
-      reverse();
+      reverseSlow();
     } else { // if the time is up on the compact sequence stop
       stop();
     }
@@ -176,6 +182,14 @@ public class Indexer extends SubsystemBase {
 
   public void enableCompact() {
     m_compactAvaliable = true;
+  }
+
+  public void setIndexerAdvanceEnable(boolean value) {
+    m_enableIndexerAdvance = value;
+  }
+
+  public boolean getIndexerAdvanceEnabled() {
+    return m_enableIndexerAdvance;
   }
 
 }

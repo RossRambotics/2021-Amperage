@@ -99,7 +99,7 @@ public class RobotContainer {
 
     // Reverse intake
     JoystickButton bButton = new JoystickButton(joystick, 2);
-    bButton.whenPressed(new frc.robot.commands.Intake.IntakeReverse(intake));
+    bButton.whileHeld(new frc.robot.commands.Intake.IntakeReverse(intake));
 
     // inhale and stop intake
     JoystickButton yButton = new JoystickButton(joystick, 4);

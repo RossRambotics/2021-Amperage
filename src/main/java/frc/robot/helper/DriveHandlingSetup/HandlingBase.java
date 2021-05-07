@@ -199,7 +199,7 @@ public class HandlingBase { // extend this class to create a unique set of handl
             m_straightVelocityControlkIEntry.setDouble(getStraightVelocityControlkP());
             m_straightVelocityControlkDEntry.setDouble(getStraightVelocityControlkP());
 
-            m_targettingTurnKPEntry = automationTable.getEntry("Targetting Turn Kp");
+            m_targettingTurnKPEntry = automationTable.getEntry("Targetting Turn KP");
             m_targettingTurnKIEntry = automationTable.getEntry("Targetting Turn KI");
             m_targettingTurnKDEntry = automationTable.getEntry("Targetting Turn KD");
 
