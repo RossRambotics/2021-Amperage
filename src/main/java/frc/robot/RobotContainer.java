@@ -20,7 +20,6 @@ import frc.robot.commands.AutomatedMotion.ManualDriveStraight;
 import frc.robot.commands.AutomatedMotion.ManualDriveStraightBoosted;
 import frc.robot.commands.Shoot.StopShooter;
 import frc.robot.helper.Autonomous.CourseManager;
-import frc.robot.helper.Autonomous.TestCourseManager;
 import frc.robot.subsystems.*;
 
 /**

@@ -14,7 +14,7 @@ public class EnableIndexerAdvance extends CommandBase {
 
   /** Creates a new ExtendIntake. */
   public EnableIndexerAdvance(Indexer indexer) {
-    m_indexer = m_indexer;
+    m_indexer = indexer;
 
     // Use addRequirements() here to declare subsystem dependencies.
 

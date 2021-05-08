@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 public class Climb extends SubsystemBase {
@@ -16,8 +17,8 @@ public class Climb extends SubsystemBase {
   private CANSparkMax m_rightSlide = null;
   private CANSparkMax m_leftSlide = null;
 
-  private double m_leftWinchRetractSpeed = -.2;
-  private double m_rightWinchRetractSpeed = -.2;
+  private double m_leftWinchRetractSpeed = -.9;
+  private double m_rightWinchRetractSpeed = -.9;
   private double m_leftSlidePowerCoefficent = 1;
   private double m_rightSlidePowerCoefficent = -1;
 
@@ -29,6 +30,9 @@ public class Climb extends SubsystemBase {
     m_rightWinch = new CANSparkMax(8, MotorType.kBrushless);
     m_leftSlide = new CANSparkMax(9, MotorType.kBrushless);
     m_rightSlide = new CANSparkMax(10, MotorType.kBrushless);
+
+    m_rightSlide.setIdleMode(IdleMode.kBrake);
+    m_leftSlide.setIdleMode(IdleMode.kBrake);
 
     m_smallOperatorJoystick = new Joystick(3);
 

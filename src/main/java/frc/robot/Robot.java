@@ -4,12 +4,17 @@
 
 package frc.robot;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.AutomatedMotion.GoToPoint;
 import frc.robot.commands.AutomatedMotion.TrackMotionGyro;
+import frc.robot.helper.Autonomous.AutonomousSimple;
 import frc.robot.helper.Autonomous.CourseManager;
-import frc.robot.helper.Autonomous.TestCourseManager;
+import frc.robot.helper.Autonomous.WayPoint;
 import frc.robot.helper.DriveHandlingSetup.ChesterTankDrive;
 import frc.robot.helper.DriveHandlingSetup.DefaultHardSurfaceArcadeDrive;
 import frc.robot.helper.DriveHandlingSetup.DefaultHardSurfaceHandling;
@@ -74,11 +79,6 @@ public class Robot extends TimedRobot {
     m_robotContainer = new RobotContainer();
     m_intake.createShuffleBoardTab();
 
-    m_trackMotionCommand = new TrackMotionGyro(m_drive);
-
-    System.out.println(m_trackMotionCommand);
-    CommandScheduler.getInstance().schedule(m_trackMotionCommand);
-
   }
 
   /**
@@ -117,12 +117,16 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-    CourseManager courseManager = new TestCourseManager(m_drive, m_shooter, m_indexer, m_hood, m_intake,
+
+    m_trackMotionCommand = new TrackMotionGyro(m_drive);
+    System.out.println(m_trackMotionCommand);
+    CommandScheduler.getInstance().schedule(m_trackMotionCommand);
+
+    CourseManager courseManager = new AutonomousSimple(m_drive, m_shooter, m_indexer, m_intake, m_hood,
         m_LEDController); // change
                           // to
                           // be
     // autocourse
-
     CommandScheduler.getInstance().schedule(courseManager.getCourseCommand());
   }
 

@@ -72,6 +72,10 @@ public class CourseManager {
     public SequentialCommandGroup getCourseCommand() {
         SequentialCommandGroup command = new SequentialCommandGroup();
 
+        // deploy but do not activate intake
+        command.addCommands(new frc.robot.commands.Intake.IntakeExtend(m_intake));
+        command.addCommands(new frc.robot.commands.Intake.IntakeMotorOff(m_intake));
+
         while (wayPoints.size() > 0) {
             List<WayPoint> point = wayPoints.peek();
             command.addCommands(new GoToPoint(m_drive, point));
