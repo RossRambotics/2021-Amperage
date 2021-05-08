@@ -21,7 +21,7 @@ public class AutonomousSimple extends CourseManager {
         List<double[]> wayPoints = new ArrayList();
         // its [x, y, trackAfter, shootAfter, lookAhead]
 
-        wayPoints.add(new double[] { 0, -.6, 0, 1, 1 }); // back up slightly and shoot
+        wayPoints.add(new double[] { -.6, 0, 0, 1, 1 }); // back up slightly and shoot
 
         return wayPoints;
     }

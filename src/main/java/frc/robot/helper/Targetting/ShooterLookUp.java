@@ -20,6 +20,7 @@ public class ShooterLookUp // changes distance to speed and hood angle
     private NetworkTableEntry m_targetAngleEntry;
     private NetworkTableEntry m_targetFoundEntry;
     private NetworkTableEntry m_targetDistanceEntry;
+    private double m_targetAngleOffset = -0.75;
 
     public ShooterLookUp() {
         m_targettingTable = NetworkTableInstance.getDefault().getTable("Shuffleboard")
@@ -74,7 +75,7 @@ public class ShooterLookUp // changes distance to speed and hood angle
     }
 
     public double getTargetAngle() {
-        return m_targetAngleEntry.getDouble(0);
+        return m_targetAngleEntry.getDouble(0) + m_targetAngleOffset;
     }
 
     private void addTableValue(Double Key, Double HoodAngle, Double ShooterSpeed) // appedns a set of values to the look
